@@ -1,0 +1,25 @@
+@font-face {
+    font-family: 'tommy';
+    src: url('./fonts/tommybold.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+  }
+ 
+  @font-face {
+    font-family: 'tommyregular';
+    src: url('./fonts/tommyregular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  body{
+    color: white;
+  }
+
+h1{
+    font-family: 'tommyregular';
+}
+
+p{
+    font-family: 'tommyregular';
+}

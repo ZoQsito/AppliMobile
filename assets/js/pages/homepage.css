@@ -1,25 +1,9 @@
-@font-face {
-    font-family: 'tommy';
-    src: url('./fonts/tommybold.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
-  }
- 
-  @font-face {
-    font-family: 'tommyregular';
-    src: url('./fonts/tommyregular.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
-  }
-
-  body{
-    color: white;
-  }
-
-h1{
-    font-family: 'tommyregular';
+.calendar-container {
+  background-color: #f0f0f0; /* Couleur de fond de l'élément */
+  border-radius: 10px; /* Rayon des coins pour arrondir les bords */
+  padding: 10px; /* Espacement à l'intérieur de l'élément */
 }
 
-p{
-    font-family: 'tommyregular';
+.calandar{
+  padding-bottom: 80px;
 }

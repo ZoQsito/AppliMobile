@@ -1,31 +1,24 @@
-import React from 'react';
-import ReactDOM from "react-dom";
-import Navbar from "./components/Navbar";
+import React from "react";
 import HomePage from "./pages/HomePage";
-import AccueilPage from './pages/AcueilPage';
-import RoulettePage from './pages/RoulettePage';
-import { HashRouter, Switch, Route } from "react-router-dom";
-
-// any CSS you import will output into a single css file (app.css in this case)
-import '../styles/app.css';
-
-// start the Stimulus application
-import '../bootstrap';
-
-
+import AccueilPage from "./pages/AcueilPage";
+import { BrowserRouter as Router, Route, Routes, BrowserRouter } from "react-router-dom";
+import { createRoot } from "react-dom/client";
+import "../styles/app.css";
+import "../bootstrap";
 
 const App = () => {
-    return (
-    <HashRouter>
-
-    <main className="container pt-5">
-        <Switch>
-        <Route path="/" component={RoulettePage} />  
-        </Switch>
-    </main>
-    </HashRouter>
-    );
+  return (
+    <BrowserRouter>
+      <main className="container pt-5">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/test" element={<AccueilPage />} />
+        </Routes>
+      </main>
+    </BrowserRouter>
+  );
 };
 
-const rootElement = document.querySelector('#app');
-ReactDOM.render(<App />, rootElement);
+const rootElement = document.getElementById("app");
+const root = createRoot(rootElement);
+root.render(<App />);

@@ -7,7 +7,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import "./homepage.css";
+import "../../styles/homepage.css";
 import { Autocomplete, Box, Button, Grid, TextField } from "@mui/material";
 import styled from "@mui/system/styled";
 const Item = styled("div")(({ theme }) => ({
@@ -34,7 +34,91 @@ const conges = [
   { label: "Congé Maladie" },
   { label: "Congés Exceptionnel" },
   { label: "Récupération Heures Supplémentaires" },
-  { label: "Temps Partiel" }
+  { label: "Temps Partiel" },
+];
+
+function createAccordionItem(title, contacts) {
+  return (
+    <Accordion key={title}>
+      <AccordionSummary
+        expandIcon={<ExpandMoreIcon />}
+        aria-controls={`panel-${title.toLowerCase()}-content`}
+        id={`panel-${title.toLowerCase()}-header`}
+      >
+        <Typography sx={{ textAlign: "left" }}>{title}</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        {contacts.map((contact, index) => (
+          <div
+            key={index}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              width: "100%",
+              marginBottom: "8px",
+            }}
+          >
+            <div style={{ flex: 1 }}>
+              <Typography sx={{ textAlign: "left" }}>{contact.name}</Typography>
+              <Typography
+                variant="body2"
+                color="textSecondary"
+                sx={{ textAlign: "left" }}
+              >
+                {contact.phone}
+              </Typography>
+            </div>
+            <div>
+              {contact.buttons.map((button, btnIndex) => (
+                <Button
+                  key={btnIndex}
+                  variant="contained"
+                  color={button.color}
+                  style={{ marginLeft: "8px" }}
+                >
+                  {button.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </AccordionDetails>
+    </Accordion>
+  );
+}
+
+const items = [
+  {
+    title: "DRH",
+    contacts: [
+      {
+        name: "Loïc.D",
+        buttons: [{ label: "ABS", color: "success" }],
+        phone: "07 68 04 62 22",
+      },
+    ],
+  },
+  {
+    title: "DSI",
+    contacts: [
+      {
+        name: "Florian.R",
+        buttons: [
+          { label: "DI", color: "warning" },
+          { label: "ABS", color: "success" },
+        ],
+        phone: "07 68 04 62 22",
+      },
+      {
+        name: "Vincent.D",
+        buttons: [
+          { label: "DI", color: "warning" },
+          { label: "DI", color: "warning" },
+        ],
+        phone: "06 42 58 08 11",
+      },
+    ],
+  },
 ];
 
 const HomePage = (props) => {
@@ -46,139 +130,16 @@ const HomePage = (props) => {
         </LocalizationProvider>
       </div>
       <div>
-        <Grid container spacing={8} pb={4}>
-          <Grid item xs={6} md={4}>
-            <Item>
-              <Accordion>
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  aria-controls="panel1a-content"
-                  id="panel1a-header"
-                >
-                  <Typography sx={{ textAlign: "left" }}>DRH</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      width: "100%",
-                    }}
-                  >
-                    <Typography sx={{ textAlign: "left" }}>Loïc.D</Typography>
-                    <div>
-                      <Button
-                        variant="contained"
-                        color="success"
-                        style={{ marginRight: "8px" }}
-                      >
-                        ABS
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="success"
-                        style={{ marginRight: "8px" }}
-                      >
-                        ABS
-                      </Button>
-                    </div>
-                  </div>
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    sx={{ textAlign: "left", pb: 2 }}
-                  >
-                    07 68 04 62 22
-                  </Typography>
-                </AccordionDetails>
-              </Accordion>
-              <Accordion>
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  aria-controls="panel2a-content"
-                  id="panel2a-header"
-                >
-                  <Typography sx={{ textAlign: "left" }}>DSI</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      width: "100%",
-                    }}
-                  >
-                    <Typography sx={{ textAlign: "left" }}>
-                      Florian.R
-                    </Typography>
-                    <div>
-                      <Button
-                        variant="contained"
-                        color="warning"
-                        style={{ marginRight: "8px" }}
-                      >
-                        DI
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="success"
-                        style={{ marginRight: "8px" }}
-                      >
-                        ABS
-                      </Button>
-                    </div>
-                  </div>
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    sx={{ textAlign: "left", pb: 2 }}
-                  >
-                    07 68 04 62 22
-                  </Typography>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      width: "100%",
-                    }}
-                  >
-                    <Typography sx={{ textAlign: "left" }}>
-                      Vincent.D
-                    </Typography>
-                    <div>
-                      <Button
-                        variant="contained"
-                        color="warning"
-                        style={{ marginRight: "8px" }}
-                      >
-                        DI
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="warning"
-                        style={{ marginRight: "8px" }}
-                      >
-                        DI
-                      </Button>
-                    </div>
-                  </div>
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    sx={{ textAlign: "left", pb: 2 }}
-                  >
-                    06 42 58 08 11
-                  </Typography>
-                </AccordionDetails>
-              </Accordion>
+      <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }} pb={2}>
+          <Grid item xs={6}>
+            <Item className="EDT">
+              {items.map((item) =>
+                createAccordionItem(item.title, item.contacts)
+              )}
             </Item>
           </Grid>
-          <Grid item xs={6} md={8}>
-            <Item>
+          <Grid item xs={6}>
+            <Item className="Mission">
               <Typography sx={{ p: 2 }}>Mission</Typography>
               <Box>
                 <Autocomplete
@@ -208,9 +169,9 @@ const HomePage = (props) => {
             </Item>
           </Grid>
         </Grid>
-        <Grid container spacing={8}>
-          <Grid item xs={6} md={8}>
-            <Item>
+        <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+          <Grid item xs={6} >
+            <Item className="Reunion">
               <Typography sx={{ p: 2 }}>Reunion</Typography>
               <Box>
                 <Autocomplete
@@ -239,8 +200,8 @@ const HomePage = (props) => {
               </Box>
             </Item>
           </Grid>
-          <Grid item xs={6} md={4}>
-            <Item>
+          <Grid item xs={6}>
+            <Item className="Conge">
               <Typography sx={{ p: 2 }}>Congés</Typography>
               <Box>
                 <Autocomplete

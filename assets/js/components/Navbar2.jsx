@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import "./navbar2.css";
 import { Link, NavLink } from "react-router-dom";
 
 export const Navbar2 = () => {
@@ -36,7 +35,7 @@ export const Navbar2 = () => {
             </li>
             {isAdmin && (
               <li className="nav-item">
-                <NavLink className="nav-link" to="/gestion">
+                <NavLink className="nav-link" to="/agents">
                   Gestion Agent
                 </NavLink>
               </li>

@@ -66,7 +66,7 @@ const AgentsPage = (props) => {
       <div className="mb-3 d-flex justify-content-between align-items-center">
         <h1>Liste des Agents</h1>
         <Link to="/agent/new" className="btn btn-primary">
-          Ajouté un Agent
+          Ajouter un Agent
         </Link>
       </div>
 

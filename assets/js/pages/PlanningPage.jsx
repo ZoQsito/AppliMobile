@@ -23,14 +23,29 @@ import styled from "@mui/system/styled";
 import EventsAPI from "../services/EventsAPI";
 import AgentsAPI from "../services/AgentsAPI";
 import { format } from "date-fns";
+import { toast } from "react-toastify";
+import Modal from "@mui/material/Modal";
+
 const Item = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  border: "1px solid",
+  border: "2px solid",
   borderColor: theme.palette.mode === "dark" ? "#444d58" : "#ced7e0",
   padding: theme.spacing(1),
   borderRadius: "4px",
   textAlign: "center",
 }));
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  p: 4,
+};
 
 const etablissements = [
   { label: "DI" },
@@ -43,30 +58,41 @@ const etablissements = [
 ];
 
 const conges = [
-  { label: "Congés Annuel" },
+  { label: "Congé Annuel" },
   { label: "Congé Maladie" },
-  { label: "Congés Exceptionnel" },
+  { label: "Congé Exceptionnel" },
   { label: "Récupération Heures Supplémentaires" },
   { label: "Temps Partiel" },
 ];
 
 const PlanningPage = (props) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [updateSelectedDate, setUpdateSelectedDate] = useState();
+  const [updateDate, setUpdateDate] = useState();
   const [events, setevents] = useState([]);
-  const [agents, setagents] = useState([]);
   const [eventInfo, setEventInfo] = useState([]);
+  const [agents, setagents] = useState([]);
   const [visibleBouton, setVisibleBouton] = useState(false);
   const [valeurSelectionnee, setValeurSelectionnee] = useState("");
+  const [justificatifSelectionnee, setJustificatifSelectionnee] = useState("");
+  const [agentSelectionne, setAgentSelectionne] = useState(null);
+  const [typeBoutonSelectionne, setTypeBoutonSelectionne] = useState("");
+  const [open, setOpen] = React.useState(false);
+
+  const handleClose = () => setOpen(false);
+
+  useEffect(() => {
+    fetchAgents();
+    setUpdateDate(format(selectedDate, "yyyy-MM-dd"));
+    fetchEvents();
+  }, []);
 
   useEffect(() => {
     fetchEvents();
-    fetchAgents();
-    setUpdateSelectedDate(format(selectedDate, "dd/MM/yyyy"));
-  }, []);
+  }, [visibleBouton]);
 
   const handleDateChange = (date) => {
-    setUpdateSelectedDate(format(date.$d, "dd/MM/yyyy"));
+    setSelectedDate(date.$d);
+    setUpdateDate(format(date.$d, "yyyy-MM-dd"));
   };
 
   const fetchEvents = async () => {
@@ -78,16 +104,71 @@ const PlanningPage = (props) => {
     }
   };
 
+  const clearFields = () => {
+    setMission({
+      etablissement: "",
+      autreEtablissement: "",
+      objetMission: "",
+      Quantification: "",
+      label: "MI",
+      date: "",
+      agentId: "",
+    });
+
+    setReunion({
+      etablissement: "",
+      autreEtablissement: "",
+      objetReunion: "",
+      ordreJour: "",
+      label: "REU",
+      date: "",
+      agentId: "",
+    });
+
+    setConge({
+      justification: "",
+      label: "ABS",
+    });
+
+    setValeurSelectionnee("");
+    setJustificatifSelectionnee("");
+    setVisibleBouton(false);
+  };
+
   const [mission, setMission] = useState({
     etablissement: "",
     autreEtablissement: "",
     objetMission: "",
     Quantification: "",
+    label: "MI",
+    date: "",
+    agent: "",
   });
 
-  const handleChange = ({ currentTarget }) => {
+  const [reunion, setReunion] = useState({
+    etablissement: "",
+    autreEtablissement: "",
+    objetReunion: "",
+    ordreJour: "",
+    label: "REU",
+    date: "",
+    agent: "",
+  });
+
+  const [conge, setConge] = useState({
+    justification: "",
+    label: "ABS",
+    date: "",
+    agent: "",
+  });
+
+  const handleChangeMI = ({ currentTarget }) => {
     const { name, value } = currentTarget;
     setMission({ ...mission, [name]: value });
+  };
+  const handleChangeRE = ({ currentTarget }) => {
+    const { name, value } = currentTarget;
+    setReunion({ ...reunion, [name]: value });
   };
 
   const fetchAgents = async () => {
@@ -99,13 +180,26 @@ const PlanningPage = (props) => {
     }
   };
 
-  const handleSaveMission = () => {
-    console.log(mission);
+  const handleSaveMission = async (event) => {
+    event.preventDefault();
+
+    await EventsAPI.create(mission);
+    clearFields();
   };
 
-  const handleSaveReunion = async (event) => {};
+  const handleSaveReunion = async (event) => {
+    event.preventDefault();
 
-  const handleSaveCongé = async (event) => {};
+    await EventsAPI.create(reunion);
+    clearFields();
+  };
+
+  const handleSaveCongé = async (event) => {
+    event.preventDefault();
+
+    await EventsAPI.create(conge);
+    clearFields();
+  };
 
   const agentsByService = {};
 
@@ -115,16 +209,6 @@ const PlanningPage = (props) => {
     }
     agentsByService[agent.service].push(agent);
   });
-
-  const toggleBouton = (agentID, Date) => {
-    setVisibleBouton(true);
-    setEventInfo([agentID, Date]);
-  };
-
-
-  const disableBouton = () => {
-    setVisibleBouton(false);
-  };
 
   function createAccordionItem(title, contacts) {
     return (
@@ -172,6 +256,71 @@ const PlanningPage = (props) => {
                     {button.label}
                   </Button>
                 ))}
+                <Modal
+                  open={open}
+                  onClose={() => setOpen(false)}
+                  aria-labelledby="modal-modal-title"
+                  aria-describedby="modal-modal-description"
+                >
+                  <Box sx={style}>
+                    <Typography id="modal-modal-title" variant="h6">
+                      {agentSelectionne
+                        ? `${agentSelectionne.nom} ${agentSelectionne.prenom}`
+                        : ""}
+                    </Typography>
+                    {typeBoutonSelectionne === "MI" && (
+                      <div>
+                        <Typography variant="subtitle1">Mission</Typography>
+                        <Typography variant="body1">
+                          Etablissement: {eventInfo.etablissement}
+                        </Typography>
+                        <Typography variant="body1">
+                          Autre Etablissement: {eventInfo.autreEtablissement}
+                        </Typography>
+                        <Typography variant="body1">
+                          Objet de la Mission: {eventInfo.objetMission}
+                        </Typography>
+                        <Typography variant="body1">
+                          Quantification: {eventInfo.Quantification}
+                        </Typography>
+                        <Typography variant="body1">
+                        {new Date(eventInfo.date).toLocaleDateString('fr-FR')}
+                        </Typography>
+                      </div>
+                    )}
+                    {typeBoutonSelectionne === "REU" && (
+                      <div>
+                        <Typography variant="subtitle1">Réunion</Typography>
+                        <Typography variant="body1">
+                          Etablissement: {eventInfo.etablissement}
+                        </Typography>
+                        <Typography variant="body1">
+                          Autre Etablissement: {eventInfo.autreEtablissement}
+                        </Typography>
+                        <Typography variant="body1">
+                          Objet de la Réunion: {eventInfo.objetReunion}
+                        </Typography>
+                        <Typography variant="body1">
+                          Ordre du Jour: {eventInfo.ordreJour}
+                        </Typography>
+                        <Typography variant="body1">
+                        {new Date(eventInfo.date).toLocaleDateString('fr-FR')}
+                        </Typography>
+                      </div>
+                    )}
+                    {typeBoutonSelectionne === "ABS" && (
+                      <div>
+                        <Typography variant="subtitle1">Absence</Typography>
+                        <Typography variant="body1">
+                          Justification: {eventInfo.justification}
+                        </Typography>
+                        <Typography variant="body1">
+                        Date: {new Date(eventInfo.date).toLocaleDateString('fr-FR')}
+                        </Typography>
+                      </div>
+                    )}
+                  </Box>
+                </Modal>
               </div>
             </div>
           ))}
@@ -188,10 +337,8 @@ const PlanningPage = (props) => {
           const agentId = event.agent.split("/").pop();
           const dateString = event.date;
           const date = new Date(dateString);
-          const update = format(date, "dd/MM/yyyy");
-          return (
-            parseInt(agentId, 10) === agent.id && update === updateSelectedDate
-          );
+          const update = format(date, "yyyy-MM-dd");
+          return parseInt(agentId, 10) === agent.id && update === updateDate;
         });
 
         let buttons = [];
@@ -201,12 +348,12 @@ const PlanningPage = (props) => {
             {
               label: "+",
               color: "primary",
-              onClick: () => toggleBouton(agent.id, updateSelectedDate),
+              onClick: () => toggleBouton(agent.id),
             },
             {
               label: "+",
               color: "primary",
-              onClick: () => toggleBouton(agent.id, updateSelectedDate),
+              onClick: () => toggleBouton(agent.id),
             },
           ];
         } else {
@@ -214,7 +361,7 @@ const PlanningPage = (props) => {
             label:
               event.label.toUpperCase() === "ABS"
                 ? event.label
-                : event.label.toUpperCase() === "DI"
+                : event.label.toUpperCase() === "REU"
                 ? event.label
                 : event.label.toUpperCase() === "MI"
                 ? event.label
@@ -222,19 +369,24 @@ const PlanningPage = (props) => {
             color:
               event.label.toUpperCase() === "ABS"
                 ? "success"
-                : event.label.toUpperCase() === "DI"
+                : event.label.toUpperCase() === "REU"
                 ? "warning"
                 : event.label.toUpperCase() === "MI"
-                ? "info"
+                ? "error"
                 : "primary",
-            onClick: disableBouton,
+            onClick: () => {
+              setAgentSelectionne(agent),
+                disableBouton(),
+                setTypeBoutonSelectionne(event.label),
+                setEventInfo(event);
+            },
           }));
 
           if (filteredEvents.length === 1) {
             buttons.push({
               label: "+",
               color: "primary",
-              onClick: () => toggleBouton(agent.id, updateSelectedDate),
+              onClick: () => toggleBouton(agent.id),
             });
           }
         }
@@ -248,7 +400,33 @@ const PlanningPage = (props) => {
     })
   );
 
-  const handleSelectionChange = (event) => {
+  const toggleBouton = (agentID) => {
+    clearFields();
+    setVisibleBouton(true);
+
+    setMission((prevMission) => ({
+      ...prevMission,
+      agent: `/api/agents/${agentID}`,
+      date: updateDate,
+    }));
+    setReunion((prevReunion) => ({
+      ...prevReunion,
+      agent: `/api/agents/${agentID}`,
+      date: updateDate,
+    }));
+    setConge((prevConge) => ({
+      ...prevConge,
+      agent: `/api/agents/${agentID}`,
+      date: updateDate,
+    }));
+  };
+
+  const disableBouton = () => {
+    clearFields();
+    setOpen(true);
+  };
+
+  const handleSelectionChangeMI = (event) => {
     const selectedValue = event.target.value;
 
     setMission((prevMission) => ({
@@ -259,6 +437,27 @@ const PlanningPage = (props) => {
     setValeurSelectionnee(selectedValue);
   };
 
+  const handleSelectionChangeRE = (event) => {
+    const selectedValue = event.target.value;
+
+    setReunion((prevReunion) => ({
+      ...prevReunion,
+      etablissement: selectedValue,
+    }));
+
+    setValeurSelectionnee(selectedValue);
+  };
+
+  const handleSelectionChangeConge = (event) => {
+    const justificatif = event.target.value;
+
+    setConge((prevConge) => ({
+      ...prevConge,
+      justification: justificatif,
+    }));
+
+    setJustificatifSelectionnee(justificatif);
+  };
 
   return (
     <>
@@ -266,7 +465,6 @@ const PlanningPage = (props) => {
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateCalendar
             className="calendar-container"
-            date={selectedDate}
             onChange={handleDateChange}
           />
         </LocalizationProvider>
@@ -294,7 +492,7 @@ const PlanningPage = (props) => {
                   <Select
                     value={valeurSelectionnee}
                     name="etablissement"
-                    onChange={handleSelectionChange}
+                    onChange={handleSelectionChangeMI}
                   >
                     <MenuItem value="">Sélectionnez un établissement</MenuItem>
                     {etablissements.map((etablissement, index) => (
@@ -310,7 +508,7 @@ const PlanningPage = (props) => {
                   value={mission.autreEtablissement}
                   fullWidth
                   margin="normal"
-                  onChange={handleChange}
+                  onChange={handleChangeMI}
                 />
                 <TextField
                   label="Objet de la mission"
@@ -318,7 +516,7 @@ const PlanningPage = (props) => {
                   value={mission.objetMission}
                   name="objetMission"
                   margin="normal"
-                  onChange={handleChange}
+                  onChange={handleChangeMI}
                 />
                 <TextField
                   label="Objectif et Quantification de travail"
@@ -328,7 +526,7 @@ const PlanningPage = (props) => {
                   multiline
                   rows={4}
                   margin="normal"
-                  onChange={handleChange}
+                  onChange={handleChangeMI}
                 />
                 {visibleBouton && (
                   <Button
@@ -348,28 +546,46 @@ const PlanningPage = (props) => {
             <Item className="Reunion">
               <Typography sx={{ p: 2 }}>Réunion</Typography>
               <Box>
-                <Autocomplete
-                  options={etablissements}
-                  renderInput={(params) => (
-                    <TextField {...params} label="Etablissement" />
-                  )}
-                />
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Etablissement</InputLabel>
+                  <Select
+                    value={valeurSelectionnee}
+                    name="etablissement"
+                    onChange={handleSelectionChangeRE}
+                  >
+                    <MenuItem value="">Sélectionnez un établissement</MenuItem>
+                    {etablissements.map((etablissement, index) => (
+                      <MenuItem key={index} value={etablissement.label}>
+                        {etablissement.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
                 <TextField
                   label="Autre Etablissement"
+                  name="autreEtablissement"
+                  value={reunion.autreEtablissement}
                   fullWidth
                   margin="normal"
+                  onChange={handleChangeRE}
                 />
                 <TextField
                   label="Objet de la Réunion"
                   fullWidth
                   margin="normal"
+                  name="objetReunion"
+                  value={reunion.objetReunion}
+                  onChange={handleChangeRE}
                 />
                 <TextField
                   label="Ordre du jour"
                   fullWidth
                   multiline
                   rows={4}
+                  name="ordreJour"
                   margin="normal"
+                  value={reunion.ordreJour}
+                  onChange={handleChangeRE}
                 />
                 {visibleBouton && (
                   <Button
@@ -387,16 +603,21 @@ const PlanningPage = (props) => {
             <Item className="Conge">
               <Typography sx={{ p: 2 }}>Congés</Typography>
               <Box>
-                <Autocomplete
-                  options={conges}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Justification"
-                      margin="normal"
-                    />
-                  )}
-                />
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Justificatif</InputLabel>
+                  <Select
+                    value={justificatifSelectionnee}
+                    name="justificatif"
+                    onChange={handleSelectionChangeConge}
+                  >
+                    <MenuItem value="">Sélectionnez un justificatif</MenuItem>
+                    {conges.map((conges, index) => (
+                      <MenuItem key={index} value={conges.label}>
+                        {conges.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
                 {visibleBouton && (
                   <Button
                     variant="contained"

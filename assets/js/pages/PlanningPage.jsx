@@ -78,8 +78,6 @@ const PlanningPage = (props) => {
   const [typeBoutonSelectionne, setTypeBoutonSelectionne] = useState("");
   const [open, setOpen] = React.useState(false);
 
-  const handleClose = () => setOpen(false);
-
   useEffect(() => {
     fetchAgents();
     setUpdateDate(format(selectedDate, "yyyy-MM-dd"));
@@ -93,6 +91,19 @@ const PlanningPage = (props) => {
   const handleDateChange = (date) => {
     setSelectedDate(date.$d);
     setUpdateDate(format(date.$d, "yyyy-MM-dd"));
+  };
+
+  const handleDeleteEvent = async (eventId) => {
+    try {
+      await EventsAPI.delete(eventId);
+      setOpen(false);
+      fetchEvents();
+    } catch (error) {
+      console.error(
+        "Une erreur s'est produite lors de la suppression de l'événement.",
+        error
+      );
+    }
   };
 
   const fetchEvents = async () => {
@@ -270,53 +281,88 @@ const PlanningPage = (props) => {
                     </Typography>
                     {typeBoutonSelectionne === "MI" && (
                       <div>
-                        <Typography variant="subtitle1">Mission</Typography>
+                        <Typography variant="h6">Mission</Typography>
                         <Typography variant="body1">
-                          Etablissement: {eventInfo.etablissement}
+                          <strong>Etablissement:</strong>{" "}
+                          {eventInfo.etablissement}
                         </Typography>
                         <Typography variant="body1">
-                          Autre Etablissement: {eventInfo.autreEtablissement}
+                          <strong>Autre Etablissement:</strong>{" "}
+                          {eventInfo.autreEtablissement}
                         </Typography>
                         <Typography variant="body1">
-                          Objet de la Mission: {eventInfo.objetMission}
+                          <strong>Objet de la Mission:</strong>{" "}
+                          {eventInfo.objetMission}
                         </Typography>
                         <Typography variant="body1">
-                          Quantification: {eventInfo.Quantification}
+                          <strong>Quantification:</strong>{" "}
+                          {eventInfo.Quantification}
                         </Typography>
                         <Typography variant="body1">
-                        {new Date(eventInfo.date).toLocaleDateString('fr-FR')}
+                          <strong>Date:</strong>{" "}
+                          {new Date(eventInfo.date).toLocaleDateString("fr-FR")}
                         </Typography>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={() => handleDeleteEvent(eventInfo.id)}
+                          style={{ marginTop: "16px" }}
+                        >
+                          Supprimer
+                        </Button>
                       </div>
                     )}
                     {typeBoutonSelectionne === "REU" && (
                       <div>
-                        <Typography variant="subtitle1">Réunion</Typography>
+                        <Typography variant="h6">Réunion</Typography>
                         <Typography variant="body1">
-                          Etablissement: {eventInfo.etablissement}
+                          <strong>Etablissement:</strong>{" "}
+                          {eventInfo.etablissement}
                         </Typography>
                         <Typography variant="body1">
-                          Autre Etablissement: {eventInfo.autreEtablissement}
+                          <strong>Autre Etablissement:</strong>{" "}
+                          {eventInfo.autreEtablissement}
                         </Typography>
                         <Typography variant="body1">
-                          Objet de la Réunion: {eventInfo.objetReunion}
+                          <strong>Objet de la Réunion:</strong>{" "}
+                          {eventInfo.objetReunion}
                         </Typography>
                         <Typography variant="body1">
-                          Ordre du Jour: {eventInfo.ordreJour}
+                          <strong>Ordre du Jour:</strong> {eventInfo.ordreJour}
                         </Typography>
                         <Typography variant="body1">
-                        {new Date(eventInfo.date).toLocaleDateString('fr-FR')}
+                          <strong>Date:</strong>{" "}
+                          {new Date(eventInfo.date).toLocaleDateString("fr-FR")}
                         </Typography>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={() => handleDeleteEvent(eventInfo.id)}
+                          style={{ marginTop: "16px" }}
+                        >
+                          Supprimer
+                        </Button>
                       </div>
                     )}
                     {typeBoutonSelectionne === "ABS" && (
                       <div>
-                        <Typography variant="subtitle1">Absence</Typography>
+                        <Typography variant="h6">Absence</Typography>
                         <Typography variant="body1">
-                          Justification: {eventInfo.justification}
+                          <strong>Justification:</strong>{" "}
+                          {eventInfo.justification}
                         </Typography>
                         <Typography variant="body1">
-                        Date: {new Date(eventInfo.date).toLocaleDateString('fr-FR')}
+                          <strong>Date:</strong>{" "}
+                          {new Date(eventInfo.date).toLocaleDateString("fr-FR")}
                         </Typography>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={() => handleDeleteEvent(eventInfo.id)}
+                          style={{ marginTop: "16px" }}
+                        >
+                          Supprimer
+                        </Button>
                       </div>
                     )}
                   </Box>

@@ -96,7 +96,7 @@ const AgentsPage = (props) => {
               <td>{agents.id}</td>
               <td>
                 <Link
-                  to={"/agents/" + agents.id}
+                  to={"/agent/" + agents.id}
                   style={{ textDecoration: "none" }}
                 >
                   {agents.prenom} {agents.nom}

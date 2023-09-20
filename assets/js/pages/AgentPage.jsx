@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Field from "../components/Field";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import AgentsAPI from "../services/AgentsAPI";
 
 const AgentPage = ({}) => {
-  const { id = "new" } = "new";
+  const { id = "new" } = useParams();
 
   const [agent, setAgent] = useState({
     nom: "",

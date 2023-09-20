@@ -22,7 +22,7 @@ import {
 import styled from "@mui/system/styled";
 import EventsAPI from "../services/EventsAPI";
 import AgentsAPI from "../services/AgentsAPI";
-import { format } from "date-fns";
+import { addDays, format } from "date-fns";
 import { toast } from "react-toastify";
 import Modal from "@mui/material/Modal";
 
@@ -81,8 +81,8 @@ const PlanningPage = (props) => {
   useEffect(() => {
     fetchAgents();
     setUpdateDate(format(selectedDate, "yyyy-MM-dd"));
-    fetchEvents();
-  }, []);
+    fetchEvents()
+}, []);
 
   useEffect(() => {
     fetchEvents();
@@ -91,6 +91,7 @@ const PlanningPage = (props) => {
   const handleDateChange = (date) => {
     setSelectedDate(date.$d);
     setUpdateDate(format(date.$d, "yyyy-MM-dd"));
+    deleteOldEvents();
   };
 
   const handleDeleteEvent = async (eventId) => {
@@ -106,6 +107,9 @@ const PlanningPage = (props) => {
     }
   };
 
+
+  
+
   const fetchEvents = async () => {
     try {
       const data = await EventsAPI.findAll();
@@ -114,6 +118,27 @@ const PlanningPage = (props) => {
       toast.error("Les events n'ont pas été chargés");
     }
   };
+
+  const deleteOldEvents = async () => {
+    try {
+      const currentDate = new Date();
+      const sevenDaysAgo = addDays(currentDate, -7);
+
+      const eventsToDelete = events.filter((event) => {
+        const eventDate = new Date(event.date);
+        return eventDate < sevenDaysAgo;
+      });
+  
+      for (const eventToDelete of eventsToDelete) {
+        await handleDeleteEvent(eventToDelete.id);
+      }
+  
+      fetchEvents();
+    } catch (error) {
+      console.error("Une erreur s'est produite lors de la suppression des événements obsolètes.", error);
+    }
+  };
+
 
   const clearFields = () => {
     setMission({

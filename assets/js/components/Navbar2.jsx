@@ -1,12 +1,20 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
+import AuthAPI from "../services/AuthAPI";
+import { toast } from "react-toastify";
+import AuthContext from "../contexts/AuthContext";
 
 export const Navbar2 = () => {
-  const isAuthenticated = false;
+  const isAuthenticated = useContext(AuthContext);
 
   const [isAdmin, setIsAdmin] = useState(true);
 
-  const handleLogout = () => {};
+  const handleLogout = () => {
+    AuthAPI.logout();
+    window.location.href = "/login";
+  };
+
+
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
@@ -42,7 +50,7 @@ export const Navbar2 = () => {
             )}
           </ul>
           <ul className="navbar-nav ml-auto">
-            {(!isAuthenticated && (
+            {(isAuthenticated.isAuthenticated === false && (
               <>
                 <li className="nav-item">
                   <NavLink to="/register" className="nav-link">

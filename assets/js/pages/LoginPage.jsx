@@ -1,49 +1,69 @@
-import React, {useState, useContext} from 'react';
-import Field from '../components/Field';
+import React, { useState, useContext, useEffect } from "react";
+import AuthAPI from "../services/AuthAPI";
+import Field from "../components/Field";
+import AuthContext from "../contexts/AuthContext";
 
 
-const LoginPage = ({history}) => {
-
-    const { setIsAuthenticated } = useState(true)
-
-    const [credentials, setCredentials] = useState({
-        username: "",
-        password: ""
-    })
+const LoginPage = () => {
+  const { setIsAuthenticated } = useContext(AuthContext)
 
 
-    const [error, setError] = useState("");
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
+  
+  const [error, setError] = useState("");
 
+  const handleChange = (event) => {
+    const value = event.currentTarget.value;
+    const name = event.currentTarget.name;
 
+    setCredentials({ ...credentials, [name]: value });
+  };
 
-    const handleChange = (event) => {
-        const value = event.currentTarget.value;
-        const name = event.currentTarget.name;
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-        setCredentials({...credentials, [name]: value});
+    try {
+        await AuthAPI.authenticate(credentials);
+        setError("");
+        setIsAuthenticated(true);
+        window.location.href = "/";
+    } catch (error) {
+        setError("Aucun Compte ne possède cette adresse ou alors les informations ne correspondent pas !");
     }
+}
 
-    const handleSubmit = async (event) => {
-    }
 
-    return ( <>
-    
-
-    <h1>Connexion à l'application</h1>&nbsp;
-
-    <form onSubmit={handleSubmit}>
-        <Field label="Adresse email" name="username" value={credentials.username} onChange={handleChange} placeholder="Adresse email de connexion" error={error} />
+  return (
+    <>
+      <h1>Connexion à l'application</h1>&nbsp;
+      <form onSubmit={handleSubmit}>
+        <Field
+          label="Adresse email"
+          name="username"
+          value={credentials.username}
+          onChange={handleChange}
+          placeholder="Adresse email de connexion"
+        />
         &nbsp;
-        <Field label="Mot de Passe" name="password" value={credentials.password} onChange={handleChange} error={error} type="password" />
+        <Field
+          label="Mot de Passe"
+          name="password"
+          value={credentials.password}
+          onChange={handleChange}
+          type="password"
+        />
         &nbsp;
         <div className="form-group">
-            <button type='submit' className="btn btn-primary">Connexion</button>
+          <button type="submit" className="btn btn-primary">
+            Connexion
+          </button>
         </div>
-    </form>
-    
-    </> 
-    
-    );
-}
- 
+      </form>
+    </>
+  );
+};
+
 export default LoginPage;

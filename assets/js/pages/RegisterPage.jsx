@@ -1,20 +1,18 @@
 import React, { useState } from "react";
 import Field from "../components/Field";
 import { Link } from "react-router-dom";
-
+import usersAPI from "../services/usersAPI";
 
 const RegisterPage = ({ history }) => {
   const [user, setUser] = useState({
-    firstName: "",
-    lastName: "",
+    username: "",
     email: "",
     password: "",
     passwordConfirm: "",
   });
 
   const [errors, setErrors] = useState({
-    firstName: "",
-    lastName: "",
+    username: "",
     email: "",
     password: "",
     passwordConfirm: "",
@@ -33,8 +31,12 @@ const RegisterPage = ({ history }) => {
       apiErrors.passwordConfirm =
         "Votre Confirmation de Mot de Passe n'est pas comforme avec le Mot de Passe";
       setErrors(apiErrors);
+      toast.error("Des erreurs dans votre Formulaire !😠");
       return;
     }
+
+    await usersAPI.register(user);
+
   };
 
   return (
@@ -43,20 +45,11 @@ const RegisterPage = ({ history }) => {
 
       <form onSubmit={handleSubmit}>
         <Field
-          name="firstName"
-          label="Prénom"
-          placeholder="Votre Prénom"
-          error={errors.firstName}
-          value={user.firstName}
-          onChange={handleChange}
-        />
-        &nbsp;
-        <Field
-          name="lastName"
-          label="Nom"
-          placeholder="Votre Nom"
-          error={errors.lastName}
-          value={user.lastName}
+          name="username"
+          label="Username"
+          placeholder="Votre Username"
+          error={errors.username}
+          value={user.username}
           onChange={handleChange}
         />
         &nbsp;

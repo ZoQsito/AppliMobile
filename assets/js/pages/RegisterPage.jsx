@@ -6,14 +6,12 @@ import usersAPI from "../services/usersAPI";
 const RegisterPage = ({ history }) => {
   const [user, setUser] = useState({
     username: "",
-    email: "",
     password: "",
     passwordConfirm: "",
   });
 
   const [errors, setErrors] = useState({
     username: "",
-    email: "",
     password: "",
     passwordConfirm: "",
   });
@@ -36,6 +34,7 @@ const RegisterPage = ({ history }) => {
     }
 
     await usersAPI.register(user);
+    window.location.href = "/";
 
   };
 
@@ -50,15 +49,6 @@ const RegisterPage = ({ history }) => {
           placeholder="Votre Username"
           error={errors.username}
           value={user.username}
-          onChange={handleChange}
-        />
-        &nbsp;
-        <Field
-          name="email"
-          label="Email"
-          placeholder="Votre Email"
-          error={errors.email}
-          value={user.email}
           onChange={handleChange}
         />
         &nbsp;

@@ -119,6 +119,7 @@ const PlanningPage = (props) => {
     }
   };
 
+
   const deleteOldEvents = async () => {
     try {
       const currentDate = new Date();

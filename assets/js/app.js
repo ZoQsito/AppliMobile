@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import { createRoot } from "react-dom/client";
 import "../styles/app.css";
 import "../bootstrap";
@@ -12,6 +17,7 @@ import PlanningPage from "./pages/PlanningPage";
 import AuthAPI from "./services/AuthAPI";
 import jwtDecode from "jwt-decode";
 import AuthContext from "./contexts/AuthContext";
+
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -31,23 +37,35 @@ const App = () => {
     }
   }, [isAuthenticated]);
 
-  const AdminRoute = ({ component: Component, ...rest }) => (
-    <Route
-      {...rest}
-      render={(props) =>
-        isAuthenticated && isAdmin ? (
-          <Component {...props} />
-        ) : (
-          <Redirect
-            to={{
-              pathname: "/",
-              state: { from: props.location },
-            }}
-          />
-        )
-      }
-    />
-  );
+  const adminRoute = (path, element) => {
+    return (
+      <Route
+        path={path}
+        element={
+          isAuthenticated && isAdmin ? (
+            element
+          ) : (
+            <Navigate to="/" state={{ from: window.location.pathname }} />
+          )
+        }
+      />
+    );
+  };
+
+  const AuthenticatedRoute = (path, element) => {
+    return (
+      <Route
+        path={path}
+        element={
+          isAuthenticated ? (
+            element
+          ) : (
+            <Navigate to="/login" state={{ from: window.location.pathname }} />
+          )
+        }
+      />
+    );
+  };
 
   return (
     <AuthContext.Provider
@@ -60,11 +78,11 @@ const App = () => {
         <Navbar2 />
         <main className="container pt-5">
           <Routes>
-            <Route path="/" element={<PlanningPage />} />
-            <Route path="/agents" element={<AgentsPage />} />
-            <Route path="/agent/:id" element={<AgentPage />} />
+            {AuthenticatedRoute("/", <PlanningPage />)}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            {adminRoute("/agents", <AgentsPage />)}
+            {adminRoute("/agent/:id", <AgentPage />)}
           </Routes>
         </main>
       </Router>

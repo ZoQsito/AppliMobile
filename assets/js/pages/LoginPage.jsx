@@ -41,11 +41,11 @@ const LoginPage = () => {
       <h1>Connexion à l'application</h1>&nbsp;
       <form onSubmit={handleSubmit}>
         <Field
-          label="username"
+          label="Identifiant"
           name="username"
           value={credentials.username}
           onChange={handleChange}
-          placeholder="username de connexion"
+          placeholder="Identifiant de connexion"
         />
         &nbsp;
         <Field

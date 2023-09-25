@@ -1,13 +1,27 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import AuthAPI from "../services/AuthAPI";
 import { toast } from "react-toastify";
 import AuthContext from "../contexts/AuthContext";
+import jwtDecode from "jwt-decode";
 
 export const Navbar2 = () => {
-  const isAuthenticated = useContext(AuthContext);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    AuthAPI.isAuthenticated()
+  );
 
-  const [isAdmin, setIsAdmin] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    var token = localStorage.getItem("authToken");
+
+    if (token) {
+      var decodedToken = jwtDecode(token);
+      if (decodedToken.roles[0] === "ADMIN") {
+        setIsAdmin(true);
+      }
+    }
+  }, [isAuthenticated]);
 
   const handleLogout = () => {
     AuthAPI.logout();

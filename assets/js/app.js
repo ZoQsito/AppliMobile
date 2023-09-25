@@ -17,6 +17,7 @@ import PlanningPage from "./pages/PlanningPage";
 import AuthAPI from "./services/AuthAPI";
 import jwtDecode from "jwt-decode";
 import AuthContext from "./contexts/AuthContext";
+import Testpage from "./pages/Testpage";
 
 
 const App = () => {
@@ -78,9 +79,10 @@ const App = () => {
         <Navbar2 />
         <main className="container pt-5">
           <Routes>
-            {AuthenticatedRoute("/", <PlanningPage />)}
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/" element={<PlanningPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/test" element={<Testpage />} />
             {adminRoute("/agents", <AgentsPage />)}
             {adminRoute("/agent/:id", <AgentPage />)}
           </Routes>

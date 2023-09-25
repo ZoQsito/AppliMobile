@@ -38,6 +38,9 @@ class Agent
     #[ORM\OneToMany(targetEntity: Events::class, mappedBy: "agent", cascade: ["remove"])]
     private $events;
 
+    #[ORM\Column(length: 255)]
+    private ?string $color = null;
+
     public function getEvents()
     {
         return $this->events;
@@ -104,5 +107,17 @@ class Agent
     public function setUser(?User $user): void
     {
         $this->user = $user;
+    }
+
+    public function getColor(): ?string
+    {
+        return $this->color;
+    }
+
+    public function setColor(string $color): static
+    {
+        $this->color = $color;
+
+        return $this;
     }
 }

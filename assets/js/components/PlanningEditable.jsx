@@ -7,12 +7,10 @@ import {
   Card,
   CardContent,
   IconButton,
-  Modal,
   Toolbar,
   Typography,
 } from "@mui/material";
 import { Scheduler } from "@aldabil/react-scheduler";
-import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import AgentsAPI from "../services/AgentsAPI";
 import EventsAPI from "../services/EventsAPI";
 import { FormControl, Grid, InputLabel, MenuItem, Select } from "@mui/material";
@@ -122,6 +120,7 @@ const PlanningEditable = ({ props }) => {
   const calendarRef = useRef(null);
   const [selectedOption, setSelectedOption] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   const [events, setEvents] = useState([
     {
@@ -185,6 +184,8 @@ const PlanningEditable = ({ props }) => {
       );
     }
   };
+
+  console.log(isEditorOpen)
 
   if (isLoading) {
     return <div></div>;
@@ -310,6 +311,14 @@ const PlanningEditable = ({ props }) => {
                     >
                       Supprimer
                     </Button>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => setIsEditorOpen(true)}
+                      style={{ marginTop: "16px" }}
+                    >
+                      Modifier
+                    </Button>
                   </div>
                 )}
                 {props.title === "REU" && (
@@ -349,6 +358,14 @@ const PlanningEditable = ({ props }) => {
                     >
                       Supprimer
                     </Button>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => setIsEditorOpen(true)}
+                      style={{ marginTop: "16px" }}
+                    >
+                      Modifier
+                    </Button>
                   </div>
                 )}
                 {props.title === "ABS" && (
@@ -373,6 +390,14 @@ const PlanningEditable = ({ props }) => {
                     >
                       Supprimer
                     </Button>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => setIsEditorOpen(true)}
+                      style={{ marginTop: "16px" }}
+                    >
+                      Modifier
+                    </Button>
                   </div>
                 )}
               </CardContent>
@@ -380,75 +405,74 @@ const PlanningEditable = ({ props }) => {
           );
         }}
         customEditor={(props) => (
-          console.log(props.edited),
-          props.edited === undefined ? (
-            <Card sx={{ width: "750px" }}>
-              <CardContent>
-                <AppBar position="static">
-                  <Toolbar>
-                    <Typography
-                      variant="h6"
-                      component="div"
-                      sx={{ flexGrow: 1 }}
-                    >
-                      Ajout d'événement
-                    </Typography>
-                    <IconButton
-                      edge="end"
-                      color="inherit"
-                      onClick={() => props.close()}
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                  </Toolbar>
-                </AppBar>
-                <Grid container rowSpacing={1}>
-                  <Grid item xs={12} sm={12} md={12}>
-                    <FormControl fullWidth margin="normal">
-                      <InputLabel>Choisissez une option</InputLabel>
-                      <Select
-                        value={selectedOption}
-                        onChange={handleOptionChange}
+            props.edited === undefined ? (
+              <Card sx={{ width: "750px" }}>
+                <CardContent>
+                  <AppBar position="static">
+                    <Toolbar>
+                      <Typography
+                        variant="h6"
+                        component="div"
+                        sx={{ flexGrow: 1 }}
                       >
-                        <MenuItem value="">Sélectionnez une option</MenuItem>
-                        <MenuItem value="MI">MI</MenuItem>
-                        <MenuItem value="REU">REU</MenuItem>
-                        <MenuItem value="ABS">ABS</MenuItem>
-                      </Select>
-                    </FormControl>
+                        Ajout d'événement
+                      </Typography>
+                      <IconButton
+                        edge="end"
+                        color="inherit"
+                        onClick={() => props.close()}
+                      >
+                        <CloseIcon />
+                      </IconButton>
+                    </Toolbar>
+                  </AppBar>
+                  <Grid container rowSpacing={1}>
+                    <Grid item xs={12} sm={12} md={12}>
+                      <FormControl fullWidth margin="normal">
+                        <InputLabel>Choisissez une option</InputLabel>
+                        <Select
+                          value={selectedOption}
+                          onChange={handleOptionChange}
+                        >
+                          <MenuItem value="">Sélectionnez une option</MenuItem>
+                          <MenuItem value="MI">MI</MenuItem>
+                          <MenuItem value="REU">REU</MenuItem>
+                          <MenuItem value="ABS">ABS</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
                   </Grid>
-                </Grid>
-                {selectedOption === "MI" && (
-                  <EventFormMI
-                    props={props}
-                    setIsLoading={setIsLoading}
-                    edited={props.edited}
-                  />
-                )}
-                {selectedOption === "REU" && (
-                  <EventFormREU
-                    props={props}
-                    setIsLoading={setIsLoading}
-                    edited={props.edited}
-                  />
-                )}
-                {selectedOption === "ABS" && (
-                  <EventFormABS
-                    props={props}
-                    setIsLoading={setIsLoading}
-                    edited={props.edited}
-                  />
-                )}
-              </CardContent>
-            </Card>
-          ) : (
-            <CustomEditor
-              props={props}
-              selectedOption={selectedOption}
-              setSelectedOption={setSelectedOption}
-              setIsLoading={setIsLoading}
-            />
-          )
+                  {selectedOption === "MI" && (
+                    <EventFormMI
+                      props={props}
+                      setIsLoading={setIsLoading}
+                      edited={props.edited}
+                    />
+                  )}
+                  {selectedOption === "REU" && (
+                    <EventFormREU
+                      props={props}
+                      setIsLoading={setIsLoading}
+                      edited={props.edited}
+                    />
+                  )}
+                  {selectedOption === "ABS" && (
+                    <EventFormABS
+                      props={props}
+                      setIsLoading={setIsLoading}
+                      edited={props.edited}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <CustomEditor
+                props={props}
+                selectedOption={selectedOption}
+                setSelectedOption={setSelectedOption}
+                setIsLoading={setIsLoading}
+              />
+            )
         )}
       />
     </Fragment>

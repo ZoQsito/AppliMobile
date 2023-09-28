@@ -12,6 +12,7 @@ const AgentPage = ({}) => {
     prenom: "",
     telephone: "",
     service: "",
+    color:"",
   });
 
   const [errors, setErrors] = useState({
@@ -23,17 +24,17 @@ const AgentPage = ({}) => {
 
   const [editing, setEditing] = useState(false);
 
-  // Récuperation du customer en fonction de l'identifiant
+
   const fetchAgent = async (id) => {
     try {
-      const { prenom, nom, telephone, service } = await AgentsAPI.find(id);
-      setAgent({ prenom, nom, telephone, service });
+      const { prenom, nom, telephone, service, color } = await AgentsAPI.find(id);
+      setAgent({ prenom, nom, telephone, service, color });
     } catch (error) {
       toast.error("L'agent n'a pas pu être chargé");
     }
   };
 
-  //Changement du customer si besoin au chargement du composant ou au changement de l'identifiant
+
   useEffect(() => {
     if (id !== "new") {
       setEditing(true);
@@ -41,13 +42,13 @@ const AgentPage = ({}) => {
     }
   }, [id]);
 
-  //Gestion des changements des inputs dans le formulaire
+
   const handleChange = ({ currentTarget }) => {
     const { name, value } = currentTarget;
     setAgent({ ...agent, [name]: value });
   };
 
-  //Gestion de la soumission du formulaire
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -109,6 +110,14 @@ const AgentPage = ({}) => {
           value={agent.service}
           onChange={handleChange}
           error={errors.service}
+        />
+        &nbsp;
+        <Field
+          name="color"
+          label="Couleur de l'agent"
+          placeholder="#FFFFFF"
+          value={agent.color}
+          onChange={handleChange}
         />
         &nbsp;
         <div className="form-group">

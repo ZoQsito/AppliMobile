@@ -1,11 +1,20 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
 import AuthAPI from "../services/AuthAPI";
-import { toast } from "react-toastify";
-import AuthContext from "../contexts/AuthContext";
 import jwtDecode from "jwt-decode";
+import "../../styles/navbar.css";
+import {
+  AppBar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  IconButton,
+  Toolbar,
+  Typography,
+} from "@mui/material";
 
-export const Navbar2 = () => {
+export const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
     AuthAPI.isAuthenticated()
   );
@@ -28,26 +37,16 @@ export const Navbar2 = () => {
     window.location.href = "/login";
   };
 
-
-
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <div className="container-fluid">
-        <NavLink className="navbar-brand" to="/">
+        <NavLink
+          className="navbar-brand"
+          to="/"
+          style={{ paddingRight: "50px" }}
+        >
           DISP
         </NavLink>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarColor02"
-          aria-controls="navbarColor02"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
-
         <div className="collapse navbar-collapse" id="navbarColor02">
           <ul className="navbar-nav me-auto">
             <li className="nav-item">
@@ -62,9 +61,16 @@ export const Navbar2 = () => {
                 </NavLink>
               </li>
             )}
+            {isAdmin && (
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/users">
+                  Gestion User
+                </NavLink>
+              </li>
+            )}
           </ul>
           <ul className="navbar-nav ml-auto">
-            {(isAuthenticated.isAuthenticated === false && (
+            {(isAuthenticated === false && (
               <>
                 <li className="nav-item">
                   <NavLink to="/register" className="nav-link">
@@ -79,9 +85,9 @@ export const Navbar2 = () => {
               </>
             )) || (
               <li className="nav-item">
-                <button onClick={handleLogout} className="btn btn-danger">
-                  Déconnexion
-                </button>
+                <Button variant="contained" onClick={handleLogout} color="error">
+                Déconnexion
+                </Button>
               </li>
             )}
           </ul>

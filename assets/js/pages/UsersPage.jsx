@@ -3,37 +3,40 @@ import Pagination from "../components/Pagination";
 import AgentsAPI from "../services/AgentsAPI";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import usersAPI from "../services/usersAPI";
 
-const AgentsPage = (props) => {
-  const [agents, setagents] = useState([]);
+const UsersPage = (props) => {
+  const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
 
-  const fetchAgents = async () => {
+
+  const fetchUsers = async () => {
     try {
-      const data = await AgentsAPI.findAll();
-      setagents(data);
+      const data = await usersAPI.findAll();
+      setUsers(data);
     } catch (error) {
-      toast.error("Les agents n'ont pas été chargés");
+      toast.error("Les users n'ont pas été chargés");
     }
   };
 
+  console.log(users)
+
   useEffect(() => {
-    fetchAgents();
+    fetchUsers();
   }, []);
 
-
   const handleDelete = async (id) => {
-    const originalAgents = [...agents];
+    const originalUsers = [...users];
 
-    setagents(agents.filter((agents) => agents.id !== id));
+    setagents(users.filter((users) => users.id !== id));
 
     try {
-      await AgentsAPI.delete(id);
-      toast.success("L'agent a bien été supprimé");
+      await usersAPI.deleteUsers(id);
+      toast.success("Le user a bien été supprimé");
     } catch (error) {
-      setagents(originalAgents);
-      toast.error("La suppression de l'agent n'a pas pu fonctionner");
+      setUsers(originalUsers);
+      toast.error("La suppression du user n'a pas pu fonctionner");
     }
   };
 
@@ -47,15 +50,13 @@ const AgentsPage = (props) => {
 
   const itemsPerPage = 10;
 
-  const filteredAgents = agents.filter(
+  const filteredUsers = users.filter(
     (a) =>
-      a.nom.toLowerCase().includes(search.toLowerCase()) ||
-      a.prenom.toLowerCase().includes(search.toLowerCase()) ||
-      (a.service && a.service.toLowerCase().includes(search.toLowerCase()))
+      a.username.toLowerCase().includes(search.toLowerCase())
   );
 
-  const paginatedAgents = Pagination.getData(
-    filteredAgents,
+  const paginatedUsers = Pagination.getData(
+    filteredUsers,
     currentPage,
     itemsPerPage
   );
@@ -63,9 +64,9 @@ const AgentsPage = (props) => {
   return (
     <>
       <div className="mb-3 d-flex justify-content-between align-items-center">
-        <h1>Liste des Agents</h1>
-        <Link to="/agent/new" className="btn btn-primary">
-          Ajouter un Agent
+        <h1>Liste des Users</h1>
+        <Link to="/user/new" className="btn btn-primary">
+          Ajouter un User
         </Link>
       </div>
 
@@ -83,29 +84,27 @@ const AgentsPage = (props) => {
         <thead>
           <tr>
             <th>Id</th>
-            <th>Nom</th>
-            <th>Téléphone</th>
-            <th>Service</th>
+            <th>Username</th>
+            <th>Role</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          {paginatedAgents.map((agents) => (
-            <tr key={agents.id}>
-              <td>{agents.id}</td>
+          {paginatedUsers.map((user) => (
+            <tr key={user.id}>
+              <td>{user.id}</td>
               <td>
                 <Link
-                  to={"/agent/" + agents.id}
+                  to={"/user/" + user.id}
                   style={{ textDecoration: "none" }}
                 >
-                  {agents.prenom} {agents.nom}
+                  {user.username}
                 </Link>
               </td>
-              <td>{agents.telephone.replace(/(\d{2})(?=\d)/g, "$1 ")}</td>
-              <td>{agents.service}</td>
+              <td>{user.roles[0]}</td>
               <td>
                 <button
-                  onClick={() => handleDelete(agents.id)}
+                  onClick={() => handleDelete(user.id)}
                   className="btn btn-sm btn-danger"
                 >
                   Supprimer
@@ -116,11 +115,11 @@ const AgentsPage = (props) => {
         </tbody>
       </table>
 
-      {itemsPerPage < filteredAgents.length && (
+      {itemsPerPage < filteredUsers.length && (
         <Pagination
           currentPage={currentPage}
           itemsPerPage={itemsPerPage}
-          length={filteredAgents.length}
+          length={filteredUsers.length}
           onPageChanged={handlePageChange}
         />
       )}
@@ -128,4 +127,4 @@ const AgentsPage = (props) => {
   );
 };
 
-export default AgentsPage;
+export default UsersPage;

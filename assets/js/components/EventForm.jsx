@@ -10,14 +10,16 @@ import {
   Typography,
   Button,
   styled,
+  IconButton,
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { renderTimeViewClock } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import EventsAPI from "../services/EventsAPI";
-import { addHours, format } from "date-fns";
+import { format } from "date-fns";
 import dayjs from "dayjs";
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 
 const Item = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -75,8 +77,6 @@ const EventFormMI = ({ props, setIsLoading, edited }) => {
     }
   }, [edited, isEditMode]);
 
-
-
   const handleSelectionChangeMI = (event) => {
     const selectedValue = event.target.value;
 
@@ -94,14 +94,14 @@ const EventFormMI = ({ props, setIsLoading, edited }) => {
   const handleSaveMission = async (event) => {
     event.preventDefault();
 
-    console.log(mission)
+    console.log(mission);
 
     if (isEditMode) {
       await EventsAPI.update(edited.event_id, mission);
     } else {
       await EventsAPI.create(mission);
     }
-    setIsLoading(true); 
+    setIsLoading(true);
   };
 
   const handleDateChange = (newDate, target, agentID) => {
@@ -216,13 +216,9 @@ const EventFormMI = ({ props, setIsLoading, edited }) => {
                 </LocalizationProvider>
               </Grid>
             </Grid>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSaveMission}
-            >
-              Enregistrer
-            </Button>
+            <IconButton aria-label="delete" size="large" onClick={handleSaveMission}>
+              <AddCircleIcon fontSize="large" />
+            </IconButton>
           </Box>
         </Item>
       </Grid>
@@ -230,9 +226,7 @@ const EventFormMI = ({ props, setIsLoading, edited }) => {
   );
 };
 
-const EventFormREU = ({ props, setIsLoading }) => {
-  const [valeurSelectionnee, setValeurSelectionnee] = useState("");
-
+const EventFormREU = ({ props, setIsLoading, edited }) => {
   const [reunion, setReunion] = useState({
     etablissement: "",
     autreEtablissement: "",
@@ -244,6 +238,23 @@ const EventFormREU = ({ props, setIsLoading }) => {
     agent: "",
   });
 
+  const isEditMode = !!edited;
+
+  useEffect(() => {
+    if (isEditMode) {
+      setReunion({
+        etablissement: edited.etablissement,
+        autreEtablissement: edited.autreEtablissement,
+        objetReunion: edited.objetReunion,
+        ordreJour: edited.ordreJour,
+        label: edited.label,
+        dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
+        dateFin: format(edited.end, "yyyy-MM-dd HH:mm:ss"),
+        agent: `/api/agents/${edited.admin_id}`,
+      });
+    }
+  }, [edited, isEditMode]);
+
   const handleChangeRE = ({ currentTarget }) => {
     const { name, value } = currentTarget;
     setReunion({ ...reunion, [name]: value });
@@ -252,7 +263,11 @@ const EventFormREU = ({ props, setIsLoading }) => {
   const handleSaveReunion = async (event) => {
     event.preventDefault();
 
-    await EventsAPI.create(reunion);
+    if (isEditMode) {
+      await EventsAPI.update(edited.event_id, reunion);
+    } else {
+      await EventsAPI.create(reunion);
+    }
     setIsLoading(true);
   };
 
@@ -263,24 +278,36 @@ const EventFormREU = ({ props, setIsLoading }) => {
       ...prevReunion,
       etablissement: selectedValue,
     }));
-
-    setValeurSelectionnee(selectedValue);
   };
 
   const handleDateChange = (newDate, target, agentID) => {
     const date = format(newDate.$d, "yyyy-MM-dd HH:mm:ss");
 
-    if (target === "debut") {
-      setReunion((prevReunion) => ({
-        ...prevReunion,
-        dateDebut: date,
-        agent: `/api/agents/${agentID}`,
-      }));
-    } else if (target === "fin") {
-      setReunion((prevReunion) => ({
-        ...prevReunion,
-        dateFin: date,
-      }));
+    if (isEditMode) {
+      if (target === "debut") {
+        setReunion((prevReunion) => ({
+          ...prevReunion,
+          dateDebut: date,
+        }));
+      } else if (target === "fin") {
+        setReunion((prevReunion) => ({
+          ...prevReunion,
+          dateFin: date,
+        }));
+      }
+    } else {
+      if (target === "debut") {
+        setReunion((prevReunion) => ({
+          ...prevReunion,
+          dateDebut: date,
+          agent: `/api/agents/${agentID}`,
+        }));
+      } else if (target === "fin") {
+        setReunion((prevReunion) => ({
+          ...prevReunion,
+          dateFin: date,
+        }));
+      }
     }
   };
 
@@ -293,7 +320,7 @@ const EventFormREU = ({ props, setIsLoading }) => {
             <FormControl fullWidth margin="normal">
               <InputLabel>Etablissement</InputLabel>
               <Select
-                value={valeurSelectionnee}
+                value={reunion.etablissement}
                 name="etablissement"
                 onChange={handleSelectionChangeRE}
               >
@@ -335,6 +362,7 @@ const EventFormREU = ({ props, setIsLoading }) => {
               <Grid item xs={6}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DateTimePicker
+                    value={dayjs(reunion.dateDebut)}
                     label="Date et Heure de Début"
                     viewRenderers={{
                       hours: renderTimeViewClock,
@@ -350,6 +378,7 @@ const EventFormREU = ({ props, setIsLoading }) => {
               <Grid item xs={6} style={{ marginBottom: "10px" }}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DateTimePicker
+                    value={dayjs(reunion.dateFin)}
                     label="Date et Heure de Fin"
                     viewRenderers={{
                       hours: renderTimeViewClock,
@@ -363,13 +392,9 @@ const EventFormREU = ({ props, setIsLoading }) => {
                 </LocalizationProvider>
               </Grid>
             </Grid>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSaveReunion}
-            >
-              Enregistrer
-            </Button>
+            <IconButton aria-label="delete" size="large" onClick={handleSaveReunion}>
+              <AddCircleIcon fontSize="large" />
+            </IconButton>
           </Box>
         </Item>
       </Grid>
@@ -377,9 +402,7 @@ const EventFormREU = ({ props, setIsLoading }) => {
   );
 };
 
-const EventFormABS = ({ props, setIsLoading }) => {
-  const [justificatifSelectionnee, setJustificatifSelectionnee] = useState("");
-
+const EventFormABS = ({ props, setIsLoading, edited }) => {
   const [conge, setConge] = useState({
     justification: "",
     label: "ABS",
@@ -388,6 +411,20 @@ const EventFormABS = ({ props, setIsLoading }) => {
     agent: "",
   });
 
+  const isEditMode = !!edited;
+
+  useEffect(() => {
+    if (isEditMode) {
+      setConge({
+        justification: edited.justification,
+        label: edited.label,
+        dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
+        dateFin: format(edited.end, "yyyy-MM-dd HH:mm:ss"),
+        agent: `/api/agents/${edited.admin_id}`,
+      });
+    }
+  }, [edited, isEditMode]);
+
   const handleSelectionChangeConge = (event) => {
     const justificatif = event.target.value;
 
@@ -395,31 +432,47 @@ const EventFormABS = ({ props, setIsLoading }) => {
       ...prevConge,
       justification: justificatif,
     }));
-
-    setJustificatifSelectionnee(justificatif);
   };
 
   const handleDateChange = (newDate, target, agentID) => {
     const date = format(newDate.$d, "yyyy-MM-dd HH:mm:ss");
 
-    if (target === "debut") {
-      setConge((prevConge) => ({
-        ...prevConge,
-        dateDebut: date,
-        agent: `/api/agents/${agentID}`,
-      }));
-    } else if (target === "fin") {
-      setConge((prevConge) => ({
-        ...prevConge,
-        dateFin: date,
-      }));
+    if (isEditMode) {
+      if (target === "debut") {
+        setConge((prevConge) => ({
+          ...prevConge,
+          dateDebut: date,
+        }));
+      } else if (target === "fin") {
+        setConge((prevConge) => ({
+          ...prevConge,
+          dateFin: date,
+        }));
+      }
+    } else {
+      if (target === "debut") {
+        setConge((prevConge) => ({
+          ...prevConge,
+          dateDebut: date,
+          agent: `/api/agents/${agentID}`,
+        }));
+      } else if (target === "fin") {
+        setConge((prevConge) => ({
+          ...prevConge,
+          dateFin: date,
+        }));
+      }
     }
   };
 
   const handleSaveConge = async (event) => {
     event.preventDefault();
 
-    await EventsAPI.create(conge);
+    if (isEditMode) {
+      await EventsAPI.update(edited.event_id, conge);
+    } else {
+      await EventsAPI.create(conge);
+    }
     setIsLoading(true);
   };
 
@@ -432,7 +485,7 @@ const EventFormABS = ({ props, setIsLoading }) => {
             <FormControl fullWidth margin="normal">
               <InputLabel>Justificatif</InputLabel>
               <Select
-                value={justificatifSelectionnee}
+                value={conge.justification}
                 name="justificatif"
                 onChange={handleSelectionChangeConge}
               >
@@ -448,6 +501,7 @@ const EventFormABS = ({ props, setIsLoading }) => {
               <Grid item xs={6}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DateTimePicker
+                    value={dayjs(conge.dateDebut)}
                     label="Date et Heure de Début"
                     viewRenderers={{
                       hours: renderTimeViewClock,
@@ -463,6 +517,7 @@ const EventFormABS = ({ props, setIsLoading }) => {
               <Grid item xs={6} style={{ marginBottom: "10px" }}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DateTimePicker
+                    value={dayjs(conge.dateFin)}
                     label="Date et Heure de Fin"
                     viewRenderers={{
                       hours: renderTimeViewClock,
@@ -476,13 +531,9 @@ const EventFormABS = ({ props, setIsLoading }) => {
                 </LocalizationProvider>
               </Grid>
             </Grid>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSaveConge}
-            >
-              Enregistrer
-            </Button>
+            <IconButton aria-label="delete" size="large" onClick={handleSaveConge}>
+              <AddCircleIcon fontSize="large" />
+            </IconButton>
           </Box>
         </Item>
       </Grid>

@@ -8,7 +8,7 @@ import {
 import { createRoot } from "react-dom/client";
 import "../styles/app.css";
 import "../bootstrap";
-import { Navbar2 } from "./components/Navbar2";
+import { Navbar } from "./components/Navbar";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AgentsPage from "./pages/AgentsPage";
@@ -18,6 +18,8 @@ import AuthAPI from "./services/AuthAPI";
 import jwtDecode from "jwt-decode";
 import AuthContext from "./contexts/AuthContext";
 import Testpage from "./pages/Testpage";
+import UsersPage from "./pages/UsersPage";
+import UserPage from "./pages/UserPage";
 
 
 const App = () => {
@@ -69,6 +71,7 @@ const App = () => {
   };
 
   return (
+    
     <AuthContext.Provider
       value={{
         isAuthenticated,
@@ -76,7 +79,7 @@ const App = () => {
       }}
     >
       <Router>
-        <Navbar2 />
+        <Navbar/>
         <main className="container pt-5">
           <Routes>
             <Route path="/login" element={<LoginPage />} />
@@ -85,6 +88,8 @@ const App = () => {
             <Route path="/test" element={<Testpage />} />
             {adminRoute("/agents", <AgentsPage />)}
             {adminRoute("/agent/:id", <AgentPage />)}
+            {adminRoute("/users", <UsersPage />)}
+            {adminRoute("/user/:id", <UserPage />)}
           </Routes>
         </main>
       </Router>

@@ -3,6 +3,7 @@ import PlanningEditable from "../components/PlanningEditable";
 import jwtDecode from "jwt-decode";
 import PlanningOnlyView from "../components/PlanningOnlyView";
 import AuthAPI from "../services/AuthAPI";
+import PlanningComponent from "../components/PlanningComponent";
 
 function Planning() {
 
@@ -26,9 +27,9 @@ function Planning() {
   return (<>
   
   {isAdmin ? (
-      <PlanningEditable />
+      <PlanningComponent isEditable={true} isDeletable={true}/>
     ) : (
-      <PlanningOnlyView/>
+      <PlanningComponent isDeletable={false} isEditable={false}/>
     )}
 
   </>

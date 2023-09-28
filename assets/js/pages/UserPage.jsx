@@ -56,6 +56,8 @@ const UserPage = ({ props }) => {
     if (user.roles.length === 0) {
       user.roles = [];
     }
+
+    console.log(user)
   
     try {
       setErrors({});
@@ -70,7 +72,7 @@ const UserPage = ({ props }) => {
   
         toast.success("Le user a bien été modifié");
       } else {
-        await usersAPI.create(user);
+        await usersAPI.register(user);
         toast.success("Le user a bien été créé");
         window.location.href = "/users";
       }

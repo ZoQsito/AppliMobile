@@ -29,7 +29,7 @@ const UsersPage = (props) => {
   const handleDelete = async (id) => {
     const originalUsers = [...users];
 
-    setagents(users.filter((users) => users.id !== id));
+    setUsers(users.filter((users) => users.id !== id));
 
     try {
       await usersAPI.deleteUsers(id);

@@ -12,6 +12,7 @@ function Planning() {
   );
 
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isResp, setIsResp] = useState(false);
 
   useEffect(() => {
     var token = localStorage.getItem("authToken");
@@ -21,15 +22,19 @@ function Planning() {
       if (decodedToken.roles[0] === "ADMIN") {
         setIsAdmin(true);
       }
+
+      if (decodedToken.roles[0] === "RESP") {
+        setIsResp(true);
+      }
     }
   }, [isAuthenticated]);
   
   return (<>
   
-  {isAdmin ? (
-      <PlanningComponent isEditable={true} isDeletable={true}/>
+  {isAdmin || isResp ? (
+      <PlanningComponent />
     ) : (
-      <PlanningComponent isDeletable={false} isEditable={false}/>
+      <PlanningComponent />
     )}
 
   </>

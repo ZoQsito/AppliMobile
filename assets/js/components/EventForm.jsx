@@ -54,7 +54,7 @@ const EventFormMI = ({ props, setIsLoading, edited }) => {
     autreEtablissement: "",
     objetMission: "",
     Quantification: "",
-    label: "MI",
+    label: "MISSION",
     dateDebut: "",
     dateFin: "",
     agent: "",
@@ -139,7 +139,6 @@ const EventFormMI = ({ props, setIsLoading, edited }) => {
     <Grid container rowSpacing={1}>
       <Grid item xs={12} sm={12} md={12}>
         <Item className="Mission">
-          <Typography sx={{ p: 2 }}>Mission</Typography>
           <Box>
             <FormControl fullWidth margin="normal">
               <InputLabel>Etablissement</InputLabel>
@@ -172,7 +171,7 @@ const EventFormMI = ({ props, setIsLoading, edited }) => {
               margin="normal"
               onChange={handleChangeMI}
             />
-            <TextField
+            <TextField 
               label="Objectif et Quantification de travail"
               fullWidth
               value={mission.Quantification}
@@ -182,7 +181,7 @@ const EventFormMI = ({ props, setIsLoading, edited }) => {
               margin="normal"
               onChange={handleChangeMI}
             />
-            <Grid container spacing={1}>
+            <Grid container spacing={1} style={{ marginTop: "10px" }}>
               <Grid item xs={6}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DateTimePicker
@@ -232,7 +231,7 @@ const EventFormREU = ({ props, setIsLoading, edited }) => {
     autreEtablissement: "",
     objetReunion: "",
     ordreJour: "",
-    label: "REU",
+    label: "REUNION",
     dateDebut: "",
     dateFin: "",
     agent: "",
@@ -358,7 +357,7 @@ const EventFormREU = ({ props, setIsLoading, edited }) => {
               value={reunion.ordreJour}
               onChange={handleChangeRE}
             />
-            <Grid container spacing={1}>
+            <Grid container spacing={1} style={{ marginTop: "10px" }}>
               <Grid item xs={6}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DateTimePicker
@@ -405,7 +404,7 @@ const EventFormREU = ({ props, setIsLoading, edited }) => {
 const EventFormABS = ({ props, setIsLoading, edited }) => {
   const [conge, setConge] = useState({
     justification: "",
-    label: "ABS",
+    label: "ABSENCE",
     dateDebut: "",
     dateFin: "",
     agent: "",
@@ -497,7 +496,7 @@ const EventFormABS = ({ props, setIsLoading, edited }) => {
                 ))}
               </Select>
             </FormControl>
-            <Grid container spacing={1}>
+            <Grid container spacing={1} style={{ marginTop: "10px" }}>
               <Grid item xs={6}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DateTimePicker

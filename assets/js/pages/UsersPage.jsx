@@ -9,6 +9,7 @@ const UsersPage = (props) => {
   const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
+  
 
 
   const fetchUsers = async () => {

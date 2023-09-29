@@ -1,40 +1,20 @@
-import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
-import AuthAPI from "../services/AuthAPI";
-import jwtDecode from "jwt-decode";
+import { Button } from "@mui/material";
+import React, { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import "../../styles/navbar.css";
-import {
-  AppBar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  IconButton,
-  Toolbar,
-  Typography,
-} from "@mui/material";
+import { useAuth } from "../contexts/AuthContext";
+import AuthAPI from "../services/AuthAPI";
 
 export const Navbar = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    AuthAPI.isAuthenticated()
-  );
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    var token = localStorage.getItem("authToken");
-
-    if (token) {
-      var decodedToken = jwtDecode(token);
-      if (decodedToken.roles[0] === "ADMIN") {
-        setIsAdmin(true);
-      }
-    }
-  }, [isAuthenticated]);
+  const { isAdmin, setIsAuthenticated, isAuthenticated } = useAuth();
 
   const handleLogout = () => {
+    setIsAuthenticated(false)
     AuthAPI.logout();
-    window.location.href = "/login";
+    navigate("/login")
   };
 
   return (
@@ -85,8 +65,12 @@ export const Navbar = () => {
               </>
             )) || (
               <li className="nav-item">
-                <Button variant="contained" onClick={handleLogout} color="error">
-                Déconnexion
+                <Button
+                  variant="contained"
+                  onClick={handleLogout}
+                  color="error"
+                >
+                  Déconnexion
                 </Button>
               </li>
             )}

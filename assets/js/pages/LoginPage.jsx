@@ -1,11 +1,11 @@
 import React, { useState, useContext, useEffect } from "react";
 import AuthAPI from "../services/AuthAPI";
 import Field from "../components/Field";
-import AuthContext from "../contexts/AuthContext";
+import AuthContext, { useAuth } from "../contexts/AuthContext";
 
 
 const LoginPage = () => {
-  const { setIsAuthenticated } = useContext(AuthContext)
+  const { setIsAuthenticated } = useAuth();
 
 
   const [credentials, setCredentials] = useState({

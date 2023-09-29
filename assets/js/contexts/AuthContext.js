@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
-export default React.createContext({
+export const AuthContext = React.createContext({
     isAuthenticated: false,
     setIsAuthenticated: value => {}
 });
+
+export const useAuth= ()=> useContext(AuthContext);

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Field from "../components/Field";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import AgentsAPI from "../services/AgentsAPI";
 
 const AgentPage = ({}) => {
   const { id = "new" } = useParams();
+  const navigate = useNavigate();
 
   const [agent, setAgent] = useState({
     nom: "",
@@ -58,11 +59,11 @@ const AgentPage = ({}) => {
       if (editing) {
         await AgentsAPI.update(id, agent);
         toast.success("L'agent a bien été modifié");
-        window.location.href = "/agents";
+        navigate("/agents");
       } else {
         await AgentsAPI.create(agent);
         toast.success("L'agent a bien été crée");
-        window.location.href = "/agents";
+        navigate("/agents");
       }
     } catch ({ error }) {
       toast.error("L'agent n'a pas pu être créer");

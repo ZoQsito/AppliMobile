@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Field from "../components/Field";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import usersAPI from "../services/usersAPI";
 
 const UserPage = ({ props }) => {
   const { id = "new" } = useParams();
+  const navigate = useNavigate();
 
   const [user, setUser] = useState({
     username: "",
@@ -13,19 +14,22 @@ const UserPage = ({ props }) => {
     roles: [],
   });
 
-  const [errors, setErrors] = useState({
-    username: "",
-    password: "",
+  const [userRole, setUserRole] = useState({
     roles: [],
   });
 
-  const [editing, setEditing] = useState(false);
+  const [errors, setErrors] = useState({
+    username: "",
+    password: "",
+  });
 
+  const [editing, setEditing] = useState(false);
 
   const fetchUsers = async (id) => {
     try {
       const { username, roles, password } = await usersAPI.find(id);
       setUser({ username, roles, password });
+      setUserRole({ roles });
     } catch (error) {
       toast.error("Le user n'a pas pu être chargé");
     }
@@ -41,40 +45,43 @@ const UserPage = ({ props }) => {
   const handleChange = ({ currentTarget }) => {
     const { name, value } = currentTarget;
 
-
     if (name === "roles") {
-      const rolesArray = value.split(',').map((role) => role.trim()); 
+      const rolesArray = value.split(",").map((role) => role.trim()); 
       setUser({ ...user, [name]: rolesArray });
     } else {
       setUser({ ...user, [name]: value });
     }
   };
 
+  const handleChangeModif = ({ currentTarget }) => {
+    const { name, value } = currentTarget;
+
+    if (name === "roles") {
+      const rolesArray = value.split(",").map((role) => role.trim());
+      setUserRole({ ...userRole, [name]: rolesArray });
+    } else {
+      setUserRole({ ...userRole, [name]: value });
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
+
     if (user.roles.length === 0) {
       user.roles = [];
     }
 
-    console.log(user)
-  
     try {
-      setErrors({});
+
       if (editing) {
-        const { password: currentPassword } = await usersAPI.find(id);
-  
-        if (user.password === currentPassword) {
-          user.password = null;
-        }
-  
-        await usersAPI.update(id, user);
-  
-        toast.success("Le user a bien été modifié");
+        console.log(userRole)
+        await usersAPI.update(id, userRole);
+        toast.success("Le role du user a bien été modifié");
+        navigate("/users");
       } else {
         await usersAPI.register(user);
         toast.success("Le user a bien été créé");
-        window.location.href = "/users";
+        navigate("/users");
       }
     } catch ({ error }) {
       toast.error("Le user n'a pas pu être créé");
@@ -83,47 +90,70 @@ const UserPage = ({ props }) => {
 
   return (
     <>
-      {(!editing && <h1>Ajout d'un User</h1>) || (
-        <h1>Modification d'un User</h1>
+      {(!editing && (
+        <>
+          <h1>Ajout d'un User</h1>
+          <form onSubmit={handleSubmit}>
+            <Field
+              name="username"
+              label="Username"
+              placeholder="Username"
+              value={user.username}
+              onChange={handleChange}
+              error={errors.username}
+            />
+            &nbsp;
+            <Field
+              name="password"
+              type="password"
+              label="Password"
+              placeholder="Votre Mot de Passe"
+              error={errors.password}
+              value={user.password}
+              onChange={handleChange}
+            />
+            &nbsp;
+            <Field
+              name="roles"
+              label="Role"
+              placeholder="Role du User"
+              value={user.roles}
+              onChange={handleChange}
+            />
+            &nbsp;
+            <div className="form-group">
+              <button type="submit" className="btn btn-success">
+                Enregistrer
+              </button>
+              <Link to="/users" className="btn btn-link">
+                Retour à la liste
+              </Link>
+            </div>
+          </form>
+        </>
+      )) || (
+        <>
+          <h1>Modification du role d'un User</h1>
+          <form onSubmit={handleSubmit}>
+            <Field
+              name="roles"
+              label="Role"
+              placeholder="Role du User"
+              value={userRole.roles[0]}
+              onChange={handleChangeModif}
+            />
+            &nbsp;
+            <div className="form-group">
+              <button type="submit" className="btn btn-success">
+                Enregistrer
+              </button>
+              <Link to="/users" className="btn btn-link">
+                Retour à la liste
+              </Link>
+            </div>
+          </form>
+        </>
       )}
-
-      <form onSubmit={handleSubmit}>
-        <Field
-          name="username"
-          label="Username"
-          placeholder="Username"
-          value={user.username}
-          onChange={handleChange}
-          error={errors.username}
-        />
-        &nbsp;
-        <Field
-          name="password"
-          type="password"
-          label="Password"
-          placeholder="Votre Mot de Passe"
-          error={errors.password}
-          value={user.password}
-          onChange={handleChange}
-        />
-        &nbsp;
-        <Field
-          name="roles"
-          label="Role"
-          placeholder="Role du User"
-          value={user.roles.join(', ')} 
-          onChange={handleChange}
-        />
-        &nbsp;
-        <div className="form-group">
-          <Link to="/users" className="btn btn-success" onClick={handleSubmit}>
-            Enregistrer
-          </Link>
-          <Link to="/users" className="btn btn-link">
-            Retour à la liste
-          </Link>
-        </div>
-      </form>
     </>
   );
 };

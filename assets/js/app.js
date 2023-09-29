@@ -16,10 +16,9 @@ import AgentPage from "./pages/AgentPage";
 import PlanningPage from "./pages/PlanningPage";
 import AuthAPI from "./services/AuthAPI";
 import jwtDecode from "jwt-decode";
-import AuthContext from "./contexts/AuthContext";
-import Testpage from "./pages/Testpage";
 import UsersPage from "./pages/UsersPage";
 import UserPage from "./pages/UserPage";
+import { AuthContext } from "./contexts/AuthContext";
 
 
 const App = () => {
@@ -37,6 +36,7 @@ const App = () => {
       if (decodedToken.roles[0] === "ADMIN") {
         setIsAdmin(true);
       }
+      
     }
   }, [isAuthenticated]);
 
@@ -76,6 +76,7 @@ const App = () => {
       value={{
         isAuthenticated,
         setIsAuthenticated,
+        isAdmin,
       }}
     >
       <Router>
@@ -85,7 +86,6 @@ const App = () => {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<PlanningPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/test" element={<Testpage />} />
             {adminRoute("/agents", <AgentsPage />)}
             {adminRoute("/agent/:id", <AgentPage />)}
             {adminRoute("/users", <UsersPage />)}

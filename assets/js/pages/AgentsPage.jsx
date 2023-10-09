@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from "react";
-import Pagination from "../components/Pagination";
-import AgentsAPI from "../services/AgentsAPI";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import AgentsAPI from "../services/AgentsAPI";
+import Pagination from "../components/Pagination";
 
-const AgentsPage = (props) => {
-  const [agents, setagents] = useState([]);
+const AgentsPage = () => {
+  const [agents, setAgents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
+  const itemsPerPage = 10;
 
   const fetchAgents = async () => {
     try {
       const data = await AgentsAPI.findAll();
-      setagents(data);
+      setAgents(data);
     } catch (error) {
       toast.error("Les agents n'ont pas été chargés");
     }
@@ -22,36 +23,31 @@ const AgentsPage = (props) => {
     fetchAgents();
   }, []);
 
-
   const handleDelete = async (id) => {
     const originalAgents = [...agents];
-
-    setagents(agents.filter((agents) => agents.id !== id));
+    setAgents(agents.filter((agent) => agent.id !== id));
 
     try {
       await AgentsAPI.delete(id);
       toast.success("L'agent a bien été supprimé");
     } catch (error) {
-      setagents(originalAgents);
+      setAgents(originalAgents);
       toast.error("La suppression de l'agent n'a pas pu fonctionner");
     }
   };
 
   const handlePageChange = (page) => setCurrentPage(page);
 
-
-  const handleSearch = ({ currentTarget }) => {
-    setSearch(currentTarget.value);
+  const handleSearch = ({ target }) => {
+    setSearch(target.value);
     setCurrentPage(1);
   };
 
-  const itemsPerPage = 10;
-
   const filteredAgents = agents.filter(
-    (a) =>
-      a.nom.toLowerCase().includes(search.toLowerCase()) ||
-      a.prenom.toLowerCase().includes(search.toLowerCase()) ||
-      (a.service && a.service.toLowerCase().includes(search.toLowerCase()))
+    (agent) =>
+      agent.nom.toLowerCase().includes(search.toLowerCase()) ||
+      agent.prenom.toLowerCase().includes(search.toLowerCase()) ||
+      (agent.service && agent.service.toLowerCase().includes(search.toLowerCase()))
   );
 
   const paginatedAgents = Pagination.getData(
@@ -61,15 +57,15 @@ const AgentsPage = (props) => {
   );
 
   return (
-    <>
-      <div className="mb-3 d-flex justify-content-between align-items-center">
+    <div className="container mt-4">
+      <div className="d-flex justify-content-between align-items-center mb-3">
         <h1>Liste des Agents</h1>
         <Link to="/agent/new" className="btn btn-primary">
           Ajouter un Agent
         </Link>
       </div>
 
-      <div className="form-group" style={{ paddingBottom: "20px" }}>
+      <div className="form-group" style={{paddingBottom: 20}}>
         <input
           type="text"
           onChange={handleSearch}
@@ -79,7 +75,7 @@ const AgentsPage = (props) => {
         />
       </div>
 
-      <table className="table table-hover">
+      <table className="table table-striped">
         <thead>
           <tr>
             <th>Id</th>
@@ -90,22 +86,19 @@ const AgentsPage = (props) => {
           </tr>
         </thead>
         <tbody>
-          {paginatedAgents.map((agents) => (
-            <tr key={agents.id}>
-              <td>{agents.id}</td>
+          {paginatedAgents.map((agent) => (
+            <tr key={agent.id}>
+              <td>{agent.id}</td>
               <td>
-                <Link
-                  to={"/agent/" + agents.id}
-                  style={{ textDecoration: "none" }}
-                >
-                  {agents.prenom} {agents.nom}
+                <Link to={`/agent/${agent.id}`} style={{ textDecoration: "none" }}>
+                  {agent.prenom} {agent.nom}
                 </Link>
               </td>
-              <td>{agents.telephone.replace(/(\d{2})(?=\d)/g, "$1 ")}</td>
-              <td>{agents.service}</td>
+              <td>{agent.telephone.replace(/(\d{2})(?=\d)/g, "$1 ")}</td>
+              <td>{agent.service}</td>
               <td>
                 <button
-                  onClick={() => handleDelete(agents.id)}
+                  onClick={() => handleDelete(agent.id)}
                   className="btn btn-sm btn-danger"
                 >
                   Supprimer
@@ -124,7 +117,7 @@ const AgentsPage = (props) => {
           onPageChanged={handlePageChange}
         />
       )}
-    </>
+    </div>
   );
 };
 

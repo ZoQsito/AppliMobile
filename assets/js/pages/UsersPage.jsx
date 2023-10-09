@@ -1,27 +1,23 @@
 import React, { useEffect, useState } from "react";
 import Pagination from "../components/Pagination";
-import AgentsAPI from "../services/AgentsAPI";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import usersAPI from "../services/usersAPI";
 
-const UsersPage = (props) => {
+const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
-  
-
+  const itemsPerPage = 10;
 
   const fetchUsers = async () => {
     try {
       const data = await usersAPI.findAll();
       setUsers(data);
     } catch (error) {
-      toast.error("Les users n'ont pas été chargés");
+      toast.error("Les utilisateurs n'ont pas été chargés");
     }
   };
-
-  console.log(users)
 
   useEffect(() => {
     fetchUsers();
@@ -30,30 +26,26 @@ const UsersPage = (props) => {
   const handleDelete = async (id) => {
     const originalUsers = [...users];
 
-    setUsers(users.filter((users) => users.id !== id));
+    setUsers(users.filter((user) => user.id !== id));
 
     try {
-      await usersAPI.deleteUsers(id);
-      toast.success("Le user a bien été supprimé");
+      await usersAPI.delete(id);
+      toast.success("L'utilisateur a bien été supprimé");
     } catch (error) {
       setUsers(originalUsers);
-      toast.error("La suppression du user n'a pas pu fonctionner");
+      toast.error("La suppression de l'utilisateur n'a pas pu fonctionner");
     }
   };
 
   const handlePageChange = (page) => setCurrentPage(page);
 
-
-  const handleSearch = ({ currentTarget }) => {
-    setSearch(currentTarget.value);
+  const handleSearch = ({ target }) => {
+    setSearch(target.value);
     setCurrentPage(1);
   };
 
-  const itemsPerPage = 10;
-
-  const filteredUsers = users.filter(
-    (a) =>
-      a.username.toLowerCase().includes(search.toLowerCase())
+  const filteredUsers = users.filter((user) =>
+    user.username.toLowerCase().includes(search.toLowerCase())
   );
 
   const paginatedUsers = Pagination.getData(
@@ -63,15 +55,15 @@ const UsersPage = (props) => {
   );
 
   return (
-    <>
-      <div className="mb-3 d-flex justify-content-between align-items-center">
-        <h1>Liste des Users</h1>
+    <div className="container mt-4">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h1>Liste des Utilisateurs</h1>
         <Link to="/user/new" className="btn btn-primary">
-          Ajouter un User
+          Ajouter un Utilisateur
         </Link>
       </div>
 
-      <div className="form-group" style={{ paddingBottom: "20px" }}>
+      <div className="form-group" style={{ paddingBottom: 20 }}>
         <input
           type="text"
           onChange={handleSearch}
@@ -81,7 +73,7 @@ const UsersPage = (props) => {
         />
       </div>
 
-      <table className="table table-hover">
+      <table className="table table-striped">
         <thead>
           <tr>
             <th>Id</th>
@@ -95,10 +87,7 @@ const UsersPage = (props) => {
             <tr key={user.id}>
               <td>{user.id}</td>
               <td>
-                <Link
-                  to={"/user/" + user.id}
-                  style={{ textDecoration: "none" }}
-                >
+                <Link to={`/user/${user.id}`} style={{ textDecoration: "none" }}>
                   {user.username}
                 </Link>
               </td>
@@ -124,7 +113,7 @@ const UsersPage = (props) => {
           onPageChanged={handlePageChange}
         />
       )}
-    </>
+    </div>
   );
 };
 

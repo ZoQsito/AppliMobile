@@ -53,11 +53,6 @@ export const Navbar = () => {
             {(isAuthenticated === false && (
               <>
                 <li className="nav-item">
-                  <NavLink to="/register" className="nav-link">
-                    Inscription
-                  </NavLink>
-                </li>
-                <li className="nav-item">
                   <NavLink to="/login" className="btn btn-outline-success">
                     Connexion
                   </NavLink>

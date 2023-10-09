@@ -10,7 +10,6 @@ import "../styles/app.css";
 import "../bootstrap";
 import { Navbar } from "./components/Navbar";
 import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
 import AgentsPage from "./pages/AgentsPage";
 import AgentPage from "./pages/AgentPage";
 import PlanningPage from "./pages/PlanningPage";
@@ -85,7 +84,6 @@ const App = () => {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<PlanningPage />} />
-            <Route path="/register" element={<RegisterPage />} />
             {adminRoute("/agents", <AgentsPage />)}
             {adminRoute("/agent/:id", <AgentPage />)}
             {adminRoute("/users", <UsersPage />)}

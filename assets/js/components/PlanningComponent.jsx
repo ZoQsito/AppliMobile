@@ -19,7 +19,7 @@ import { toast } from "react-toastify";
 import { addDays } from "date-fns";
 import jwtDecode from "jwt-decode";
 import usersAPI from "../services/usersAPI";
-import frLocale from 'date-fns/locale/fr'
+
 
 function CustomEditor({
   props,
@@ -106,12 +106,15 @@ function CustomEditor({
   );
 }
 
-const PlanningComponent = ({ props, isDeletable, isEditable }) => {
+const PlanningComponent = ({ props }) => {
   const [mode, setMode] = useState("default");
   const calendarRef = useRef(null);
   const [selectedOption, setSelectedOption] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [JWT, setJWT] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [isEditable , setIsEditable] = useState(true)
+  const [isDeletable, setIsDeletable] = useState(true)
 
   useEffect(() => {
     var token = localStorage.getItem("authToken");
@@ -121,7 +124,6 @@ const PlanningComponent = ({ props, isDeletable, isEditable }) => {
       setJWT(decodedToken);
     }
 
-    const userData = usersAPI.findAll();
   }, []);
 
   const [events, setEvents] = useState([
@@ -141,6 +143,7 @@ const PlanningComponent = ({ props, isDeletable, isEditable }) => {
       avatar: "",
       color: "",
       service: "",
+      user:"",
     },
   ]);
 
@@ -159,8 +162,13 @@ const PlanningComponent = ({ props, isDeletable, isEditable }) => {
           avatar: "https://picsum.photos/200/300",
           color: agent.color,
           service: agent.service,
+          user: agent.user,
         }))
       );
+
+      const userData =  await usersAPI.findAll();
+
+      setUsers(userData)
 
       setIsLoading(false);
     } catch (error) {
@@ -212,6 +220,7 @@ const PlanningComponent = ({ props, isDeletable, isEditable }) => {
     }
   };
 
+
   const handleServiceChangeForAll = (selectedService) => {
     let filteredResources = agents;
 
@@ -221,8 +230,36 @@ const PlanningComponent = ({ props, isDeletable, isEditable }) => {
       );
     }
 
+    let foundUser = null
+
+    for (const user of users) {
+      if (user.username === JWT.username) {
+        foundUser = user;
+        break; 
+      }
+    }
+
+    const foundAgent = agents.find(agent => {
+      const userId = parseInt(agent.user.split('/').pop());
+      return userId === foundUser.id;
+    });
+
+    if (foundAgent.service === selectedService) {
+      setIsEditable(true)
+      setIsDeletable(true)
+    }else{
+      setIsEditable(false)
+      setIsDeletable(false)
+    }
+
+
     calendarRef.current?.scheduler?.handleState(filteredResources, "resources");
+    calendarRef.current?.scheduler?.handleState(isEditable, "editable");
+    calendarRef.current?.scheduler?.handleState(isDeletable, "deletable");
+
   };
+
+  console.log(isEditable)
 
   const agentsByService = {};
 
@@ -492,8 +529,8 @@ const PlanningComponent = ({ props, isDeletable, isEditable }) => {
               </div>
             );
           }}
-          editable={(props) => isEditable}
-          deletable={(props) => isDeletable}
+          editable={isEditable}
+          deletable={isDeletable}
         />
       </div>
     </Fragment>

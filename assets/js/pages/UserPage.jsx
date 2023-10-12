@@ -10,8 +10,9 @@ const UserPage = ({ props }) => {
 
   const [user, setUser] = useState({
     username: "",
-    password: "",
+    plainPassword: "",
     roles: [],
+    email:"",
   });
 
   const [userRole, setUserRole] = useState({
@@ -20,15 +21,15 @@ const UserPage = ({ props }) => {
 
   const [errors, setErrors] = useState({
     username: "",
-    password: "",
+    plainPassword: "",
   });
 
   const [editing, setEditing] = useState(false);
 
   const fetchUsers = async (id) => {
     try {
-      const { username, roles, password } = await usersAPI.find(id);
-      setUser({ username, roles, password });
+      const { username, roles, password, email } = await usersAPI.find(id);
+      setUser({ username, roles, password, email });
       setUserRole({ roles });
     } catch (error) {
       toast.error("Le user n'a pas pu être chargé");
@@ -104,7 +105,15 @@ const UserPage = ({ props }) => {
             />
             &nbsp;
             <Field
-              name="password"
+              name="email"
+              label="Email"
+              placeholder="Email"
+              value={user.email}
+              onChange={handleChange}
+            />
+            &nbsp;
+            <Field
+              name="plainPassword"
               type="password"
               label="Password"
               placeholder="Votre Mot de Passe"

@@ -6,15 +6,14 @@ import { useAuth } from "../contexts/AuthContext";
 import AuthAPI from "../services/AuthAPI";
 
 export const Navbar = () => {
-
   const navigate = useNavigate();
 
-  const { isAdmin, setIsAuthenticated, isAuthenticated } = useAuth();
+  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP } = useAuth();
 
   const handleLogout = () => {
-    setIsAuthenticated(false)
+    setIsAuthenticated(false);
     AuthAPI.logout();
-    navigate("/login")
+    navigate("/login");
   };
 
   return (
@@ -34,13 +33,13 @@ export const Navbar = () => {
                 Planning
               </NavLink>
             </li>
-            {isAdmin && (
+            {isAdmin || isRESP ? (
               <li className="nav-item">
                 <NavLink className="nav-link" to="/agents">
                   Gestion Agent
                 </NavLink>
               </li>
-            )}
+            ) : null}
             {isAdmin && (
               <li className="nav-item">
                 <NavLink className="nav-link" to="/users">

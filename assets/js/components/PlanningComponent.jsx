@@ -20,7 +20,6 @@ import { addDays } from "date-fns";
 import jwtDecode from "jwt-decode";
 import usersAPI from "../services/usersAPI";
 
-
 function CustomEditor({
   props,
   selectedOption,
@@ -113,8 +112,8 @@ const PlanningComponent = ({ props }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [JWT, setJWT] = useState([]);
   const [users, setUsers] = useState([]);
-  const [isEditable , setIsEditable] = useState(true)
-  const [isDeletable, setIsDeletable] = useState(true)
+  const [isEditable, setIsEditable] = useState(false);
+  const [isDeletable, setIsDeletable] = useState(false);
 
   useEffect(() => {
     var token = localStorage.getItem("authToken");
@@ -123,7 +122,6 @@ const PlanningComponent = ({ props }) => {
       var decodedToken = jwtDecode(token);
       setJWT(decodedToken);
     }
-
   }, []);
 
   const [events, setEvents] = useState([
@@ -143,7 +141,7 @@ const PlanningComponent = ({ props }) => {
       avatar: "",
       color: "",
       service: "",
-      user:"",
+      user: "",
     },
   ]);
 
@@ -166,9 +164,9 @@ const PlanningComponent = ({ props }) => {
         }))
       );
 
-      const userData =  await usersAPI.findAll();
+      const userData = await usersAPI.findAll();
 
-      setUsers(userData)
+      setUsers(userData);
 
       setIsLoading(false);
     } catch (error) {
@@ -176,32 +174,32 @@ const PlanningComponent = ({ props }) => {
     }
   };
 
-  const deleteOldEvents = async () => {
-    try {
-      const eventsData = await EventsAPI.findAll();
-      const currentDate = new Date();
-      const sevenDaysAgo = addDays(currentDate, -7);
+  // const deleteOldEvents = async () => {
+  //   try {
+  //     const eventsData = await EventsAPI.findAll();
+  //     const currentDate = new Date();
+  //     const sevenDaysAgo = addDays(currentDate, -7);
 
-      const eventsToDelete = eventsData.filter((event) => {
-        const eventDate = new Date(event.dateFin);
-        return eventDate < sevenDaysAgo;
-      });
+  //     const eventsToDelete = eventsData.filter((event) => {
+  //       const eventDate = new Date(event.dateFin);
+  //       return eventDate < sevenDaysAgo;
+  //     });
 
-      for (const eventToDelete of eventsToDelete) {
-        await handleDeleteEvent(eventToDelete.id);
-      }
+  //     for (const eventToDelete of eventsToDelete) {
+  //       await handleDeleteEvent(eventToDelete.id);
+  //     }
 
-      fetchData();
-    } catch (error) {
-      console.error(
-        "Une erreur s'est produite lors de la suppression des événements obsolètes.",
-        error
-      );
-    }
-  };
+  //     fetchData();
+  //   } catch (error) {
+  //     console.error(
+  //       "Une erreur s'est produite lors de la suppression des événements obsolètes.",
+  //       error
+  //     );
+  //   }
+  // };
 
   useEffect(() => {
-    deleteOldEvents();
+    fetchData();
   }, [isLoading]);
 
   const handleOptionChange = (event) => {
@@ -220,7 +218,6 @@ const PlanningComponent = ({ props }) => {
     }
   };
 
-
   const handleServiceChangeForAll = (selectedService) => {
     let filteredResources = agents;
 
@@ -230,36 +227,45 @@ const PlanningComponent = ({ props }) => {
       );
     }
 
-    let foundUser = null
+    let foundUser = null;
 
     for (const user of users) {
       if (user.username === JWT.username) {
         foundUser = user;
-        break; 
+        break;
       }
     }
 
-    const foundAgent = agents.find(agent => {
-      const userId = parseInt(agent.user.split('/').pop());
+    const foundAgent = agents.find((agent) => {
+      const userId = parseInt(agent.user.split("/").pop());
       return userId === foundUser.id;
     });
 
     if (foundAgent.service === selectedService) {
-      setIsEditable(true)
-      setIsDeletable(true)
-    }else{
-      setIsEditable(false)
-      setIsDeletable(false)
+      setIsEditable(true);
+      setIsDeletable(true);
+    } else {
+      setIsEditable(false);
+      setIsDeletable(false);
     }
 
-
     calendarRef.current?.scheduler?.handleState(filteredResources, "resources");
-    calendarRef.current?.scheduler?.handleState(isEditable, "editable");
-    calendarRef.current?.scheduler?.handleState(isDeletable, "deletable");
-
   };
 
-  console.log(isEditable)
+  const handleServiceChange = () => {
+
+    setIsEditable(false);
+    setIsDeletable(false);
+
+
+    calendarRef.current?.scheduler?.handleState(agents, "resources");
+  };
+
+  useEffect(() => {
+    calendarRef.current?.scheduler?.handleState(isEditable, "editable");
+    calendarRef.current?.scheduler?.handleState(isDeletable, "deletable");
+  }, [isEditable, isDeletable]);
+
 
   const agentsByService = {};
 
@@ -271,7 +277,6 @@ const PlanningComponent = ({ props }) => {
   });
 
   const services = Object.keys(agentsByService);
-
 
   if (isLoading) {
     return <div></div>;
@@ -312,6 +317,13 @@ const PlanningComponent = ({ props }) => {
       </div>
       <div style={{ margin: "10px 0" }}>
         <span>Changer le service : </span>
+        <Button
+          variant="outlined"
+          style={{ marginRight: "10px" }}
+          onClick={() => handleServiceChange()}
+        >
+          ALL
+        </Button>
         {services.map((service, index) => (
           <Button
             key={service}
@@ -363,7 +375,6 @@ const PlanningComponent = ({ props }) => {
             startHour: 8,
             endHour: 18,
             step: 60,
-
           }}
           resourceFields={{
             idField: "admin_id",

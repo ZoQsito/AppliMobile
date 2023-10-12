@@ -4,12 +4,19 @@ namespace App\Entity;
 
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use App\Repository\AgentRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 
 #[ORM\Entity(repositoryClass: AgentRepository::class)]
+#[Put(security: "is_granted('ROLE_RESP')" )]
+#[Post(security: "is_granted('ROLE_RESP')")]
+
 #[ApiResource]
 class Agent
 {
@@ -31,7 +38,7 @@ class Agent
     #[ORM\Column(length: 255)]
     private ?string $service = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\OneToOne(inversedBy:'agent',targetEntity: User::class,cascade:['persist'])]
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id")]
     private ?User $user = null;
     
@@ -40,6 +47,11 @@ class Agent
 
     #[ORM\Column(length: 255)]
     private ?string $color = null;
+
+    public function __construct()
+    {
+        $this->events = new ArrayCollection();
+    }
 
     public function getEvents()
     {
@@ -117,6 +129,28 @@ class Agent
     public function setColor(string $color): static
     {
         $this->color = $color;
+
+        return $this;
+    }
+
+    public function addEvent(Events $event): static
+    {
+        if (!$this->events->contains($event)) {
+            $this->events->add($event);
+            $event->setAgent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEvent(Events $event): static
+    {
+        if ($this->events->removeElement($event)) {
+            // set the owning side to null (unless already changed)
+            if ($event->getAgent() === $this) {
+                $event->setAgent(null);
+            }
+        }
 
         return $this;
     }

@@ -1,30 +1,30 @@
-import Axios from "axios";
+import fetcher from "./dataAcces";
 
 function findAll(){
-    return Axios
-        .get("http://127.0.0.1:8000/api/agents")
+    return fetcher
+        .get("/api/agents")
         .then(response =>response.data['hydra:member'])
 }
 
 function find(id){
-    return Axios
-        .get("http://localhost:8000/api/agents/" + id)
+    return fetcher
+        .get("/api/agents/" + id)
         .then(response => response.data);
 }
 
 function deleteAgents(id){
-    return Axios
-        .delete("http://127.0.0.1:8000/api/agents/" + id)
+    return fetcher
+        .delete("/api/agents/" + id)
 }
 
 function update(id, agents){
-    return Axios
-    .put("http://localhost:8000/api/agents/" + id , agents);
+    return fetcher
+    .put("/api/agents/" + id , agents);
 }
 
 function create(agents){
-    return Axios
-    .post("http://localhost:8000/api/agents", agents);
+    return fetcher
+    .post("/api/agents", agents);
 }
 
 export default{

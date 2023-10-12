@@ -29,7 +29,7 @@ const UsersPage = () => {
     setUsers(users.filter((user) => user.id !== id));
 
     try {
-      await usersAPI.delete(id);
+      await usersAPI.deleteUsers(id);
       toast.success("L'utilisateur a bien été supprimé");
     } catch (error) {
       setUsers(originalUsers);

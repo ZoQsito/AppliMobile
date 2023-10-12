@@ -141,11 +141,14 @@ const EventFormMI = ({ props, setIsLoading, edited }) => {
         <Item className="Mission">
           <Box>
             <FormControl fullWidth margin="normal">
-              <InputLabel>Etablissement</InputLabel>
+            <label htmlFor="etablissement">Etablissement</label>
               <Select
                 value={mission.etablissement}
                 name="etablissement"
                 onChange={handleSelectionChangeMI}
+                variant="filled"
+                id="etablissement"
+                className={"form-control" + (error && " is-invalid")}
               >
                 <MenuItem value="">Sélectionnez un établissement</MenuItem>
                 {etablissements.map((etablissement, index) => (
@@ -162,6 +165,7 @@ const EventFormMI = ({ props, setIsLoading, edited }) => {
               fullWidth
               margin="normal"
               onChange={handleChangeMI}
+              variant="filled"
             />
             <TextField
               label="Objet de la mission"

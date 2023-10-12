@@ -26,14 +26,19 @@ const App = () => {
   );
 
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isRESP, setIsRESP] = useState(false);
 
   useEffect(() => {
     var token = localStorage.getItem("authToken");
 
     if (token) {
       var decodedToken = jwtDecode(token);
-      if (decodedToken.roles[0] === "ADMIN") {
+      if (decodedToken.roles[0] === "ROLE_ADMIN") {
         setIsAdmin(true);
+      }
+
+      if (decodedToken.roles[0] === "ROLE_RESP") {
+        setIsRESP(true);
       }
       
     }
@@ -45,6 +50,21 @@ const App = () => {
         path={path}
         element={
           isAuthenticated && isAdmin ? (
+            element
+          ) : (
+            <Navigate to="/" state={{ from: window.location.pathname }} />
+          )
+        }
+      />
+    );
+  };
+
+  const RESPRoute = (path, element) => {
+    return (
+      <Route
+        path={path}
+        element={
+          isAuthenticated && isAdmin || isRESP ? (
             element
           ) : (
             <Navigate to="/" state={{ from: window.location.pathname }} />
@@ -76,16 +96,17 @@ const App = () => {
         isAuthenticated,
         setIsAuthenticated,
         isAdmin,
+        isRESP,
       }}
     >
-      <Router>
+      <Router basename={process.env.NODE_ENV === "production" ? "/planning" : "/"}>
         <Navbar/>
         <main className="container pt-5">
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<PlanningPage />} />
-            {adminRoute("/agents", <AgentsPage />)}
-            {adminRoute("/agent/:id", <AgentPage />)}
+            {RESPRoute("/agents", <AgentsPage />)}
+            {RESPRoute("/agent/:id", <AgentPage />)}
             {adminRoute("/users", <UsersPage />)}
             {adminRoute("/user/:id", <UserPage />)}
           </Routes>

@@ -1,18 +1,21 @@
-import Axios from "axios";
 import jwtDecode from "jwt-decode";
+import fetcher from "./dataAcces";
+
+
+
 
 function logout(){
     window.localStorage.removeItem("authToken");
-    delete Axios.defaults.headers["Authorization"];
+    delete fetcher.defaults.headers["Authorization"];
 }
 
 function authenticate(credentials) {
-    return Axios
-      .post("http://localhost:8000/api/login_check", credentials)
+    return fetcher
+      .post("/api/login_check", credentials)
       .then(response => response.data.token)
       .then(token => {
         window.localStorage.setItem("authToken", token);
-        Axios.defaults.headers["Authorization"] = "Bearer " + token;
+        fetcher.defaults.headers["Authorization"] = "Bearer " + token;
         return true;
       })
       .catch(error => {
@@ -28,8 +31,8 @@ function setup(){
     if(token){
         const {exp: expiration} = jwtDecode(token);
         if(expiration * 1000 > new Date().getTime()){
-            Axios.defaults.headers["Authorization"] = "Bearer " + token;
-            console.log("Connexion établie avec axios");
+            fetcher.defaults.headers["Authorization"] = "Bearer " + token;
+            console.log("Connexion établie avec fetcher");
         } else {
             logout();
         }

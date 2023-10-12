@@ -33,10 +33,14 @@ security:
       stateless: true
       jwt: ~
 
+  role_hierarchy:
+        ROLE_RESP:       ROLE_USER
+        ROLE_ADMIN: [ROLE_RESP]
+
   access_control:
     # Contrôles d'accès spécifiques
-    # - { path: ^/admin, roles: ROLE_ADMIN }
-    # - { path: ^/profile, roles: ROLE_USER }
+    # - { path: ^/api/login, roles: PUBLIC_ACCESS }
+    # - { path: ^/, roles: IS_AUTHENTICATED_ }
 
 when@test:
   security:

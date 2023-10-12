@@ -3,12 +3,20 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import AgentsAPI from "../services/AgentsAPI";
 import Pagination from "../components/Pagination";
+import jwtDecode from "jwt-decode";
+import usersAPI from "../services/usersAPI";
+import { useAuth } from "../contexts/AuthContext";
 
 const AgentsPage = () => {
   const [agents, setAgents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
   const itemsPerPage = 10;
+  const [JWT, setJWT] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [userService, setUserService] = useState([]);
+
+  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP } = useAuth();
 
   const fetchAgents = async () => {
     try {
@@ -19,9 +27,33 @@ const AgentsPage = () => {
     }
   };
 
+  const fetchData = async () => {
+    const userData = await usersAPI.findAll();
+
+    var token = localStorage.getItem("authToken");
+    var decodedToken = jwtDecode(token);
+    setJWT(decodedToken);
+
+    setUsers(userData);
+  };
+
+  const connectedUser = users.find((user) => user.username === JWT.username);
+
   useEffect(() => {
     fetchAgents();
+    fetchData();
   }, []);
+
+  useEffect(() => {
+    if (connectedUser) {
+      const connectedAgent = agents.find((agent) => {
+        const userId = parseInt(agent.user.split("/").pop());
+        return userId === connectedUser.id;
+      });
+
+      setUserService(connectedAgent.service);
+    }
+  }, [connectedUser]);
 
   const handleDelete = async (id) => {
     const originalAgents = [...agents];
@@ -45,9 +77,9 @@ const AgentsPage = () => {
 
   const filteredAgents = agents.filter(
     (agent) =>
-      agent.nom.toLowerCase().includes(search.toLowerCase()) ||
-      agent.prenom.toLowerCase().includes(search.toLowerCase()) ||
-      (agent.service && agent.service.toLowerCase().includes(search.toLowerCase()))
+      (agent.nom.toLowerCase().includes(search.toLowerCase()) ||
+        agent.prenom.toLowerCase().includes(search.toLowerCase()) || agent.service.toLowerCase().includes(search.toLowerCase())) &&
+        (isRESP ? (userService ? agent.service === userService : true) : true)
   );
 
   const paginatedAgents = Pagination.getData(
@@ -65,7 +97,7 @@ const AgentsPage = () => {
         </Link>
       </div>
 
-      <div className="form-group" style={{paddingBottom: 20}}>
+      <div className="form-group" style={{ paddingBottom: 20 }}>
         <input
           type="text"
           onChange={handleSearch}
@@ -82,6 +114,7 @@ const AgentsPage = () => {
             <th>Nom</th>
             <th>Téléphone</th>
             <th>Service</th>
+            <th>User_ID</th>
             <th></th>
           </tr>
         </thead>
@@ -90,12 +123,16 @@ const AgentsPage = () => {
             <tr key={agent.id}>
               <td>{agent.id}</td>
               <td>
-                <Link to={`/agent/${agent.id}`} style={{ textDecoration: "none" }}>
+                <Link
+                  to={`/agent/${agent.id}`}
+                  style={{ textDecoration: "none" }}
+                >
                   {agent.prenom} {agent.nom}
                 </Link>
               </td>
               <td>{agent.telephone.replace(/(\d{2})(?=\d)/g, "$1 ")}</td>
               <td>{agent.service}</td>
+              <td>{agent.user ? parseInt(agent.user.split("/").pop()) : ""}</td>
               <td>
                 <button
                   onClick={() => handleDelete(agent.id)}

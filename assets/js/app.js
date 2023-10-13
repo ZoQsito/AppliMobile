@@ -19,7 +19,6 @@ import UsersPage from "./pages/UsersPage";
 import UserPage from "./pages/UserPage";
 import { AuthContext } from "./contexts/AuthContext";
 
-
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
     AuthAPI.isAuthenticated()
@@ -40,7 +39,6 @@ const App = () => {
       if (decodedToken.roles[0] === "ROLE_RESP") {
         setIsRESP(true);
       }
-      
     }
   }, [isAuthenticated]);
 
@@ -64,7 +62,7 @@ const App = () => {
       <Route
         path={path}
         element={
-          isAuthenticated && isAdmin || isRESP ? (
+          (isAuthenticated && isAdmin) || isRESP ? (
             element
           ) : (
             <Navigate to="/" state={{ from: window.location.pathname }} />
@@ -90,7 +88,6 @@ const App = () => {
   };
 
   return (
-    
     <AuthContext.Provider
       value={{
         isAuthenticated,
@@ -99,8 +96,8 @@ const App = () => {
         isRESP,
       }}
     >
-      <Router basename={process.env.NODE_ENV === "production" ? "/planning" : "/"}>
-        <Navbar/>
+      <Router basename={process.env.BASE_PATH}>
+        <Navbar />
         <main className="container pt-5">
           <Routes>
             <Route path="/login" element={<LoginPage />} />

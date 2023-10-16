@@ -11,7 +11,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AgentRepository::class)]
 #[Put(security: "is_granted('ROLE_RESP')" )]
@@ -23,19 +23,24 @@ class Agent
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['events:read', 'user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['events:read', 'user:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['events:read', 'user:read'])]
     private ?string $prenom = null;
 
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['events:read', 'user:read'])]
     private ?string $telephone = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['events:read', 'user:read'])]
     private ?string $service = null;
 
     #[ORM\OneToOne(inversedBy:'agent',targetEntity: User::class,cascade:['persist'])]
@@ -46,6 +51,7 @@ class Agent
     private $events;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['events:read', 'user:read'])]
     private ?string $color = null;
 
     public function __construct()

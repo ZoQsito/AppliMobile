@@ -1,7 +1,6 @@
 import React, { useState, useEffect, Fragment, useRef } from "react";
 import {
   AppBar,
-  Box,
   Button,
   Card,
   CardContent,
@@ -14,11 +13,10 @@ import AgentsAPI from "../services/AgentsAPI";
 import EventsAPI from "../services/EventsAPI";
 import { FormControl, Grid, InputLabel, MenuItem, Select } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { EventFormMI, EventFormREU, EventFormABS } from "./EventForm";
+import EventForm from "./EventForm";
 import { toast } from "react-toastify";
+import { useAuth } from "../contexts/AuthContext";
 import { addDays } from "date-fns";
-import jwtDecode from "jwt-decode";
-import usersAPI from "../services/usersAPI";
 
 function CustomEditor({
   props,
@@ -80,21 +78,24 @@ function CustomEditor({
           </Grid>
         </Grid>
         {selectedOption === "MISSION" && (
-          <EventFormMI
+          <EventForm
+            type={"MISSION"}
             props={props}
             setIsLoading={setIsLoading}
             edited={props.edited}
           />
         )}
         {selectedOption === "REUNION" && (
-          <EventFormREU
+          <EventForm
+            type={"REUNION"}
             props={props}
             setIsLoading={setIsLoading}
             edited={props.edited}
           />
         )}
         {selectedOption === "ABSENCE" && (
-          <EventFormABS
+          <EventForm
+            type={"ABSENCE"}
             props={props}
             setIsLoading={setIsLoading}
             edited={props.edited}
@@ -110,19 +111,11 @@ const PlanningComponent = ({ props }) => {
   const calendarRef = useRef(null);
   const [selectedOption, setSelectedOption] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [JWT, setJWT] = useState([]);
-  const [users, setUsers] = useState([]);
   const [isEditable, setIsEditable] = useState(false);
   const [isDeletable, setIsDeletable] = useState(false);
 
-  useEffect(() => {
-    var token = localStorage.getItem("authToken");
-
-    if (token) {
-      var decodedToken = jwtDecode(token);
-      setJWT(decodedToken);
-    }
-  }, []);
+  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP, decodedToken } =
+    useAuth();
 
   const [events, setEvents] = useState([
     {
@@ -164,10 +157,6 @@ const PlanningComponent = ({ props }) => {
         }))
       );
 
-      const userData = await usersAPI.findAll();
-
-      setUsers(userData);
-
       setIsLoading(false);
     } catch (error) {
       toast.error("Les données n'ont pas été chargées");
@@ -199,7 +188,9 @@ const PlanningComponent = ({ props }) => {
   // };
 
   useEffect(() => {
-    fetchData();
+    if (isLoading) {
+      fetchData();
+    }
   }, [isLoading]);
 
   const handleOptionChange = (event) => {
@@ -227,21 +218,7 @@ const PlanningComponent = ({ props }) => {
       );
     }
 
-    let foundUser = null;
-
-    for (const user of users) {
-      if (user.username === JWT.username) {
-        foundUser = user;
-        break;
-      }
-    }
-
-    const foundAgent = agents.find((agent) => {
-      const userId = parseInt(agent.user.split("/").pop());
-      return userId === foundUser.id;
-    });
-
-    if (foundAgent.service === selectedService) {
+    if (decodedToken?.custom_data?.service === selectedService) {
       setIsEditable(true);
       setIsDeletable(true);
     } else {
@@ -253,10 +230,8 @@ const PlanningComponent = ({ props }) => {
   };
 
   const handleServiceChange = () => {
-
     setIsEditable(false);
     setIsDeletable(false);
-
 
     calendarRef.current?.scheduler?.handleState(agents, "resources");
   };
@@ -265,7 +240,6 @@ const PlanningComponent = ({ props }) => {
     calendarRef.current?.scheduler?.handleState(isEditable, "editable");
     calendarRef.current?.scheduler?.handleState(isDeletable, "deletable");
   }, [isEditable, isDeletable]);
-
 
   const agentsByService = {};
 
@@ -349,9 +323,9 @@ const PlanningComponent = ({ props }) => {
           events={events.map((event) => ({
             event_id: event.id,
             title: event.label,
-            start: new Date(event.dateDebut),
-            end: new Date(event.dateFin),
-            admin_id: parseInt(event.agent.split("/").pop(), 10),
+            start: new Date(event.date_debut),
+            end: new Date(event.date_fin),
+            admin_id: event.agent.id,
             color:
               event.label === "MISSION"
                 ? "red"
@@ -423,19 +397,22 @@ const PlanningComponent = ({ props }) => {
                     </Grid>
                   </Grid>
                   {selectedOption === "MISSION" ? (
-                    <EventFormMI
+                    <EventForm
+                    type={"MISSION"}
                       props={props}
                       setIsLoading={setIsLoading}
                       edited={props.edited}
                     />
                   ) : selectedOption === "REUNION" ? (
-                    <EventFormREU
+                    <EventForm
+                    type={"REUNION"}
                       props={props}
                       setIsLoading={setIsLoading}
                       edited={props.edited}
                     />
                   ) : selectedOption === "ABSENCE" ? (
-                    <EventFormABS
+                    <EventForm
+                    type={"ABSENCE"}
                       props={props}
                       setIsLoading={setIsLoading}
                       edited={props.edited}

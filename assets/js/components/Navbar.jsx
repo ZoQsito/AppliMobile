@@ -8,13 +8,13 @@ import AuthAPI from "../services/AuthAPI";
 export const Navbar = () => {
   const navigate = useNavigate();
 
-  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP } = useAuth();
+  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP, decodedToken } = useAuth();
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     AuthAPI.logout();
     navigate("/login");
-  };
+  }; 
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">

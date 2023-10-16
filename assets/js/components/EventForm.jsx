@@ -8,7 +8,6 @@ import {
   Select,
   TextField,
   Typography,
-  Button,
   styled,
   IconButton,
 } from "@mui/material";
@@ -19,7 +18,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import EventsAPI from "../services/EventsAPI";
 import { format } from "date-fns";
 import dayjs from "dayjs";
-import AddCircleIcon from '@mui/icons-material/AddCircle';
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 const Item = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -48,463 +47,260 @@ const conges = [
   { label: "Temps Partiel" },
 ];
 
-const EventFormMI = ({ props, setIsLoading, edited }) => {
-  const [mission, setMission] = useState({
+const EventForm = ({ type, props, setIsLoading, edited }) => {
+  console.log(props);
+
+  const [eventData, setEventData] = useState({
     etablissement: "",
     autreEtablissement: "",
-    objetMission: "",
-    Quantification: "",
-    label: "MISSION",
+    label: type,
     dateDebut: "",
     dateFin: "",
     agent: "",
-  });
-
-  const isEditMode = !!edited;
-
-  useEffect(() => {
-    if (isEditMode) {
-      setMission({
-        etablissement: edited.etablissement,
-        autreEtablissement: edited.autreEtablissement,
-        objetMission: edited.objetMission,
-        Quantification: edited.quantification,
-        label: edited.label,
-        dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
-        dateFin: format(edited.end, "yyyy-MM-dd HH:mm:ss"),
-        agent: `/api/agents/${edited.admin_id}`,
-      });
-    }
-  }, [edited, isEditMode]);
-
-  const handleSelectionChangeMI = (event) => {
-    const selectedValue = event.target.value;
-
-    setMission((prevMission) => ({
-      ...prevMission,
-      etablissement: selectedValue,
-    }));
-  };
-
-  const handleChangeMI = ({ currentTarget }) => {
-    const { name, value } = currentTarget;
-    setMission({ ...mission, [name]: value });
-  };
-
-  const handleSaveMission = async (event) => {
-    event.preventDefault();
-
-    console.log(mission);
-
-    if (isEditMode) {
-      await EventsAPI.update(edited.event_id, mission);
-    } else {
-      await EventsAPI.create(mission);
-    }
-    setIsLoading(true);
-  };
-
-  const handleDateChange = (newDate, target, agentID) => {
-    const date = format(newDate.$d, "yyyy-MM-dd HH:mm:ss");
-
-    if (isEditMode) {
-      if (target === "debut") {
-        setMission((prevMission) => ({
-          ...prevMission,
-          dateDebut: date,
-        }));
-      } else if (target === "fin") {
-        setMission((prevMission) => ({
-          ...prevMission,
-          dateFin: date,
-        }));
-      }
-    } else {
-      if (target === "debut") {
-        setMission((prevMission) => ({
-          ...prevMission,
-          dateDebut: date,
-          agent: `/api/agents/${agentID}`,
-        }));
-      } else if (target === "fin") {
-        setMission((prevMission) => ({
-          ...prevMission,
-          dateFin: date,
-        }));
-      }
-    }
-  };
-
-  return (
-    <Grid container rowSpacing={1}>
-      <Grid item xs={12} sm={12} md={12}>
-        <Item className="Mission">
-          <Box>
-            <FormControl fullWidth margin="normal">
-            <label htmlFor="etablissement">Etablissement</label>
-              <Select
-                value={mission.etablissement}
-                name="etablissement"
-                onChange={handleSelectionChangeMI}
-                variant="filled"
-                id="etablissement"
-                className={"form-control" + (error && " is-invalid")}
-              >
-                <MenuItem value="">Sélectionnez un établissement</MenuItem>
-                {etablissements.map((etablissement, index) => (
-                  <MenuItem key={index} value={etablissement.label}>
-                    {etablissement.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              label="Autre Etablissement"
-              name="autreEtablissement"
-              value={mission.autreEtablissement}
-              fullWidth
-              margin="normal"
-              onChange={handleChangeMI}
-              variant="filled"
-            />
-            <TextField
-              label="Objet de la mission"
-              fullWidth
-              value={mission.objetMission}
-              name="objetMission"
-              margin="normal"
-              onChange={handleChangeMI}
-            />
-            <TextField 
-              label="Objectif et Quantification de travail"
-              fullWidth
-              value={mission.Quantification}
-              name="Quantification"
-              multiline
-              rows={4}
-              margin="normal"
-              onChange={handleChangeMI}
-            />
-            <Grid container spacing={1} style={{ marginTop: "10px" }}>
-              <Grid item xs={6}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DateTimePicker
-                    value={dayjs(mission.dateDebut)}
-                    label="Date et Heure de Début"
-                    viewRenderers={{
-                      hours: renderTimeViewClock,
-                      minutes: renderTimeViewClock,
-                      seconds: renderTimeViewClock,
-                    }}
-                    onChange={(newDate) =>
-                      handleDateChange(newDate, "debut", props.admin_id)
-                    }
-                  />
-                </LocalizationProvider>
-              </Grid>
-              <Grid item xs={6} style={{ marginBottom: "10px" }}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DateTimePicker
-                    value={dayjs(mission.dateFin)}
-                    label="Date et Heure de Fin"
-                    viewRenderers={{
-                      hours: renderTimeViewClock,
-                      minutes: renderTimeViewClock,
-                      seconds: renderTimeViewClock,
-                    }}
-                    onChange={(newDate) =>
-                      handleDateChange(newDate, "fin", props.admin_id)
-                    }
-                  />
-                </LocalizationProvider>
-              </Grid>
-            </Grid>
-            <IconButton aria-label="delete" size="large" onClick={handleSaveMission}>
-              <AddCircleIcon fontSize="large" />
-            </IconButton>
-          </Box>
-        </Item>
-      </Grid>
-    </Grid>
-  );
-};
-
-const EventFormREU = ({ props, setIsLoading, edited }) => {
-  const [reunion, setReunion] = useState({
-    etablissement: "",
-    autreEtablissement: "",
+    objetMission: "",
+    quantification: "",
     objetReunion: "",
     ordreJour: "",
-    label: "REUNION",
-    dateDebut: "",
-    dateFin: "",
-    agent: "",
+    justification: "",
   });
+
+  useEffect(() => {
+    setEventData((prevEventData) => ({
+      ...prevEventData,
+      label: type,
+      objetMission: "",
+      quantification: "",
+      objetReunion: "",
+      ordreJour: "",
+      justification: "",
+    }));
+  }, [type]);
+
+  console.log(eventData);
 
   const isEditMode = !!edited;
 
   useEffect(() => {
     if (isEditMode) {
-      setReunion({
-        etablissement: edited.etablissement,
-        autreEtablissement: edited.autreEtablissement,
-        objetReunion: edited.objetReunion,
-        ordreJour: edited.ordreJour,
-        label: edited.label,
-        dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
-        dateFin: format(edited.end, "yyyy-MM-dd HH:mm:ss"),
-        agent: `/api/agents/${edited.admin_id}`,
-      });
+      if (type === edited.title) {
+        setEventData({
+          etablissement: edited.etablissement,
+          autreEtablissement: edited.autreEtablissement,
+          label: edited.title,
+          dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
+          dateFin: format(edited.end, "yyyy-MM-dd HH:mm:ss"),
+          agent: `/api/agents/${edited.admin_id}`,
+          objetMission: edited.objetMission,
+          quantification: edited.quantification,
+          objetReunion: edited.objetReunion,
+          ordreJour: edited.ordreJour,
+          justification: edited.justification,
+        });
+      } else {
+        setEventData({
+          etablissement: "",
+          autreEtablissement: "",
+          label: type,
+          dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
+          dateFin: format(edited.end, "yyyy-MM-dd HH:mm:ss"),
+          agent: `/api/agents/${edited.admin_id}`,
+          objetMission: "",
+          quantification: "",
+          objetReunion: "",
+          ordreJour: "",
+          justification: "",
+        });
+      }
     }
   }, [edited, isEditMode]);
 
-  const handleChangeRE = ({ currentTarget }) => {
-    const { name, value } = currentTarget;
-    setReunion({ ...reunion, [name]: value });
-  };
-
-  const handleSaveReunion = async (event) => {
-    event.preventDefault();
-
-    if (isEditMode) {
-      await EventsAPI.update(edited.event_id, reunion);
-    } else {
-      await EventsAPI.create(reunion);
-    }
-    setIsLoading(true);
-  };
-
-  const handleSelectionChangeRE = (event) => {
+  const handleSelectionChange = (event) => {
     const selectedValue = event.target.value;
 
-    setReunion((prevReunion) => ({
-      ...prevReunion,
+    setEventData((prevEventData) => ({
+      ...prevEventData,
       etablissement: selectedValue,
     }));
   };
 
-  const handleDateChange = (newDate, target, agentID) => {
-    const date = format(newDate.$d, "yyyy-MM-dd HH:mm:ss");
-
-    if (isEditMode) {
-      if (target === "debut") {
-        setReunion((prevReunion) => ({
-          ...prevReunion,
-          dateDebut: date,
-        }));
-      } else if (target === "fin") {
-        setReunion((prevReunion) => ({
-          ...prevReunion,
-          dateFin: date,
-        }));
-      }
-    } else {
-      if (target === "debut") {
-        setReunion((prevReunion) => ({
-          ...prevReunion,
-          dateDebut: date,
-          agent: `/api/agents/${agentID}`,
-        }));
-      } else if (target === "fin") {
-        setReunion((prevReunion) => ({
-          ...prevReunion,
-          dateFin: date,
-        }));
-      }
-    }
-  };
-
-  return (
-    <Grid container rowSpacing={1}>
-      <Grid item xs={12} sm={12} md={12}>
-        <Item className="Reunion">
-          <Typography sx={{ p: 2 }}>Réunion</Typography>
-          <Box>
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Etablissement</InputLabel>
-              <Select
-                value={reunion.etablissement}
-                name="etablissement"
-                onChange={handleSelectionChangeRE}
-              >
-                <MenuItem value="">Sélectionnez un établissement</MenuItem>
-                {etablissements.map((etablissement, index) => (
-                  <MenuItem key={index} value={etablissement.label}>
-                    {etablissement.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              label="Autre Etablissement"
-              name="autreEtablissement"
-              value={reunion.autreEtablissement}
-              fullWidth
-              margin="normal"
-              onChange={handleChangeRE}
-            />
-            <TextField
-              label="Objet de la Réunion"
-              fullWidth
-              margin="normal"
-              name="objetReunion"
-              value={reunion.objetReunion}
-              onChange={handleChangeRE}
-            />
-            <TextField
-              label="Ordre du jour"
-              fullWidth
-              multiline
-              rows={4}
-              name="ordreJour"
-              margin="normal"
-              value={reunion.ordreJour}
-              onChange={handleChangeRE}
-            />
-            <Grid container spacing={1} style={{ marginTop: "10px" }}>
-              <Grid item xs={6}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DateTimePicker
-                    value={dayjs(reunion.dateDebut)}
-                    label="Date et Heure de Début"
-                    viewRenderers={{
-                      hours: renderTimeViewClock,
-                      minutes: renderTimeViewClock,
-                      seconds: renderTimeViewClock,
-                    }}
-                    onChange={(newDate) =>
-                      handleDateChange(newDate, "debut", props.admin_id)
-                    }
-                  />
-                </LocalizationProvider>
-              </Grid>
-              <Grid item xs={6} style={{ marginBottom: "10px" }}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DateTimePicker
-                    value={dayjs(reunion.dateFin)}
-                    label="Date et Heure de Fin"
-                    viewRenderers={{
-                      hours: renderTimeViewClock,
-                      minutes: renderTimeViewClock,
-                      seconds: renderTimeViewClock,
-                    }}
-                    onChange={(newDate) =>
-                      handleDateChange(newDate, "fin", props.admin_id)
-                    }
-                  />
-                </LocalizationProvider>
-              </Grid>
-            </Grid>
-            <IconButton aria-label="delete" size="large" onClick={handleSaveReunion}>
-              <AddCircleIcon fontSize="large" />
-            </IconButton>
-          </Box>
-        </Item>
-      </Grid>
-    </Grid>
-  );
-};
-
-const EventFormABS = ({ props, setIsLoading, edited }) => {
-  const [conge, setConge] = useState({
-    justification: "",
-    label: "ABSENCE",
-    dateDebut: "",
-    dateFin: "",
-    agent: "",
-  });
-
-  const isEditMode = !!edited;
-
-  useEffect(() => {
-    if (isEditMode) {
-      setConge({
-        justification: edited.justification,
-        label: edited.label,
-        dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
-        dateFin: format(edited.end, "yyyy-MM-dd HH:mm:ss"),
-        agent: `/api/agents/${edited.admin_id}`,
-      });
-    }
-  }, [edited, isEditMode]);
-
   const handleSelectionChangeConge = (event) => {
-    const justificatif = event.target.value;
+    const selectedValue = event.target.value;
 
-    setConge((prevConge) => ({
-      ...prevConge,
-      justification: justificatif,
+    setEventData((prevEventData) => ({
+      ...prevEventData,
+      justification: selectedValue,
     }));
   };
 
-  const handleDateChange = (newDate, target, agentID) => {
-    const date = format(newDate.$d, "yyyy-MM-dd HH:mm:ss");
-
-    if (isEditMode) {
-      if (target === "debut") {
-        setConge((prevConge) => ({
-          ...prevConge,
-          dateDebut: date,
-        }));
-      } else if (target === "fin") {
-        setConge((prevConge) => ({
-          ...prevConge,
-          dateFin: date,
-        }));
-      }
-    } else {
-      if (target === "debut") {
-        setConge((prevConge) => ({
-          ...prevConge,
-          dateDebut: date,
-          agent: `/api/agents/${agentID}`,
-        }));
-      } else if (target === "fin") {
-        setConge((prevConge) => ({
-          ...prevConge,
-          dateFin: date,
-        }));
-      }
-    }
+  const handleChange = ({ currentTarget }) => {
+    const { name, value } = currentTarget;
+    setEventData({ ...eventData, [name]: value });
   };
 
-  const handleSaveConge = async (event) => {
+  const handleSaveEvent = async (event) => {
     event.preventDefault();
 
     if (isEditMode) {
-      await EventsAPI.update(edited.event_id, conge);
+      await EventsAPI.update(edited.event_id, eventData);
     } else {
-      await EventsAPI.create(conge);
+      await EventsAPI.create(eventData);
     }
     setIsLoading(true);
   };
 
+  const handleDateChange = (newDate, target, agentID) => {
+    const date = format(newDate.$d, "yyyy-MM-dd HH:mm:ss");
+
+    if (isEditMode) {
+      setEventData((prevEventData) => ({
+        ...prevEventData,
+        [target === "debut" ? "dateDebut" : "dateFin"]: date,
+      }));
+    } else {
+      setEventData((prevEventData) => ({
+        ...prevEventData,
+        [target === "debut" ? "dateDebut" : "dateFin"]: date,
+        agent: `/api/agents/${agentID}`,
+      }));
+    }
+  };
+
+  const renderEventSpecificFields = () => {
+    if (type === "MISSION") {
+      return (
+        <div>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Etablissement</InputLabel>
+            <Select
+              value={eventData.etablissement}
+              name="etablissement"
+              onChange={handleSelectionChange}
+              variant="filled"
+              id="etablissement"
+              className={"form-control"}
+            >
+              <MenuItem value="">Sélectionnez un établissement</MenuItem>
+              {etablissements.map((etablissement, index) => (
+                <MenuItem key={index} value={etablissement.label}>
+                  {etablissement.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            label="Autre Etablissement"
+            name="autreEtablissement"
+            value={eventData.autreEtablissement}
+            fullWidth
+            margin="normal"
+            onChange={handleChange}
+            variant="filled"
+          />
+          <TextField
+            label="Objet de la mission"
+            name="objetMission"
+            value={eventData.objetMission}
+            fullWidth
+            margin="normal"
+            onChange={handleChange}
+          />
+          <TextField
+            label="Objectif et Quantification de travail"
+            name="Quantification"
+            value={eventData.Quantification}
+            fullWidth
+            multiline
+            rows={4}
+            margin="normal"
+            onChange={handleChange}
+          />
+        </div>
+      );
+    } else if (type === "REUNION") {
+      return (
+        <div>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Etablissement</InputLabel>
+            <Select
+              value={eventData.etablissement}
+              name="etablissement"
+              onChange={handleSelectionChange}
+              variant="filled"
+              id="etablissement"
+              className={"form-control"}
+            >
+              <MenuItem value="">Sélectionnez un établissement</MenuItem>
+              {etablissements.map((etablissement, index) => (
+                <MenuItem key={index} value={etablissement.label}>
+                  {etablissement.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            label="Autre Etablissement"
+            name="autreEtablissement"
+            value={eventData.autreEtablissement}
+            fullWidth
+            margin="normal"
+            onChange={handleChange}
+            variant="filled"
+          />
+          <TextField
+            label="Objet de la Réunion"
+            name="objetReunion"
+            value={eventData.objetReunion}
+            fullWidth
+            margin="normal"
+            onChange={handleChange}
+          />
+          <TextField
+            label="Ordre du jour"
+            name="ordreJour"
+            value={eventData.ordreJour}
+            fullWidth
+            multiline
+            rows={4}
+            margin="normal"
+            onChange={handleChange}
+          />
+        </div>
+      );
+    } else if (type === "ABSENCE") {
+      return (
+        <div>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Justificatif</InputLabel>
+            <Select
+              value={eventData.justification}
+              name="justification"
+              onChange={handleSelectionChangeConge}
+            >
+              <MenuItem value="">Sélectionnez un justificatif</MenuItem>
+              {conges.map((conge, index) => (
+                <MenuItem key={index} value={conge.label}>
+                  {conge.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </div>
+      );
+    }
+  };
+
   return (
     <Grid container rowSpacing={1}>
       <Grid item xs={12} sm={12} md={12}>
-        <Item className="Conge">
-          <Typography sx={{ p: 2 }}>Congés</Typography>
+        <Item className={type}>
+          <Typography sx={{ p: 2 }}>{type}</Typography>
           <Box>
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Justificatif</InputLabel>
-              <Select
-                value={conge.justification}
-                name="justificatif"
-                onChange={handleSelectionChangeConge}
-              >
-                <MenuItem value="">Sélectionnez un justificatif</MenuItem>
-                {conges.map((conges, index) => (
-                  <MenuItem key={index} value={conges.label}>
-                    {conges.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            {renderEventSpecificFields()}
             <Grid container spacing={1} style={{ marginTop: "10px" }}>
               <Grid item xs={6}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DateTimePicker
-                    value={dayjs(conge.dateDebut)}
+                    value={dayjs(eventData.dateDebut)}
                     label="Date et Heure de Début"
                     viewRenderers={{
                       hours: renderTimeViewClock,
@@ -520,7 +316,7 @@ const EventFormABS = ({ props, setIsLoading, edited }) => {
               <Grid item xs={6} style={{ marginBottom: "10px" }}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DateTimePicker
-                    value={dayjs(conge.dateFin)}
+                    value={dayjs(eventData.dateFin)}
                     label="Date et Heure de Fin"
                     viewRenderers={{
                       hours: renderTimeViewClock,
@@ -534,7 +330,11 @@ const EventFormABS = ({ props, setIsLoading, edited }) => {
                 </LocalizationProvider>
               </Grid>
             </Grid>
-            <IconButton aria-label="delete" size="large" onClick={handleSaveConge}>
+            <IconButton
+              aria-label="delete"
+              size="large"
+              onClick={handleSaveEvent}
+            >
               <AddCircleIcon fontSize="large" />
             </IconButton>
           </Box>
@@ -544,4 +344,4 @@ const EventFormABS = ({ props, setIsLoading, edited }) => {
   );
 };
 
-export { EventFormMI, EventFormREU, EventFormABS };
+export default EventForm;

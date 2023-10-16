@@ -50,6 +50,7 @@ function isAuthenticated(){
         if(expiration * 1000 > new Date().getTime()){
             return true
         }else{
+        logout()
         return false
         }
         

@@ -12,11 +12,8 @@ const AgentsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
   const itemsPerPage = 10;
-  const [JWT, setJWT] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [userService, setUserService] = useState([]);
 
-  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP } = useAuth();
+  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP, decodedToken } = useAuth();
 
   const fetchAgents = async () => {
     try {
@@ -27,33 +24,10 @@ const AgentsPage = () => {
     }
   };
 
-  const fetchData = async () => {
-    const userData = await usersAPI.findAll();
-
-    var token = localStorage.getItem("authToken");
-    var decodedToken = jwtDecode(token);
-    setJWT(decodedToken);
-
-    setUsers(userData);
-  };
-
-  const connectedUser = users.find((user) => user.username === JWT.username);
 
   useEffect(() => {
     fetchAgents();
-    fetchData();
   }, []);
-
-  useEffect(() => {
-    if (connectedUser) {
-      const connectedAgent = agents.find((agent) => {
-        const userId = parseInt(agent.user.split("/").pop());
-        return userId === connectedUser.id;
-      });
-
-      setUserService(connectedAgent.service);
-    }
-  }, [connectedUser]);
 
   const handleDelete = async (id) => {
     const originalAgents = [...agents];
@@ -79,7 +53,7 @@ const AgentsPage = () => {
     (agent) =>
       (agent.nom.toLowerCase().includes(search.toLowerCase()) ||
         agent.prenom.toLowerCase().includes(search.toLowerCase()) || agent.service.toLowerCase().includes(search.toLowerCase())) &&
-        (isRESP ? (userService ? agent.service === userService : true) : true)
+        (isRESP ? (decodedToken?.custom_data?.service ? agent.service === decodedToken?.custom_data?.service : true) : true)
   );
 
   const paginatedAgents = Pagination.getData(

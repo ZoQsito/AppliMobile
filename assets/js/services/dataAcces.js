@@ -1,8 +1,10 @@
 import axios from "axios";
-const token = window.localStorage.getItem("authToken");
+const token = localStorage.getItem("authToken");
+
+
 
 const fetcher = axios.create({
-  headers: { Authorization: "Bearer " + token },
+  headers: { Authorization:token  ?  "Bearer " +token : undefined},
   baseURL: process.env.BASE_PATH,
 });
 

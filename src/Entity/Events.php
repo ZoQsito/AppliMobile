@@ -6,49 +6,64 @@ use ApiPlatform\Metadata\ApiResource;
 use App\Repository\EventsRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: EventsRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['events:read']],
+)]
 class Events
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['events:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['events:read'])]
     private ?\DateTimeInterface $date_debut = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['events:read'])]
     private ?\DateTimeInterface $date_fin = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['events:read'])]
     private ?string $label = null;
 
 
     #[ORM\ManyToOne(targetEntity: Agent::class)]
     #[ORM\JoinColumn(name: "agent_id", referencedColumnName: "id")]
+    #[Groups(['events:read'])]
     private ?Agent $agent = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['events:read'])]
     private ?string $etablissement = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['events:read'])]
     private ?string $autreEtablissement = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['events:read'])]
     private ?string $objetMission = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['events:read'])]
     private ?string $Quantification = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['events:read'])]
     private ?string $objetReunion = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['events:read'])]
     private ?string $ordreJour = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['events:read'])]
     private ?string $justification = null;
 
 

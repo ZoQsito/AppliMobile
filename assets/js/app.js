@@ -26,12 +26,14 @@ const App = () => {
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [isRESP, setIsRESP] = useState(false);
+  const [decodedToken, setDecodedToken] = useState([]);
 
   useEffect(() => {
     var token = localStorage.getItem("authToken");
 
     if (token) {
       var decodedToken = jwtDecode(token);
+      setDecodedToken(decodedToken)
       if (decodedToken.roles[0] === "ROLE_ADMIN") {
         setIsAdmin(true);
       }
@@ -72,21 +74,6 @@ const App = () => {
     );
   };
 
-  const AuthenticatedRoute = (path, element) => {
-    return (
-      <Route
-        path={path}
-        element={
-          isAuthenticated ? (
-            element
-          ) : (
-            <Navigate to="/login" state={{ from: window.location.pathname }} />
-          )
-        }
-      />
-    );
-  };
-
   return (
     <AuthContext.Provider
       value={{
@@ -94,6 +81,7 @@ const App = () => {
         setIsAuthenticated,
         isAdmin,
         isRESP,
+        decodedToken,
       }}
     >
       <Router basename={process.env.BASE_PATH}>

@@ -3,8 +3,6 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import AgentsAPI from "../services/AgentsAPI";
 import Pagination from "../components/Pagination";
-import jwtDecode from "jwt-decode";
-import usersAPI from "../services/usersAPI";
 import { useAuth } from "../contexts/AuthContext";
 
 const AgentsPage = () => {

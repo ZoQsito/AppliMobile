@@ -17,10 +17,6 @@ function authenticate(credentials) {
         window.localStorage.setItem("authToken", token);
         fetcher.defaults.headers["Authorization"] = "Bearer " + token;
         return true;
-      })
-      .catch(error => {
-        console.error("Erreur lors de l'authentification :", error);
-        return false;
       });
   }
 

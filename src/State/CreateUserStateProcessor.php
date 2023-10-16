@@ -5,6 +5,7 @@ namespace App\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Entity\User;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -21,6 +22,10 @@ class CreateUserStateProcessor implements ProcessorInterface
         /** @var User  */
         $data = $data;
         $this->processor->process($data, $operation, $uriVariables, $context) ;
-        $this->mailer->send(new RawMessage('Voici un lien pour modifier votre Mot de Passe'),new Envelope(new Address('admin@justice.fr'),[new Address($data->getEmail())]));
+        $this->mailer->send((new TemplatedEmail())
+        ->from(new Address('admin@justice.fr', 'Admin'))
+        ->to($data->getEmail())
+        ->subject("Confirmation de l'email")
+        ->htmlTemplate('reset_password/createPassword.html.twig'));
     }
 }

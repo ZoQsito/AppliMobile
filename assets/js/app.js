@@ -33,7 +33,7 @@ const App = () => {
 
     if (token) {
       var decodedToken = jwtDecode(token);
-      setDecodedToken(decodedToken)
+      setDecodedToken(decodedToken);
       if (decodedToken.roles[0] === "ROLE_ADMIN") {
         setIsAdmin(true);
       }
@@ -64,7 +64,7 @@ const App = () => {
       <Route
         path={path}
         element={
-          (isAuthenticated && isAdmin) || isRESP ? (
+          isAdmin || isRESP ? (
             element
           ) : (
             <Navigate to="/" state={{ from: window.location.pathname }} />
@@ -86,7 +86,7 @@ const App = () => {
     >
       <Router basename={process.env.BASE_PATH}>
         <Navbar />
-        <main className="container pt-5">
+        <main >
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<PlanningPage />} />

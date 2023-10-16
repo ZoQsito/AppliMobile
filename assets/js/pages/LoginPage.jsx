@@ -1,6 +1,5 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState } from "react";
 import AuthAPI from "../services/AuthAPI";
-import Field from "../components/Field";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -38,7 +37,7 @@ const LoginPage = () => {
       navigate("/");
     } catch (error) {
       setError(
-        "Aucun Compte ne possède cette adresse ou alors les informations ne correspondent pas !"
+        "Aucun Compte ne possède cette Identifiant ou Alors le Mot de passe ne correspond pas !"
       );
     }
   };

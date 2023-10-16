@@ -19,6 +19,7 @@ import EventsAPI from "../services/EventsAPI";
 import { format } from "date-fns";
 import dayjs from "dayjs";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import { fr } from "date-fns/locale";
 
 const Item = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -298,15 +299,12 @@ const EventForm = ({ type, props, setIsLoading, edited }) => {
             {renderEventSpecificFields()}
             <Grid container spacing={1} style={{ marginTop: "10px" }}>
               <Grid item xs={6}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={fr}>
                   <DateTimePicker
                     value={dayjs(eventData.dateDebut)}
+                    localeText={fr}
                     label="Date et Heure de Début"
-                    viewRenderers={{
-                      hours: renderTimeViewClock,
-                      minutes: renderTimeViewClock,
-                      seconds: renderTimeViewClock,
-                    }}
+                    ampm={false}
                     onChange={(newDate) =>
                       handleDateChange(newDate, "debut", props.admin_id)
                     }
@@ -314,15 +312,11 @@ const EventForm = ({ type, props, setIsLoading, edited }) => {
                 </LocalizationProvider>
               </Grid>
               <Grid item xs={6} style={{ marginBottom: "10px" }}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={fr}>
                   <DateTimePicker
                     value={dayjs(eventData.dateFin)}
                     label="Date et Heure de Fin"
-                    viewRenderers={{
-                      hours: renderTimeViewClock,
-                      minutes: renderTimeViewClock,
-                      seconds: renderTimeViewClock,
-                    }}
+                    
                     onChange={(newDate) =>
                       handleDateChange(newDate, "fin", props.admin_id)
                     }

@@ -17,6 +17,7 @@ import EventForm from "./EventForm";
 import { toast } from "react-toastify";
 import { useAuth } from "../contexts/AuthContext";
 import { addDays } from "date-fns";
+import { fr } from "date-fns/locale";
 
 function CustomEditor({
   props,
@@ -138,6 +139,32 @@ const PlanningComponent = ({ props }) => {
     },
   ]);
 
+  const deleteOldEvents = async () => {
+    try {
+      const eventsData = await EventsAPI.findAll();
+      const currentDate = new Date();
+      const sevenDaysAgo = addDays(currentDate, -7);
+  
+      const eventsToDelete = eventsData.filter((event) => {
+        const eventDate = new Date(event.date_fin);
+        return eventDate < sevenDaysAgo;
+      });
+  
+      if (eventsToDelete.length > 0) {
+        for (const eventToDelete of eventsToDelete) {
+          await handleDeleteEvent(eventToDelete.id);
+        }
+      }
+
+  
+    } catch (error) {
+      console.error(
+        "Une erreur s'est produite lors de la suppression des événements obsolètes.",
+        error
+      );
+    }
+  };
+
   const fetchData = async () => {
     try {
       const eventsData = await EventsAPI.findAll();
@@ -163,34 +190,17 @@ const PlanningComponent = ({ props }) => {
     }
   };
 
-  // const deleteOldEvents = async () => {
-  //   try {
-  //     const eventsData = await EventsAPI.findAll();
-  //     const currentDate = new Date();
-  //     const sevenDaysAgo = addDays(currentDate, -7);
 
-  //     const eventsToDelete = eventsData.filter((event) => {
-  //       const eventDate = new Date(event.dateFin);
-  //       return eventDate < sevenDaysAgo;
-  //     });
-
-  //     for (const eventToDelete of eventsToDelete) {
-  //       await handleDeleteEvent(eventToDelete.id);
-  //     }
-
-  //     fetchData();
-  //   } catch (error) {
-  //     console.error(
-  //       "Une erreur s'est produite lors de la suppression des événements obsolètes.",
-  //       error
-  //     );
-  //   }
-  // };
 
   useEffect(() => {
-    if (isLoading) {
-      fetchData();
+    const fetchDataAndDeleteOldEvents = async () => {
+      if (isLoading) {
+        await deleteOldEvents();
+        fetchData();
+      }
     }
+  
+    fetchDataAndDeleteOldEvents();
   }, [isLoading]);
 
   const handleOptionChange = (event) => {
@@ -320,6 +330,8 @@ const PlanningComponent = ({ props }) => {
               today: "Aujourd'hui",
             },
           }}
+          locale={fr}
+          hourFormat="24"
           events={events.map((event) => ({
             event_id: event.id,
             title: event.label,
@@ -347,7 +359,7 @@ const PlanningComponent = ({ props }) => {
             weekDays: [0, 1, 2, 3, 4, 5, 6],
             weekStartOn: 6,
             startHour: 8,
-            endHour: 18,
+            endHour: 20,
             step: 60,
           }}
           resourceFields={{

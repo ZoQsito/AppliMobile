@@ -10,15 +10,17 @@ import {
   Typography,
   styled,
   IconButton,
+  Button,
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import EventsAPI from "../services/EventsAPI";
 import { format } from "date-fns";
-import dayjs from "dayjs";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { fr } from "date-fns/locale";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import EtablissementAPI from "../services/EtablissementAPI";
+import JustificatifAPI from "../services/JustificatifAPI";
 
 const Item = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -29,27 +31,39 @@ const Item = styled("div")(({ theme }) => ({
   textAlign: "center",
 }));
 
-const etablissements = [
-  { label: "DI" },
-  { label: "Maison Arrêt" },
-  { label: "Maison Centrale" },
-  { label: "Centres pénitentiaires" },
-  { label: "Centres de détention" },
-  { label: "Centres de semi-liberté" },
-  { label: "EPM" },
-];
-
-const conges = [
-  { label: "Congé Annuel" },
-  { label: "Congé Maladie" },
-  { label: "Congé Exceptionnel" },
-  { label: "Récupération Heures Supplémentaires" },
-  { label: "Temps Partiel" },
-];
-
 const EventForm = ({ type, props, setIsLoading, edited, state }) => {
+  const [etablissements, setEtablissements] = useState([]);
+  const [justificatifs, setJustificatifs] = useState([]);
 
-  console.log(props)
+  const fetchData = async () => {
+    try {
+      const data = await EtablissementAPI.findAll();
+      setEtablissements(data);
+    } catch (error) {
+      toast.error("Les Etablissements n'ont pas été chargés");
+    }
+
+    try {
+      const data = await JustificatifAPI.findAll();
+      setJustificatifs(data);
+    } catch (error) {
+      toast.error("Les Justificatifs n'ont pas été chargés");
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  console.log(edited);
+
+  const [eventDataConge, setEventDataConge] = useState({
+    label: type,
+    dateDebut: format(state.start.value, "yyyy-MM-dd HH:mm:ss"),
+    dateFin: format(state.end.value, "yyyy-MM-dd HH:mm:ss"),
+    agent: `/api/agents/${props.admin_id}`,
+    justification: "",
+  });
 
   const [eventData, setEventData] = useState({
     etablissement: "",
@@ -62,7 +76,6 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
     quantification: "",
     objetReunion: "",
     ordreJour: "",
-    justification: "",
   });
 
   useEffect(() => {
@@ -76,8 +89,13 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
       ordreJour: "",
       justification: "",
     }));
+    setEventDataConge((prevEventData) => ({
+      ...prevEventData,
+      label: type,
+      agent: `/api/agents/${props.admin_id}`,
+      justification: "",
+    }));
   }, [type]);
-
 
   const isEditMode = !!edited;
 
@@ -85,7 +103,7 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
     if (isEditMode) {
       if (type === edited.title) {
         setEventData({
-          etablissement: edited.etablissement,
+          etablissement: edited.etablissement["@id"],
           autreEtablissement: edited.autreEtablissement,
           label: edited.title,
           dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
@@ -95,7 +113,13 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
           quantification: edited.quantification,
           objetReunion: edited.objetReunion,
           ordreJour: edited.ordreJour,
-          justification: edited.justification,
+        });
+        setEventDataConge({
+          label: edited.title,
+          dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
+          dateFin: format(edited.end, "yyyy-MM-dd HH:mm:ss"),
+          agent: `/api/agents/${edited.admin_id}`,
+          justification: edited.justificatif["@id"],
         });
       } else {
         setEventData({
@@ -109,13 +133,17 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
           quantification: "",
           objetReunion: "",
           ordreJour: "",
+        });
+        setEventDataConge({
+          label: type,
+          dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
+          dateFin: format(edited.end, "yyyy-MM-dd HH:mm:ss"),
+          agent: `/api/agents/${edited.admin_id}`,
           justification: "",
         });
       }
     }
   }, [edited, isEditMode]);
-
-  console.log(eventData)
 
   const handleSelectionChange = (event) => {
     const selectedValue = event.target.value;
@@ -129,7 +157,7 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
   const handleSelectionChangeConge = (event) => {
     const selectedValue = event.target.value;
 
-    setEventData((prevEventData) => ({
+    setEventDataConge((prevEventData) => ({
       ...prevEventData,
       justification: selectedValue,
     }));
@@ -143,30 +171,85 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
   const handleSaveEvent = async (event) => {
     event.preventDefault();
 
-    if (isEditMode) {
-      await EventsAPI.update(edited.event_id, eventData);
+    if (type === "MISSION" || type === "REUNION") {
+      if (isEditMode) {
+        await EventsAPI.update(edited.event_id, eventData);
+      } else {
+        await EventsAPI.create(eventData);
+      }
     } else {
-      await EventsAPI.create(eventData);
+      if (isEditMode) {
+        await EventsAPI.update(edited.event_id, eventDataConge);
+      } else {
+        await EventsAPI.create(eventDataConge);
+      }
     }
+
     setIsLoading(true);
   };
 
   const handleDateChange = (newDate, target, agentID) => {
     const date = format(newDate.$d, "yyyy-MM-dd HH:mm:ss");
 
+    setEventData((prevEventData) => ({
+      ...prevEventData,
+      [target === "debut" ? "dateDebut" : "dateFin"]: date,
+    }));
+    setEventDataConge((prevEventData) => ({
+      ...prevEventData,
+      [target === "debut" ? "dateDebut" : "dateFin"]: date,
+    }));
+  };
+
+  const handleTimeChange = (selectedTimeRange) => {
+    const HalfDayStart = "08:00:00";
+    const HalfDayEnd = "12:00:00";
+    const FullDayStart = "08:00:00";
+    const FullDayEnd = "17:00:00";
+
+    const date = new Date(eventData);
+
+    const date1 = new Date(eventData);
+
+    let newStartTime, newEndTime;
+
+    date.setHours(parseInt(newStartTime.split(":")[0], 10));
+    date.setMinutes(parseInt(newStartTime.split(":")[1], 10));
+
+    date1.setHours(parseInt(newEndTime.split(":")[0], 10));
+    date1.setMinutes(parseInt(newEndTime.split(":")[1], 10));
+
+    if (selectedTimeRange === "Demi Journée") {
+      newStartTime = HalfDayStart;
+      newEndTime = HalfDayEnd;
+    } else if (selectedTimeRange === "Journée") {
+      newStartTime = FullDayStart;
+      newEndTime = FullDayEnd;
+    }
+
     if (isEditMode) {
       setEventData((prevEventData) => ({
+        ...prevEventData,
+        [target === "debut" ? "dateDebut" : "dateFin"]: date,
+      }));
+      setEventDataConge((prevEventData) => ({
         ...prevEventData,
         [target === "debut" ? "dateDebut" : "dateFin"]: date,
       }));
     } else {
       setEventData((prevEventData) => ({
         ...prevEventData,
-        [target === "debut" ? "dateDebut" : "dateFin"]: date,
-        agent: `/api/agents/${agentID}`,
+        [target === "debut" ? "dateDebut" : "dateFin"]: date1,
+      }));
+      setEventDataConge((prevEventData) => ({
+        ...prevEventData,
+        [target === "debut" ? "dateDebut" : "dateFin"]: date1,
       }));
     }
   };
+
+  console.log(eventData);
+  console.log(eventDataConge);
 
   const renderEventSpecificFields = () => {
     if (type === "MISSION") {
@@ -182,8 +265,8 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
             >
               <MenuItem value="">Sélectionnez un établissement</MenuItem>
               {etablissements.map((etablissement, index) => (
-                <MenuItem key={index} value={etablissement.label}>
-                  {etablissement.label}
+                <MenuItem key={index} value={etablissement["@id"]}>
+                  {etablissement.name}
                 </MenuItem>
               ))}
             </Select>
@@ -206,8 +289,8 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
           />
           <TextField
             label="Objectif et Quantification de travail"
-            name="Quantification"
-            value={eventData.Quantification}
+            name="quantification"
+            value={eventData.quantification}
             fullWidth
             multiline
             rows={4}
@@ -229,8 +312,8 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
             >
               <MenuItem value="">Sélectionnez un établissement</MenuItem>
               {etablissements.map((etablissement, index) => (
-                <MenuItem key={index} value={etablissement.label}>
-                  {etablissement.label}
+                <MenuItem key={index} value={etablissement["@id"]}>
+                  {etablissement.name}
                 </MenuItem>
               ))}
             </Select>
@@ -269,14 +352,14 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
           <FormControl fullWidth margin="normal">
             <InputLabel>Justificatif</InputLabel>
             <Select
-              value={eventData.justification}
+              value={eventDataConge.justification}
               name="justification"
               onChange={handleSelectionChangeConge}
             >
               <MenuItem value="">Sélectionnez un justificatif</MenuItem>
-              {conges.map((conge, index) => (
-                <MenuItem key={index} value={conge.label}>
-                  {conge.label}
+              {justificatifs.map((justificatif, index) => (
+                <MenuItem key={index} value={justificatif["@id"]}>
+                  {justificatif.name}
                 </MenuItem>
               ))}
             </Select>
@@ -293,14 +376,39 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
           <Typography sx={{ p: 2 }}>{type}</Typography>
           <Box>
             {renderEventSpecificFields()}
+            <Grid
+              container
+              spacing={1}
+              style={{ marginTop: "10px", marginBottom: "20px" }}
+            >
+              <Grid item xs={6}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleTimeChange("Demi Journée")}
+                >
+                  Demi Journée
+                </Button>
+              </Grid>
+              <Grid item xs={6}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleTimeChange("Journée")}
+                >
+                  Journée
+                </Button>
+              </Grid>
+            </Grid>
             <Grid container spacing={1} style={{ marginTop: "10px" }}>
               <Grid item xs={6}>
-                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={fr}>
+                <LocalizationProvider
+                  dateAdapter={AdapterDateFns}
+                  adapterLocale={fr}
+                >
                   <DateTimePicker
-                    value={dayjs(eventData.dateDebut)}
-                    localeText={fr}
+                    value={new Date(eventData.dateDebut)}
                     label="Date et Heure de Début"
-                    ampm={false}
                     onChange={(newDate) =>
                       handleDateChange(newDate, "debut", props.admin_id)
                     }
@@ -308,12 +416,13 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
                 </LocalizationProvider>
               </Grid>
               <Grid item xs={6} style={{ marginBottom: "10px" }}>
-                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={fr}>
+                <LocalizationProvider
+                  dateAdapter={AdapterDateFns}
+                  adapterLocale={fr}
+                >
                   <DateTimePicker
-                    value={dayjs(eventData.dateFin)}
+                    value={new Date(eventData.dateFin)}
                     label="Date et Heure de Fin"
-                    localeText={fr}
-                    ampm={false}
                     onChange={(newDate) =>
                       handleDateChange(newDate, "fin", props.admin_id)
                     }

@@ -13,6 +13,7 @@ const AgentsPage = () => {
 
   const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP, decodedToken } = useAuth();
 
+
   const fetchAgents = async () => {
     try {
       const data = await AgentsAPI.findAll();
@@ -51,7 +52,7 @@ const AgentsPage = () => {
     (agent) =>
       (agent.nom.toLowerCase().includes(search.toLowerCase()) ||
         agent.prenom.toLowerCase().includes(search.toLowerCase()) || agent.service.toLowerCase().includes(search.toLowerCase())) &&
-        (isRESP ? (decodedToken?.custom_data?.service ? agent.service === decodedToken?.custom_data?.service : true) : true)
+        (isRESP ? (decodedToken?.custom_data?.service ? agent.service.name === decodedToken?.custom_data?.service : true) : true)
   );
 
   const paginatedAgents = Pagination.getData(
@@ -103,7 +104,7 @@ const AgentsPage = () => {
                 </Link>
               </td>
               <td>{agent.telephone.replace(/(\d{2})(?=\d)/g, "$1 ")}</td>
-              <td>{agent.service}</td>
+              <td>{agent.service.name}</td>
               <td>{agent.user ? parseInt(agent.user.split("/").pop()) : ""}</td>
               <td>
                 <button

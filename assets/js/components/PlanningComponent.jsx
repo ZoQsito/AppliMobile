@@ -25,7 +25,6 @@ function CustomEditor({
   setSelectedOption,
   setIsLoading,
 }) {
-  console.log(props);
 
   useEffect(() => {
     switch (props.edited.title) {
@@ -158,11 +157,10 @@ const PlanningComponent = ({ props }) => {
 
   const deleteOldEvents = async () => {
     try {
-      const eventsData = await EventsAPI.findAll();
       const currentDate = new Date();
       const sevenDaysAgo = addDays(currentDate, -7);
 
-      const eventsToDelete = eventsData.filter((event) => {
+      const eventsToDelete = events.filter((event) => {
         const eventDate = new Date(event.date_fin);
         return eventDate < sevenDaysAgo;
       });
@@ -192,7 +190,7 @@ const PlanningComponent = ({ props }) => {
           admin_id: agent.id,
           title: `${agent.nom} ${agent.prenom}`,
           mobile: agent.telephone,
-          avatar: "https://picsum.photos/200/300",
+          avatar: undefined,
           color: agent.color,
           service: agent.service,
           user: agent.user,
@@ -204,6 +202,7 @@ const PlanningComponent = ({ props }) => {
       toast.error("Les données n'ont pas été chargées");
     }
   };
+
 
   useEffect(() => {
     const fetchDataAndDeleteOldEvents = async () => {
@@ -223,7 +222,7 @@ const PlanningComponent = ({ props }) => {
         selectedService = localStorage.getItem("selectedService");
       } else if (decodedToken?.custom_data?.service) {
 
-        selectedService = decodedToken.custom_data.service;
+        selectedService = decodedToken?.custom_data?.service;
         localStorage.setItem("selectedService", selectedService); 
       } else {
 
@@ -508,9 +507,9 @@ const PlanningComponent = ({ props }) => {
                 {event.title === "MISSION" && (
                   <div>
                     <Typography variant="h6">Mission</Typography>
-                    {event.etablissement && (
+                    {event?.etablissement?.name && (
                       <Typography variant="body1">
-                        <strong>Etablissement:</strong> {event.etablissement}
+                        <strong>Etablissement:</strong> {event?.etablissement?.name}
                       </Typography>
                     )}
                     {event.autreEtablissement && (
@@ -538,9 +537,9 @@ const PlanningComponent = ({ props }) => {
                 {event.title === "REUNION" && (
                   <div>
                     <Typography variant="h6">Réunion</Typography>
-                    {event.etablissement && (
+                    {event?.etablissement?.name && (
                       <Typography variant="body1">
-                        <strong>Etablissement:</strong> {event.etablissement}
+                        <strong>Etablissement:</strong> {event?.etablissement?.name}
                       </Typography>
                     )}
                     {event.autreEtablissement && (
@@ -569,7 +568,7 @@ const PlanningComponent = ({ props }) => {
                   <div>
                     <Typography variant="h6">Absence</Typography>
                     <Typography variant="body1">
-                      <strong>Justification:</strong> {event.justification}
+                      <strong>Justification:</strong> {event?.justificatif?.name}
                     </Typography>
                     <Typography variant="body1">
                       <strong>Date Debut:</strong>{" "}

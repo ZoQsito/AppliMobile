@@ -6,7 +6,7 @@ namespace App\EventListener;
 
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 
-class JwtListener
+class JWTListener
 {
     public function onJwtCreated(JWTCreatedEvent $event)
     {

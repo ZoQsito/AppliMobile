@@ -17,7 +17,7 @@ class JwtListener
         $user = $event->getUser();
 
         $userData = [
-            "service" => $user->getAgent()?->getService(),
+            "service" => $user->getAgent()?->getService()?->getName(),
         ];
 
         $jwt['custom_data'] = $userData;

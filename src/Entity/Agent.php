@@ -17,42 +17,48 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[Put(security: "is_granted('ROLE_RESP')" )]
 #[Post(security: "is_granted('ROLE_RESP')")]
 
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['agent:read']],
+)]
 class Agent
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['events:read', 'user:read'])]
+    #[Groups(['events:read', 'user:read', 'agent:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['events:read', 'user:read'])]
+    #[Groups(['events:read', 'user:read', 'agent:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['events:read', 'user:read'])]
+    #[Groups(['events:read', 'user:read', 'agent:read'])]
     private ?string $prenom = null;
 
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['events:read', 'user:read'])]
+    #[Groups(['events:read', 'user:read', 'agent:read'])]
     private ?string $telephone = null;
 
-    #[ORM\Column(length: 255)]
-    #[Groups(['events:read', 'user:read'])]
-    private ?string $service = null;
-
+    #[Groups(['events:read', 'user:read', 'agent:read'])]
     #[ORM\OneToOne(inversedBy:'agent',targetEntity: User::class,cascade:['persist'])]
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id")]
     private ?User $user = null;
+
+
     
     #[ORM\OneToMany(targetEntity: Events::class, mappedBy: "agent", cascade: ["remove"])]
     private $events;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['events:read', 'user:read'])]
+    #[Groups(['events:read', 'user:read', 'agent:read'])]
     private ?string $color = null;
+
+    #[Groups(['events:read', 'user:read', 'agent:read'])]
+    #[ORM\ManyToOne(inversedBy: 'agents')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Service $service = null;
 
     public function __construct()
     {
@@ -105,18 +111,6 @@ class Agent
         return $this;
     }
 
-    public function getService(): ?string
-    {
-        return $this->service;
-    }
-
-    public function setService(string $service): static
-    {
-        $this->service = $service;
-
-        return $this;
-    }
-
     public function getUser(): ?User
     {
         return $this->user;
@@ -157,6 +151,18 @@ class Agent
                 $event->setAgent(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getService(): ?Service
+    {
+        return $this->service;
+    }
+
+    public function setService(?Service $service): static
+    {
+        $this->service = $service;
 
         return $this;
     }

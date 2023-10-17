@@ -86,7 +86,7 @@ const App = () => {
     >
       <Router basename={process.env.BASE_PATH}>
         <Navbar />
-        <main >
+        <main className="container">
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<PlanningPage />} />

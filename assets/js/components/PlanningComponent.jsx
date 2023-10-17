@@ -50,7 +50,7 @@ function CustomEditor({
 
   return (
     <Card sx={{ width: "750px" }}>
-      <CardContent>
+      <CardContent style={{ overflowY: "auto", maxHeight: "1000px" }}>
         <AppBar position="static">
           <Toolbar>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -84,6 +84,7 @@ function CustomEditor({
             props={props}
             setIsLoading={setIsLoading}
             edited={props.edited}
+            state={props.state}
           />
         )}
         {selectedOption === "REUNION" && (
@@ -92,6 +93,7 @@ function CustomEditor({
             props={props}
             setIsLoading={setIsLoading}
             edited={props.edited}
+            state={props.state}
           />
         )}
         {selectedOption === "ABSENCE" && (
@@ -100,6 +102,7 @@ function CustomEditor({
             props={props}
             setIsLoading={setIsLoading}
             edited={props.edited}
+            state={props.state}
           />
         )}
       </CardContent>
@@ -114,9 +117,11 @@ const PlanningComponent = ({ props }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditable, setIsEditable] = useState(false);
   const [isDeletable, setIsDeletable] = useState(false);
+  const [activeService, setActiveService] = useState(null);
 
   const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP, decodedToken } =
     useAuth();
+
 
   const [events, setEvents] = useState([
     {
@@ -139,24 +144,34 @@ const PlanningComponent = ({ props }) => {
     },
   ]);
 
+  const agentsByService = {};
+
+  agents.forEach((agent) => {
+    if (!agentsByService[agent.service.name]) {
+      agentsByService[agent.service.name] = [];
+    }
+    agentsByService[agent.service.name].push(agent);
+  });
+
+
+  const services = Object.keys(agentsByService);
+
   const deleteOldEvents = async () => {
     try {
       const eventsData = await EventsAPI.findAll();
       const currentDate = new Date();
       const sevenDaysAgo = addDays(currentDate, -7);
-  
+
       const eventsToDelete = eventsData.filter((event) => {
         const eventDate = new Date(event.date_fin);
         return eventDate < sevenDaysAgo;
       });
-  
+
       if (eventsToDelete.length > 0) {
         for (const eventToDelete of eventsToDelete) {
           await handleDeleteEvent(eventToDelete.id);
         }
       }
-
-  
     } catch (error) {
       console.error(
         "Une erreur s'est produite lors de la suppression des événements obsolètes.",
@@ -190,17 +205,52 @@ const PlanningComponent = ({ props }) => {
     }
   };
 
-
-
   useEffect(() => {
     const fetchDataAndDeleteOldEvents = async () => {
       if (isLoading) {
         await deleteOldEvents();
         fetchData();
       }
-    }
-  
+    };
+
     fetchDataAndDeleteOldEvents();
+
+    if (decodedToken?.custom_data?.service) {
+
+      let selectedService;
+      if (localStorage.getItem("selectedService")) {
+
+        selectedService = localStorage.getItem("selectedService");
+      } else if (decodedToken?.custom_data?.service) {
+
+        selectedService = decodedToken.custom_data.service;
+        localStorage.setItem("selectedService", selectedService); 
+      } else {
+
+        selectedService = "ALL";
+        localStorage.setItem("selectedService", "ALL"); 
+      }
+
+      if (services.includes(selectedService)) {
+        handleServiceChangeForAll(selectedService);
+      } else {
+        handleServiceChange();
+      }
+    }
+
+    if (localStorage.getItem("selectedViewMode")) {
+      const storedViewMode = localStorage.getItem("selectedViewMode");
+      if (storedViewMode === "tabs") {
+        setMode("tabs");
+        calendarRef.current?.scheduler?.handleState("tabs", "resourceViewMode");
+      } else {
+        setMode("default");
+        calendarRef.current?.scheduler?.handleState(
+          "default",
+          "resourceViewMode"
+        );
+      }
+    }
   }, [isLoading]);
 
   const handleOptionChange = (event) => {
@@ -224,7 +274,7 @@ const PlanningComponent = ({ props }) => {
 
     if (selectedService) {
       filteredResources = agents.filter(
-        (agent) => agent.service === selectedService
+        (agent) => agent.service.name === selectedService
       );
     }
 
@@ -236,12 +286,22 @@ const PlanningComponent = ({ props }) => {
       setIsDeletable(false);
     }
 
+    setAllPressed(false);
+    setActiveService(selectedService);
+
+    localStorage.setItem("selectedService", selectedService);
+
     calendarRef.current?.scheduler?.handleState(filteredResources, "resources");
   };
+
+  const [allPressed, setAllPressed] = useState(true);
 
   const handleServiceChange = () => {
     setIsEditable(false);
     setIsDeletable(false);
+    setAllPressed(true);
+    setActiveService(null);
+    localStorage.setItem("selectedService", "ALL");
 
     calendarRef.current?.scheduler?.handleState(agents, "resources");
   };
@@ -251,24 +311,13 @@ const PlanningComponent = ({ props }) => {
     calendarRef.current?.scheduler?.handleState(isDeletable, "deletable");
   }, [isEditable, isDeletable]);
 
-  const agentsByService = {};
-
-  agents.forEach((agent) => {
-    if (!agentsByService[agent.service]) {
-      agentsByService[agent.service] = [];
-    }
-    agentsByService[agent.service].push(agent);
-  });
-
-  const services = Object.keys(agentsByService);
-
   if (isLoading) {
     return <div></div>;
   }
 
   return (
     <Fragment>
-      <div style={{ textAlign: "center" }}>
+      <div style={{ textAlign: "center", paddingTop: 60 }}>
         <Button
           color={mode === "default" ? "primary" : "inherit"}
           variant={mode === "default" ? "contained" : "text"}
@@ -280,6 +329,7 @@ const PlanningComponent = ({ props }) => {
               "default",
               "resourceViewMode"
             );
+            localStorage.setItem("selectedViewMode", "default");
           }}
         >
           Général
@@ -294,6 +344,7 @@ const PlanningComponent = ({ props }) => {
               "tabs",
               "resourceViewMode"
             );
+            localStorage.setItem("selectedViewMode", "tabs");
           }}
         >
           Personne
@@ -302,7 +353,7 @@ const PlanningComponent = ({ props }) => {
       <div style={{ margin: "10px 0" }}>
         <span>Changer le service : </span>
         <Button
-          variant="outlined"
+          variant={allPressed ? "contained" : "outlined"}
           style={{ marginRight: "10px" }}
           onClick={() => handleServiceChange()}
         >
@@ -311,7 +362,7 @@ const PlanningComponent = ({ props }) => {
         {services.map((service, index) => (
           <Button
             key={service}
-            variant="outlined"
+            variant={activeService === service ? "contained" : "outlined"}
             style={{ marginRight: "10px" }}
             onClick={() => handleServiceChangeForAll(service)}
           >
@@ -355,6 +406,7 @@ const PlanningComponent = ({ props }) => {
             quantification: event.quantification,
           }))}
           resources={agents}
+          draggable={false}
           week={{
             weekDays: [0, 1, 2, 3, 4, 5, 6],
             weekStartOn: 6,
@@ -373,7 +425,7 @@ const PlanningComponent = ({ props }) => {
           customEditor={(props) =>
             props.edited === undefined ? (
               <Card sx={{ width: "750px" }}>
-                <CardContent>
+                <CardContent style={{ overflowY: "auto", maxHeight: "500px" }}>
                   <AppBar position="static">
                     <Toolbar>
                       <Typography
@@ -410,24 +462,27 @@ const PlanningComponent = ({ props }) => {
                   </Grid>
                   {selectedOption === "MISSION" ? (
                     <EventForm
-                    type={"MISSION"}
+                      type={"MISSION"}
                       props={props}
                       setIsLoading={setIsLoading}
                       edited={props.edited}
+                      state={props.state}
                     />
                   ) : selectedOption === "REUNION" ? (
                     <EventForm
-                    type={"REUNION"}
+                      type={"REUNION"}
                       props={props}
                       setIsLoading={setIsLoading}
                       edited={props.edited}
+                      state={props.state}
                     />
                   ) : selectedOption === "ABSENCE" ? (
                     <EventForm
-                    type={"ABSENCE"}
+                      type={"ABSENCE"}
                       props={props}
                       setIsLoading={setIsLoading}
                       edited={props.edited}
+                      state={props.state}
                     />
                   ) : null}
                 </CardContent>

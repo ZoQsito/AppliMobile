@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { renderTimeViewClock } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import EventsAPI from "../services/EventsAPI";
 import { format } from "date-fns";
@@ -48,16 +47,17 @@ const conges = [
   { label: "Temps Partiel" },
 ];
 
-const EventForm = ({ type, props, setIsLoading, edited }) => {
-  console.log(props);
+const EventForm = ({ type, props, setIsLoading, edited, state }) => {
+
+  console.log(props)
 
   const [eventData, setEventData] = useState({
     etablissement: "",
     autreEtablissement: "",
     label: type,
-    dateDebut: "",
-    dateFin: "",
-    agent: "",
+    dateDebut: format(state.start.value, "yyyy-MM-dd HH:mm:ss"),
+    dateFin: format(state.end.value, "yyyy-MM-dd HH:mm:ss"),
+    agent: `/api/agents/${props.admin_id}`,
     objetMission: "",
     quantification: "",
     objetReunion: "",
@@ -69,6 +69,7 @@ const EventForm = ({ type, props, setIsLoading, edited }) => {
     setEventData((prevEventData) => ({
       ...prevEventData,
       label: type,
+      agent: `/api/agents/${props.admin_id}`,
       objetMission: "",
       quantification: "",
       objetReunion: "",
@@ -77,7 +78,6 @@ const EventForm = ({ type, props, setIsLoading, edited }) => {
     }));
   }, [type]);
 
-  console.log(eventData);
 
   const isEditMode = !!edited;
 
@@ -114,6 +114,8 @@ const EventForm = ({ type, props, setIsLoading, edited }) => {
       }
     }
   }, [edited, isEditMode]);
+
+  console.log(eventData)
 
   const handleSelectionChange = (event) => {
     const selectedValue = event.target.value;
@@ -176,9 +178,7 @@ const EventForm = ({ type, props, setIsLoading, edited }) => {
               value={eventData.etablissement}
               name="etablissement"
               onChange={handleSelectionChange}
-              variant="filled"
               id="etablissement"
-              className={"form-control"}
             >
               <MenuItem value="">Sélectionnez un établissement</MenuItem>
               {etablissements.map((etablissement, index) => (
@@ -195,7 +195,6 @@ const EventForm = ({ type, props, setIsLoading, edited }) => {
             fullWidth
             margin="normal"
             onChange={handleChange}
-            variant="filled"
           />
           <TextField
             label="Objet de la mission"
@@ -226,9 +225,7 @@ const EventForm = ({ type, props, setIsLoading, edited }) => {
               value={eventData.etablissement}
               name="etablissement"
               onChange={handleSelectionChange}
-              variant="filled"
               id="etablissement"
-              className={"form-control"}
             >
               <MenuItem value="">Sélectionnez un établissement</MenuItem>
               {etablissements.map((etablissement, index) => (
@@ -245,7 +242,6 @@ const EventForm = ({ type, props, setIsLoading, edited }) => {
             fullWidth
             margin="normal"
             onChange={handleChange}
-            variant="filled"
           />
           <TextField
             label="Objet de la Réunion"
@@ -316,7 +312,8 @@ const EventForm = ({ type, props, setIsLoading, edited }) => {
                   <DateTimePicker
                     value={dayjs(eventData.dateFin)}
                     label="Date et Heure de Fin"
-                    
+                    localeText={fr}
+                    ampm={false}
                     onChange={(newDate) =>
                       handleDateChange(newDate, "fin", props.admin_id)
                     }

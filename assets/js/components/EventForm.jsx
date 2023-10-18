@@ -15,7 +15,7 @@ import {
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import EventsAPI from "../services/EventsAPI";
-import { format } from "date-fns";
+import { format, parse, setHours, setMinutes } from "date-fns";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { fr } from "date-fns/locale";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -188,8 +188,8 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
     setIsLoading(true);
   };
 
-  const handleDateChange = (newDate, target, agentID) => {
-    const date = format(newDate.$d, "yyyy-MM-dd HH:mm:ss");
+  const handleDateChange = (newDate, target) => {
+    const date = format(newDate, "yyyy-MM-dd HH:mm:ss");
 
     setEventData((prevEventData) => ({
       ...prevEventData,
@@ -201,50 +201,84 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
     }));
   };
 
+  const [selectedTimeRange1, setSelectedTimeRange] = useState(null);
+  const [isDemiJourneeTwice, setIsDemiJourneeTwice] = useState(false);
+
   const handleTimeChange = (selectedTimeRange) => {
-    const HalfDayStart = "08:00:00";
-    const HalfDayEnd = "12:00:00";
-    const FullDayStart = "08:00:00";
-    const FullDayEnd = "17:00:00";
-
-    const date = new Date(eventData);
-
-    const date1 = new Date(eventData);
-
-    let newStartTime, newEndTime;
-
-    date.setHours(parseInt(newStartTime.split(":")[0], 10));
-    date.setMinutes(parseInt(newStartTime.split(":")[1], 10));
-
-    date1.setHours(parseInt(newEndTime.split(":")[0], 10));
-    date1.setMinutes(parseInt(newEndTime.split(":")[1], 10));
+    const dateStr = eventData.dateDebut;
 
     if (selectedTimeRange === "Demi Journée") {
-      newStartTime = HalfDayStart;
-      newEndTime = HalfDayEnd;
-    } else if (selectedTimeRange === "Journée") {
-      newStartTime = FullDayStart;
-      newEndTime = FullDayEnd;
+      setSelectedTimeRange("Demi Journée");
+    } else {
+      setSelectedTimeRange(selectedTimeRange);
     }
 
-    if (isEditMode) {
-      setEventData((prevEventData) => ({
-        ...prevEventData,
-        [target === "debut" ? "dateDebut" : "dateFin"]: date,
-      }));
-      setEventDataConge((prevEventData) => ({
-        ...prevEventData,
-        [target === "debut" ? "dateDebut" : "dateFin"]: date,
-      }));
+    const DateDebut = parse(dateStr, "yyyy-MM-dd HH:mm:ss", new Date());
+
+    const newHoursDebutDemiAprem = 13;
+    const newHoursDebut = 8;
+    const newHoursFinDemi = 12;
+    const newHoursFin = 17;
+    const newMinutes = 0;
+
+    const updatedDateDebut = setMinutes(
+      setHours(DateDebut, newHoursDebut),
+      newMinutes
+    );
+
+    const updatedDateDebutAprem = setMinutes(
+      setHours(DateDebut, newHoursDebutDemiAprem),
+      newMinutes
+    );
+
+    const updatedDateFin = setMinutes(
+      setHours(DateDebut, newHoursFin),
+      newMinutes
+    );
+
+    const updatedDateFinMatin = setMinutes(
+      setHours(DateDebut, newHoursFinDemi),
+      newMinutes
+    );
+
+    
+    if (selectedTimeRange === "Demi Journée") {
+      if(selectedTimeRange1 === selectedTimeRange){
+        setEventData((prevEventData) => ({
+          ...prevEventData,
+          dateDebut: format(updatedDateDebutAprem, "yyyy-MM-dd HH:mm:ss"),
+          dateFin: format(updatedDateFin, "yyyy-MM-dd HH:mm:ss"),
+        }));
+        setEventDataConge((prevEventData) => ({
+          ...prevEventData,
+          dateDebut: format(updatedDateDebutAprem, "yyyy-MM-dd HH:mm:ss"),
+          dateFin: format(updatedDateFin, "yyyy-MM-dd HH:mm:ss"),
+        }));
+        setSelectedTimeRange(null)
+      }else{
+        setEventData((prevEventData) => ({
+          ...prevEventData,
+          dateDebut: format(updatedDateDebut, "yyyy-MM-dd HH:mm:ss"),
+          dateFin: format(updatedDateFinMatin, "yyyy-MM-dd HH:mm:ss"),
+        }));
+        setEventDataConge((prevEventData) => ({
+          ...prevEventData,
+          dateDebut: format(updatedDateDebut, "yyyy-MM-dd HH:mm:ss"),
+          dateFin: format(updatedDateFinMatin, "yyyy-MM-dd HH:mm:ss"),
+        }));
+      }
     } else {
       setEventData((prevEventData) => ({
         ...prevEventData,
-        [target === "debut" ? "dateDebut" : "dateFin"]: date1,
+        dateDebut: format(updatedDateDebut, "yyyy-MM-dd HH:mm:ss"),
+        dateFin: format(updatedDateFin, "yyyy-MM-dd HH:mm:ss"),
       }));
       setEventDataConge((prevEventData) => ({
         ...prevEventData,
-        [target === "debut" ? "dateDebut" : "dateFin"]: date1,
+        dateDebut: format(updatedDateDebut, "yyyy-MM-dd HH:mm:ss"),
+        dateFin: format(updatedDateFin, "yyyy-MM-dd HH:mm:ss"),
       }));
+      setIsDemiJourneeTwice(false)
     }
   };
 
@@ -409,9 +443,7 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
                   <DateTimePicker
                     value={new Date(eventData.dateDebut)}
                     label="Date et Heure de Début"
-                    onChange={(newDate) =>
-                      handleDateChange(newDate, "debut", props.admin_id)
-                    }
+                    onChange={(newDate) => handleDateChange(newDate, "debut")}
                   />
                 </LocalizationProvider>
               </Grid>
@@ -423,9 +455,7 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
                   <DateTimePicker
                     value={new Date(eventData.dateFin)}
                     label="Date et Heure de Fin"
-                    onChange={(newDate) =>
-                      handleDateChange(newDate, "fin", props.admin_id)
-                    }
+                    onChange={(newDate) => handleDateChange(newDate, "fin")}
                   />
                 </LocalizationProvider>
               </Grid>

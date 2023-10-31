@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import AuthAPI from "../services/AuthAPI";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
   Avatar,
   Box,
@@ -38,14 +37,14 @@ const LoginPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // if (!isPasswordValid(credentials.password)) {
-    //   setPasswordError(
-    //     "Le mot de passe doit avoir au moins 12 caractères avec une minuscule, une majuscule, un caractère spéciale et un chiffre."
-    //   );
-    //   return;
-    // } else {
-    //   setPasswordError("");
-    // }
+    if (!isPasswordValid(credentials.password)) {
+      setPasswordError(
+        "Le mot de passe doit avoir au moins 12 caractères avec une minuscule, une majuscule, un caractère spéciale et un chiffre."
+      );
+      return;
+    } else {
+      setPasswordError("");
+    }
 
     try {
       await AuthAPI.authenticate(credentials);
@@ -114,8 +113,8 @@ const LoginPage = () => {
                 value={credentials.password}
                 onChange={handleChange}
                 type="password"
-                // error={passwordError !== ""}
-                // helperText={passwordError}
+                error={passwordError !== ""}
+                helperText={passwordError}
               />
               <Grid item xs>
                 <Link href="/reset-password" variant="body2">

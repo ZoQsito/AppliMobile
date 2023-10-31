@@ -16,7 +16,7 @@ const AgentsPage = () => {
   const [search, setSearch] = useState("");
   const itemsPerPage = 10;
 
-  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP, decodedToken } =
+  const { isRESP, decodedToken } =
     useAuth();
 
   const colorMode = useContext(ColorModeContext);

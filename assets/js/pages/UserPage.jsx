@@ -12,21 +12,13 @@ const UserPage = ({ props }) => {
   const { id = "new" } = useParams();
   const navigate = useNavigate();
 
-  const [user, setUser] = useState({
-    username: "",
-    plainPassword: "",
-    roles: [],
-    email: "",
-  });
-
   const [userRole, setUserRole] = useState({
     roles: [],
   });
 
   const fetchUsers = async (id) => {
     try {
-      const { username, roles, password, email } = await usersAPI.find(id);
-      setUser({ username, roles, password, email });
+      const {roles} = await usersAPI.find(id);
       setUserRole({ roles });
     } catch (error) {
       toast.error("Le user n'a pas pu être chargé");
@@ -55,8 +47,8 @@ const UserPage = ({ props }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (user.roles.length === 0) {
-      user.roles = [];
+    if (userRole.roles.length === 0) {
+      userRole.roles = [];
     }
 
     try {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import { createRoot } from "react-dom/client";
 import "../styles/app.css";
-import "../bootstrap";
 import LoginPage from "./pages/LoginPage";
 import AgentsPage from "./pages/AgentsPage";
 import AgentPage from "./pages/AgentPage";
@@ -17,10 +16,8 @@ import jwtDecode from "jwt-decode";
 import UsersPage from "./pages/UsersPage";
 import UserPage from "./pages/UserPage";
 import { AuthContext } from "./contexts/AuthContext";
-import { ThemeProvider } from "@emotion/react";
-import { CssBaseline, createTheme, useMediaQuery } from "@mui/material";
+import { CssBaseline } from "@mui/material";
 import ResponsiveAppBar from "./components/NavBarMUI";
-import TestPage from "./pages/Test";
 import ToggleColorModeProvider from "./services/ToggleColorModeProvider";
 
 const App = () => {
@@ -97,13 +94,13 @@ const App = () => {
             <ResponsiveAppBar/>
             <main id="container" style={{marginLeft: "10%", marginRight:"10%"}}>
               <Routes>
-                <Route path="/test" element={<TestPage/>} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/" element={<PlanningPage />} />
                 {RESPRoute("/agents", <AgentsPage />)}
                 {RESPRoute("/agent/:id", <AgentPage />)}
                 {adminRoute("/users", <UsersPage />)}
                 {adminRoute("/user/:id", <UserPage />)}
+                <Route path="*" element={<Navigate to="/" />} />
               </Routes>
             </main>
           </div>

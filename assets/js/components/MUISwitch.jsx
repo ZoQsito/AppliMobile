@@ -3,10 +3,6 @@ import { styled } from "@mui/material/styles";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import { useAuth } from "../contexts/AuthContext";
-import { useEffect } from "react";
 import ColorModeContext from "../services/ColorModeContext";
 import { useContext } from "react";
 
@@ -58,8 +54,6 @@ const MaterialUISwitch = styled(Switch)(({ theme }) => ({
 }));
 
 export default function CustomizedSwitches() {
-  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP, decodedToken } =
-    useAuth();
 
   const colorMode = useContext(ColorModeContext);
 

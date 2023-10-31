@@ -5,20 +5,16 @@ import Toolbar from "@mui/material/Toolbar";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import EventIcon from "@mui/icons-material/Event";
-import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import AuthAPI from "../services/AuthAPI";
 import { NavLink, useNavigate } from "react-router-dom";
 import CustomizedSwitches from "./MUISwitch";
 
-const pages = ["Products", "Pricing", "Blog"];
-
 function ResponsiveAppBar() {
-  const [anchorElNav, setAnchorElNav] = useState(null);
 
   const navigate = useNavigate();
 
-  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP, decodedToken } =
+  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP } =
     useAuth();
 
   const handleLogout = () => {

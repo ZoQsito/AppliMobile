@@ -117,7 +117,7 @@ const PlanningComponent = ({ props }) => {
   const [isDeletable, setIsDeletable] = useState(false);
   const [activeService, setActiveService] = useState(null);
 
-  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP, decodedToken } =
+  const { decodedToken } =
     useAuth();
 
   const [events, setEvents] = useState([]);

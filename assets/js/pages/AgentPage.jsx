@@ -31,6 +31,7 @@ const AgentPage = ({}) => {
     telephone: "",
     service: "",
     color: "",
+    user:"",
   });
 
   const [agent, setAgent] = useState({
@@ -66,7 +67,7 @@ const AgentPage = ({}) => {
 
   const fetchAgent = async (id) => {
     try {
-      const { prenom, nom, telephone, service, color } = await AgentsAPI.find(
+      const { prenom, nom, telephone, service, color, user } = await AgentsAPI.find(
         id
       );
       setAgentID(id);
@@ -76,6 +77,7 @@ const AgentPage = ({}) => {
         telephone,
         service: service["@id"],
         color,
+        user,
       });
     } catch (error) {
       toast.error("L'agent n'a pas pu être chargé");
@@ -90,6 +92,7 @@ const AgentPage = ({}) => {
       toast.error("Les Services n'ont pas été chargés");
     }
   };
+
 
   useEffect(() => {
     if (id !== "new") {
@@ -370,7 +373,7 @@ const AgentPage = ({}) => {
         <FormHelperText error>
           {editing ? updateErrors.color : creationErrors.color}
         </FormHelperText>{" "}
-        {editing && (
+        {editing && agentUpdate.user === undefined && (
           <Box sx={{ marginTop: 2 }}>
             <Button variant="contained" onClick={handleOpen}>
               Créer User

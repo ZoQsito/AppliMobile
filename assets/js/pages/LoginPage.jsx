@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import AuthAPI from "../services/AuthAPI";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
   Avatar,
   Box,
@@ -74,7 +75,7 @@ const LoginPage = () => {
               alignItems: "center",
             }}
           >
-            <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+            <Avatar sx={{ m: 1}}>
               <LockOutlinedIcon />
             </Avatar>
             <Typography
@@ -117,7 +118,7 @@ const LoginPage = () => {
                 helperText={passwordError}
               />
               <Grid item xs>
-                <Link href="/reset-password" variant="body2">
+                <Link href={`${process.env.BASE_PATH ?? ""}/reset-password`} variant="body2">
                   Forgot password?
                 </Link>
               </Grid>

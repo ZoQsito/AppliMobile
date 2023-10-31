@@ -366,6 +366,12 @@ const PlanningComponent = ({ props }) => {
               today: "Aujourd'hui",
             },
           }}
+          month={{
+            weekDays: [2, 3, 4,5,6]
+          }}
+          day={{
+            weekDays: [2, 3, 4, 5, 6]
+          }}
           locale={fr}
           hourFormat="24"
           events={events.map((event) => ({
@@ -378,7 +384,7 @@ const PlanningComponent = ({ props }) => {
               event.label === "MISSION"
                 ? "red"
                 : event.label === "REUNION"
-                ? "yellow"
+                ? "orange"
                 : event.label === "ABSENCE"
                 ? "green"
                 : "defaultColor",
@@ -393,8 +399,7 @@ const PlanningComponent = ({ props }) => {
           resources={agents}
           draggable={false}
           week={{
-            weekDays: [0, 1, 2, 3, 4, 5, 6],
-            weekStartOn: 6,
+            weekDays: [2, 3, 4, 5, 6],
             startHour: 8,
             endHour: 20,
             step: 60,

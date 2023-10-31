@@ -3,13 +3,16 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import ColorModeContext from './ColorModeContext';
 
 function ToggleColorModeProvider({ children }) {
-    const [mode, setMode] = React.useState('light');
+  const storedMode = localStorage.getItem('colorMode');
+  const [mode, setMode] = React.useState(storedMode || 'light');
   
     const colorMode = React.useMemo(
       () => ({
-        mode, // Incluez le mode actuel dans le contexte
-        toggleColorMode: () => {
-          setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
+        mode,
+        toggleColorMode : () => {
+          const newMode = mode === 'light' ? 'dark' : 'light';
+          setMode(newMode);
+          localStorage.setItem('colorMode', newMode); 
         },
       }),
       [mode]

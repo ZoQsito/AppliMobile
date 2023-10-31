@@ -11,6 +11,7 @@ use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use App\State\CreateUserStateProcessor;
@@ -42,6 +43,13 @@ use Symfony\Component\Validator\Constraints as Assert;
     processor: CreateUserStateProcessor::class,
     read:false
 )]
+#[Patch(
+    security: "is_granted('ROLE_ADMIN')",
+    uriTemplate: '/users/{id}/role',
+   
+    denormalizationContext: ['groups' => ['user:changeRole']],
+    read:false
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[Groups(['user:read'])]
@@ -60,7 +68,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $plainPassword = null;
 
     #[ORM\Column]
-    #[Groups(['user:read', 'user:create', 'user:update','agent:createAccount'])]
+    #[Groups(['user:read', 'user:create', 'user:update','agent:createAccount', 'user:changeRole'])]
     private array $roles = [];
 
     #[ORM\Column(length: 180)]

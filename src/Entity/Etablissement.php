@@ -18,10 +18,11 @@ class Etablissement
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['events:read', 'events:create', 'events:update'])]
+    #[Groups(['events:read'])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
+    #[Groups(['events:read'])]
     #[ORM\OneToMany(mappedBy: 'etablissement', targetEntity: Events::class)]
     private Collection $events;
 

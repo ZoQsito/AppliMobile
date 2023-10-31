@@ -25,7 +25,6 @@ function CustomEditor({
   setSelectedOption,
   setIsLoading,
 }) {
-
   useEffect(() => {
     switch (props.edited.title) {
       case "MISSION":
@@ -49,7 +48,7 @@ function CustomEditor({
 
   return (
     <Card sx={{ width: "750px" }}>
-      <CardContent style={{ overflowY: "auto", maxHeight: "1000px" }}>
+      <CardContent style={{ overflowY: "auto" }}>
         <AppBar position="static">
           <Toolbar>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -121,16 +120,8 @@ const PlanningComponent = ({ props }) => {
   const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP, decodedToken } =
     useAuth();
 
+  const [events, setEvents] = useState([]);
 
-  const [events, setEvents] = useState([
-    {
-      event_id: "",
-      title: "",
-      start: "",
-      end: "",
-      admin_id: "",
-    },
-  ]);
   const [agents, setAgents] = useState([
     {
       admin_id: "",
@@ -151,7 +142,6 @@ const PlanningComponent = ({ props }) => {
     }
     agentsByService[agent.service.name].push(agent);
   });
-
 
   const services = Object.keys(agentsByService);
 
@@ -203,7 +193,6 @@ const PlanningComponent = ({ props }) => {
     }
   };
 
-
   useEffect(() => {
     const fetchDataAndDeleteOldEvents = async () => {
       if (isLoading) {
@@ -215,19 +204,15 @@ const PlanningComponent = ({ props }) => {
     fetchDataAndDeleteOldEvents();
 
     if (decodedToken?.custom_data?.service) {
-
       let selectedService;
       if (localStorage.getItem("selectedService")) {
-
         selectedService = localStorage.getItem("selectedService");
       } else if (decodedToken?.custom_data?.service) {
-
         selectedService = decodedToken?.custom_data?.service;
-        localStorage.setItem("selectedService", selectedService); 
+        localStorage.setItem("selectedService", selectedService);
       } else {
-
         selectedService = "ALL";
-        localStorage.setItem("selectedService", "ALL"); 
+        localStorage.setItem("selectedService", "ALL");
       }
 
       if (services.includes(selectedService)) {
@@ -251,6 +236,7 @@ const PlanningComponent = ({ props }) => {
       }
     }
   }, [isLoading]);
+
 
   const handleOptionChange = (event) => {
     setSelectedOption(event.target.value);
@@ -349,7 +335,7 @@ const PlanningComponent = ({ props }) => {
           Personne
         </Button>
       </div>
-      <div style={{ margin: "10px 0" }}>
+      <div style={{ margin: "10px" }} className="service">
         <span>Changer le service : </span>
         <Button
           variant={allPressed ? "contained" : "outlined"}
@@ -369,7 +355,7 @@ const PlanningComponent = ({ props }) => {
           </Button>
         ))}
       </div>
-      <div style={{ marginBottom: "100px" }}>
+      <div style={{ paddingBottom: "50px" }} className="calendar">
         <Scheduler
           ref={calendarRef}
           translations={{
@@ -396,13 +382,13 @@ const PlanningComponent = ({ props }) => {
                 : event.label === "ABSENCE"
                 ? "green"
                 : "defaultColor",
-            justification: event.justification,
+            justificatif: event.justificatif,
             etablissement: event.etablissement,
             autreEtablissement: event.autreEtablissement,
             objetReunion: event.objetReunion,
             ordreJour: event.ordreJour,
             objetMission: event.objetMission,
-            quantification: event.quantification,
+            quantification: event.Quantification,
           }))}
           resources={agents}
           draggable={false}
@@ -424,7 +410,7 @@ const PlanningComponent = ({ props }) => {
           customEditor={(props) =>
             props.edited === undefined ? (
               <Card sx={{ width: "750px" }}>
-                <CardContent style={{ overflowY: "auto", maxHeight: "500px" }}>
+                <CardContent style={{ overflowY: "auto" }}>
                   <AppBar position="static">
                     <Toolbar>
                       <Typography
@@ -509,7 +495,8 @@ const PlanningComponent = ({ props }) => {
                     <Typography variant="h6">Mission</Typography>
                     {event?.etablissement?.name && (
                       <Typography variant="body1">
-                        <strong>Etablissement:</strong> {event?.etablissement?.name}
+                        <strong>Etablissement:</strong>{" "}
+                        {event?.etablissement?.name}
                       </Typography>
                     )}
                     {event.autreEtablissement && (
@@ -539,7 +526,8 @@ const PlanningComponent = ({ props }) => {
                     <Typography variant="h6">Réunion</Typography>
                     {event?.etablissement?.name && (
                       <Typography variant="body1">
-                        <strong>Etablissement:</strong> {event?.etablissement?.name}
+                        <strong>Etablissement:</strong>{" "}
+                        {event?.etablissement?.name}
                       </Typography>
                     )}
                     {event.autreEtablissement && (
@@ -568,7 +556,8 @@ const PlanningComponent = ({ props }) => {
                   <div>
                     <Typography variant="h6">Absence</Typography>
                     <Typography variant="body1">
-                      <strong>Justification:</strong> {event?.justificatif?.name}
+                      <strong>Justification:</strong>{" "}
+                      {event?.justificatif?.name}
                     </Typography>
                     <Typography variant="body1">
                       <strong>Date Debut:</strong>{" "}

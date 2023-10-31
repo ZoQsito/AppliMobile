@@ -1,23 +1,26 @@
 import { Button } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import "../../styles/navbar.css";
 import { useAuth } from "../contexts/AuthContext";
 import AuthAPI from "../services/AuthAPI";
+import CustomizedSwitches from "./MUISwitch";
 
 export const Navbar = () => {
   const navigate = useNavigate();
 
-  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP, decodedToken } = useAuth();
+  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP, decodedToken} =
+    useAuth();
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     AuthAPI.logout();
     navigate("/login");
-  }; 
+  };
+
+
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light">
+    <nav className="navbar navbar-expand-lg navbar-light">
       <div className="container-fluid">
         <NavLink
           className="navbar-brand"
@@ -33,20 +36,23 @@ export const Navbar = () => {
                 Planning
               </NavLink>
             </li>
-            {isAdmin || isRESP ? (
+            {isAdmin === true || isRESP === true ? (
               <li className="nav-item">
                 <NavLink className="nav-link" to="/agents">
                   Gestion Agent
                 </NavLink>
               </li>
             ) : null}
-            {isAdmin && (
+            {isAdmin === true && (
               <li className="nav-item">
                 <NavLink className="nav-link" to="/users">
                   Gestion User
                 </NavLink>
               </li>
             )}
+          </ul>
+          <ul>
+          <CustomizedSwitches/>
           </ul>
           <ul className="navbar-nav ml-auto">
             {(isAuthenticated === false && (

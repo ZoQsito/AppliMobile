@@ -7,10 +7,8 @@ import Pagination from "../components/Pagination";
 import { useAuth } from "../contexts/AuthContext";
 import { Container, Typography, TextField, Button, Paper } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useContext } from "react";
-import ColorModeContext from "../services/ColorModeContext";
 
-const AgentsPage = () => {
+const TestPage = () => {
   const [agents, setAgents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -18,10 +16,6 @@ const AgentsPage = () => {
 
   const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP, decodedToken } =
     useAuth();
-
-  const colorMode = useContext(ColorModeContext);
-  const currentMode = colorMode.mode;
-
 
   const fetchAgents = async () => {
     try {
@@ -81,10 +75,7 @@ const AgentsPage = () => {
       headerName: "Nom",
       width: 200,
       renderCell: (params) => (
-        <Link
-          to={`/agent/${params.row.id}`}
-          style={currentMode === 'dark' ? { textDecoration: "none", color: "white" } : {textDecoration: "none", color:"black"}}
-        >
+        <Link to={`/agent/${params.row.id}`} style={{ textDecoration: "none" }}>
           {params.row.prenom} {params.row.nom}
         </Link>
       ),
@@ -95,7 +86,7 @@ const AgentsPage = () => {
       headerName: "Service",
       width: 150,
       renderCell: (params) => (
-        <Typography>{params.row.service.name}</Typography>
+        (<Typography>{params.row.service.name}</Typography>)
       ),
     },
     {
@@ -103,9 +94,7 @@ const AgentsPage = () => {
       headerName: "User_ID",
       width: 100,
       renderCell: (params) => (
-        <Typography>
-          {params.row.user ? parseInt(params.row.user.split("/").pop()) : ""}
-        </Typography>
+        (<Typography>{params.row.user ? parseInt(params.row.user.split("/").pop()) : ""}</Typography>)
       ),
     },
     {
@@ -134,14 +123,7 @@ const AgentsPage = () => {
           marginBottom: "1.5rem",
         }}
       >
-        <Typography
-          variant="h4"
-          sx={{
-            fontFamily: '"Lexend-SemiBold", sans-serif',
-          }}
-        >
-          Liste des Agents
-        </Typography>
+        <Typography variant="h4">Liste des Agents</Typography>
         <Link to="/agent/new" style={{ textDecoration: "none" }}>
           <Button variant="contained" color="success">
             Ajouter un Agent
@@ -181,4 +163,4 @@ const AgentsPage = () => {
   );
 };
 
-export default AgentsPage;
+export default TestPage;

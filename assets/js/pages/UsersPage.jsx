@@ -1,14 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Pagination from "../components/Pagination";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { DataGrid } from "@mui/x-data-grid";
 import usersAPI from "../services/usersAPI";
+import { Container, Typography, TextField, Button, Paper } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ColorModeContext from "../services/ColorModeContext";
 
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
   const itemsPerPage = 10;
+
+  const colorMode = useContext(ColorModeContext);
+  const currentMode = colorMode.mode;
 
   const fetchUsers = async () => {
     try {
@@ -54,66 +61,96 @@ const UsersPage = () => {
     itemsPerPage
   );
 
-  return (
-    <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h1>Liste des Utilisateurs</h1>
-        <Link to="/user/new" className="btn btn-primary">
-          Ajouter un Utilisateur
+  const columns = [
+    { field: "id", headerName: "Id", width: 70 },
+    {
+      field: "username",
+      headerName: "Username",
+      width: 200,
+      renderCell: (params) => (
+        <Link
+          to={`/user/${params.row.id}`}
+          style={
+            currentMode === "dark"
+              ? { textDecoration: "none", color: "white" }
+              : { textDecoration: "none", color: "black" }
+          }
+        >
+          {params.row.username}
         </Link>
-      </div>
+      ),
+    },
+    {
+      field: "roles[0]",
+      headerName: "Role",
+      width: 150,
+      renderCell: (params) => <Typography>{params.row.roles[0]}</Typography>,
+    },
+    {
+      field: "action",
+      headerName: "",
+      width: 100,
+      renderCell: (params) => (
+        <Button
+          variant="contained"
+          color="error"
+          onClick={() => handleDelete(params.row.id)}
+        >
+          <DeleteIcon sx={{ display: { xs: "none", md: "flex" } }} />
+        </Button>
+      ),
+    },
+  ];
 
-      <div className="form-group" style={{ paddingBottom: 20 }}>
-        <input
+  return (
+    <Container style={{ marginTop: "2rem" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "1.5rem",
+        }}
+      >
+        <Typography
+          variant="h4"
+          sx={{
+            fontFamily: '"Lexend-SemiBold", sans-serif',
+          }}
+        >
+          Liste des Utilisateurs
+        </Typography>
+      </div>
+      <Paper>
+        <TextField
           type="text"
+          label="Rechercher..."
           onChange={handleSearch}
           value={search}
-          className="form-control"
-          placeholder="Rechercher..."
+          fullWidth
+          style={{ marginBottom: "1rem" }}
         />
-      </div>
 
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>Id</th>
-            <th>Username</th>
-            <th>Role</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {paginatedUsers.map((user) => (
-            <tr key={user.id}>
-              <td>{user.id}</td>
-              <td>
-                <Link to={`/user/${user.id}`} style={{ textDecoration: "none" }}>
-                  {user.username}
-                </Link>
-              </td>
-              <td>{user.roles[0]}</td>
-              <td>
-                <button
-                  onClick={() => handleDelete(user.id)}
-                  className="btn btn-sm btn-danger"
-                >
-                  Supprimer
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        <div style={{ height: 400, width: "100%" }}>
+          <DataGrid
+            rows={paginatedUsers}
+            columns={columns}
+            pageSize={itemsPerPage}
+            page={currentPage - 1}
+            onPageChange={(page) => handlePageChange(page + 1)}
+          />
+        </div>
 
-      {itemsPerPage < filteredUsers.length && (
-        <Pagination
-          currentPage={currentPage}
-          itemsPerPage={itemsPerPage}
-          length={filteredUsers.length}
-          onPageChanged={handlePageChange}
-        />
-      )}
-    </div>
+        {itemsPerPage < filteredUsers.length && (
+          <Pagination
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            length={filteredUsers.length}
+            onPageChanged={handlePageChange}
+          />
+        )}
+      </Paper>
+    </Container>
   );
 };
 

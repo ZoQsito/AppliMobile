@@ -55,14 +55,13 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
     fetchData();
   }, []);
 
-  console.log(edited);
 
   const [eventDataConge, setEventDataConge] = useState({
     label: type,
     dateDebut: format(state.start.value, "yyyy-MM-dd HH:mm:ss"),
     dateFin: format(state.end.value, "yyyy-MM-dd HH:mm:ss"),
     agent: `/api/agents/${props.admin_id}`,
-    justification: "",
+    justificatif: "",
   });
 
   const [eventData, setEventData] = useState({
@@ -87,13 +86,12 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
       quantification: "",
       objetReunion: "",
       ordreJour: "",
-      justification: "",
     }));
     setEventDataConge((prevEventData) => ({
       ...prevEventData,
       label: type,
       agent: `/api/agents/${props.admin_id}`,
-      justification: "",
+      justificatif: "",
     }));
   }, [type]);
 
@@ -102,25 +100,48 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
   useEffect(() => {
     if (isEditMode) {
       if (type === edited.title) {
-        setEventData({
-          etablissement: edited.etablissement["@id"],
-          autreEtablissement: edited.autreEtablissement,
-          label: edited.title,
-          dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
-          dateFin: format(edited.end, "yyyy-MM-dd HH:mm:ss"),
-          agent: `/api/agents/${edited.admin_id}`,
-          objetMission: edited.objetMission,
-          quantification: edited.quantification,
-          objetReunion: edited.objetReunion,
-          ordreJour: edited.ordreJour,
-        });
-        setEventDataConge({
-          label: edited.title,
-          dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
-          dateFin: format(edited.end, "yyyy-MM-dd HH:mm:ss"),
-          agent: `/api/agents/${edited.admin_id}`,
-          justification: edited.justificatif["@id"],
-        });
+        if (type === "ABSENCE") {
+          setEventData({
+            etablissement: edited.etablissement,
+            autreEtablissement: edited.autreEtablissement,
+            label: edited.title,
+            dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
+            dateFin: format(edited.end, "yyyy-MM-dd HH:mm:ss"),
+            agent: `/api/agents/${edited.admin_id}`,
+            objetMission: edited.objetMission,
+            quantification: edited.quantification,
+            objetReunion: edited.objetReunion,
+            ordreJour: edited.ordreJour,
+          });
+          setEventDataConge({
+            label: edited.title,
+            dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
+            dateFin: format(edited.end, "yyyy-MM-dd HH:mm:ss"),
+            agent: `/api/agents/${edited.admin_id}`,
+            justificatif: edited.justificatif["@id"],
+          });
+        }else{
+          setEventData({
+            etablissement: edited.etablissement["@id"],
+            autreEtablissement: edited.autreEtablissement,
+            label: edited.title,
+            dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
+            dateFin: format(edited.end, "yyyy-MM-dd HH:mm:ss"),
+            agent: `/api/agents/${edited.admin_id}`,
+            objetMission: edited.objetMission,
+            quantification: edited.quantification,
+            objetReunion: edited.objetReunion,
+            ordreJour: edited.ordreJour,
+          });
+          setEventDataConge({
+            label: edited.title,
+            dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
+            dateFin: format(edited.end, "yyyy-MM-dd HH:mm:ss"),
+            agent: `/api/agents/${edited.admin_id}`,
+            justificatif: edited.justificatif,
+          });
+        }
+        
       } else {
         setEventData({
           etablissement: "",
@@ -139,7 +160,7 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
           dateDebut: format(edited.start, "yyyy-MM-dd HH:mm:ss"),
           dateFin: format(edited.end, "yyyy-MM-dd HH:mm:ss"),
           agent: `/api/agents/${edited.admin_id}`,
-          justification: "",
+          justificatif: "",
         });
       }
     }
@@ -159,7 +180,7 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
 
     setEventDataConge((prevEventData) => ({
       ...prevEventData,
-      justification: selectedValue,
+      justificatif: selectedValue,
     }));
   };
 
@@ -282,9 +303,6 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
     }
   };
 
-  console.log(eventData);
-  console.log(eventDataConge);
-
   const renderEventSpecificFields = () => {
     if (type === "MISSION") {
       return (
@@ -386,8 +404,8 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
           <FormControl fullWidth margin="normal">
             <InputLabel>Justificatif</InputLabel>
             <Select
-              value={eventDataConge.justification}
-              name="justification"
+              value={eventDataConge.justificatif}
+              name="justificatif"
               onChange={handleSelectionChangeConge}
             >
               <MenuItem value="">Sélectionnez un justificatif</MenuItem>

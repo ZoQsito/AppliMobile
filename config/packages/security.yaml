@@ -38,9 +38,8 @@ security:
         ROLE_ADMIN: [ROLE_RESP]
 
   access_control:
-    # Contrôles d'accès spécifiques
-    # - { path: ^/api/login, roles: PUBLIC_ACCESS }
-    # - { path: ^/, roles: IS_AUTHENTICATED_ }
+     - { path: ^/api/login, roles: PUBLIC_ACCESS }
+
 
 when@test:
   security:

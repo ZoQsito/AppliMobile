@@ -3,17 +3,27 @@ import Field from "../components/Field";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import AgentsAPI from "../services/AgentsAPI";
-import Button from "@mui/material/Button";
-import Modal from "@mui/material/Modal";
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
+import {
+  Box,
+  FormControl,
+  Modal,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Button,
+  FormHelperText,
+} from "@mui/material";
 import usersAPI from "../services/usersAPI";
+import ServiceAPI from "../services/ServiceAPI";
 
 const AgentPage = ({}) => {
   const { id = "new" } = useParams();
   const navigate = useNavigate();
+
   const [editing, setEditing] = useState(false);
   const [agentID, setAgentID] = useState();
+  const [services, setServices] = useState([]);
 
   const [agentUpdate, setAgentUpdate] = useState({
     nom: "",
@@ -23,7 +33,6 @@ const AgentPage = ({}) => {
     color: "",
   });
 
-
   const [agent, setAgent] = useState({
     nom: "",
     prenom: "",
@@ -32,29 +41,53 @@ const AgentPage = ({}) => {
     color: "",
   });
 
-  const [errors, setErrors] = useState({
+  const [creationErrors, setCreationErrors] = useState({
     nom: "",
     prenom: "",
     telephone: "",
     service: "",
+    color: "",
+  });
+
+  const [updateErrors, setUpdateErrors] = useState({
+    nom: "",
+    prenom: "",
+    telephone: "",
+    service: "",
+    color: "",
   });
 
   const [User, setUser] = useState({
     username: "",
     email: "",
-    role: [],
+    roles: [],
   });
-  User.agent=`/api/agents/${agentID}`
+  User.agent = `/api/agents/${agentID}`;
 
   const fetchAgent = async (id) => {
     try {
       const { prenom, nom, telephone, service, color } = await AgentsAPI.find(
         id
       );
-      setAgentID(id)
-      setAgentUpdate({ prenom, nom, telephone, service, color });
+      setAgentID(id);
+      setAgentUpdate({
+        prenom,
+        nom,
+        telephone,
+        service: service["@id"],
+        color,
+      });
     } catch (error) {
       toast.error("L'agent n'a pas pu être chargé");
+    }
+  };
+
+  const fetchService = async (id) => {
+    try {
+      const data = await ServiceAPI.findAll();
+      setServices(data);
+    } catch (error) {
+      toast.error("Les Services n'ont pas été chargés");
     }
   };
 
@@ -63,6 +96,7 @@ const AgentPage = ({}) => {
       setEditing(true);
       fetchAgent(id);
     }
+    fetchService();
   }, [id]);
 
   const handleChange = ({ currentTarget }) => {
@@ -75,23 +109,73 @@ const AgentPage = ({}) => {
     setAgentUpdate({ ...agentUpdate, [name]: value });
   };
 
+  const phoneRegex = /^\d{10}$/;
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      setErrors({});
+      if (!editing) {
+        const validationErrors = {};
+        if (!agent.nom) {
+          validationErrors.nom = "Le nom est requis";
+        }
+        if (!agent.prenom) {
+          validationErrors.prenom = "Le prénom est requis";
+        }
+        if (!agent.telephone) {
+          validationErrors.telephone = "Le numéro de téléphone est requis";
+        } else if (!phoneRegex.test(agent.telephone)) {
+          validationErrors.telephone =
+            "Le numéro de téléphone doit comporter 10 chiffres et ne doit contenir que des chiffres.";
+        }
+        if (!agent.service) {
+          validationErrors.service = "Le service est requis";
+        }
+        if (!agent.color) {
+          validationErrors.color = "La couleur est requise";
+        }
 
-      if (editing) {
-        await AgentsAPI.update(id, agent);
-        toast.success("L'agent a bien été modifié");
-        navigate("/agents");
-      } else {
+        if (Object.keys(validationErrors).length > 0) {
+          setCreationErrors(validationErrors);
+          return;
+        }
+
         await AgentsAPI.create(agent);
-        toast.success("L'agent a bien été crée");
-        navigate("/agents");
+        toast.success("L'agent a bien été créé");
+      } else {
+        const validationErrors = {};
+        if (!agentUpdate.nom) {
+          validationErrors.nom = "Le nom est requis";
+        }
+        if (!agentUpdate.prenom) {
+          validationErrors.prenom = "Le prénom est requis";
+        }
+        if (!agentUpdate.telephone) {
+          validationErrors.telephone = "Le numéro de téléphone est requis";
+        } else if (!phoneRegex.test(agentUpdate.telephone)) {
+          validationErrors.telephone =
+            "Le numéro de téléphone doit comporter 10 chiffres et ne doit contenir que des chiffres.";
+        }
+        if (!agentUpdate.service) {
+          validationErrors.service = "Le service est requis";
+        }
+        if (!agentUpdate.color) {
+          validationErrors.color = "La couleur est requise";
+        }
+
+        if (Object.keys(validationErrors).length > 0) {
+          setUpdateErrors(validationErrors);
+          return;
+        }
+
+        await AgentsAPI.update(id, agentUpdate);
+        toast.success("L'agent a bien été modifié");
       }
+
+      navigate("/agents");
     } catch ({ error }) {
-      toast.error("L'agent n'a pas pu être créer");
+      toast.error("L'agent n'a pas pu être créé/modifié");
     }
   };
 
@@ -100,7 +184,7 @@ const AgentPage = ({}) => {
   const handleChangeModal = ({ currentTarget }) => {
     const { name, value } = currentTarget;
 
-    if (name === "role") {
+    if (name === "roles") {
       const rolesArray = value.split(",").map((role) => role.trim());
       setUser({ ...User, [name]: rolesArray });
     } else {
@@ -119,18 +203,35 @@ const AgentPage = ({}) => {
   const handleConfirm = async (event) => {
     event.preventDefault();
 
-    if (User.role.length === 0) {
-      User.role = [];
+    if (User.roles.length === 0) {
+      User.roles = [];
     }
 
-    await usersAPI.registerAgentUser(agentID ,User);
-    
+    await usersAPI.registerAgentUser(agentID, User);
+
     toast.success("Le user a bien été créé");
-    
-    
+
     navigate("/users");
 
     handleClose();
+  };
+
+  const handleSelectionChange = (event) => {
+    const selectedValue = event.target.value;
+
+    setAgent((prevAgent) => ({
+      ...prevAgent,
+      service: selectedValue,
+    }));
+  };
+
+  const handleSelectionChangeUpdate = (event) => {
+    const selectedValue = event.target.value;
+
+    setAgentUpdate((prevAgent) => ({
+      ...prevAgent,
+      service: selectedValue,
+    }));
   };
 
   const modalBody = (
@@ -164,11 +265,11 @@ const AgentPage = ({}) => {
         sx={{ mt: 2 }}
       />
       <TextField
-        name="role"
+        name="roles"
         label="Rôle"
         variant="filled"
         fullWidth
-        value={User.role}
+        value={User.roles}
         onChange={handleChangeModal}
         sx={{ mt: 2 }}
       />
@@ -179,146 +280,128 @@ const AgentPage = ({}) => {
   );
 
   return (
-    <>
-      {!editing ? (
-        <>
-          <h1>Ajout d'un Agent</h1>
-          <form onSubmit={handleSubmit}>
-            <Field
-              name="nom"
-              label="Nom de famille"
-              placeholder="Nom de famille de l'agent"
-              value={agent.nom}
-              onChange={handleChange}
-              error={errors.nom}
-            />
-            &nbsp;
-            <Field
-              name="prenom"
-              label="Prénom"
-              placeholder="Prénom de l'agent"
-              value={agent.prenom}
-              onChange={handleChange}
-              error={errors.prenom}
-            />
-            &nbsp;
-            <Field
-              name="telephone"
-              label="Numero Téléphone"
-              placeholder="Numero Téléphone de l'agent"
-              value={agent.telephone}
-              onChange={handleChange}
-              error={errors.telephone}
-            />
-            &nbsp;
-            <Field
-              name="service"
-              label="Service"
-              placeholder="Service de l'agent"
-              value={agent.service}
-              onChange={handleChange}
-              error={errors.service}
-            />
-            &nbsp;
-            <Field
-              name="color"
-              label="Couleur de l'agent"
-              placeholder="#FFFFFF"
-              value={agent.color}
-              onChange={handleChange}
-            />
-            &nbsp;
-            <div className="form-group">
-              <Link
-                to="/agents"
-                className="btn btn-success"
-                onClick={handleSubmit}
-              >
-                Enregistrer
-              </Link>
-              <Link to="/agents" className="btn btn-link">
-                Retour à la liste
-              </Link>
-            </div>
-          </form>
-        </>
-      ) : (
-        <>
-          <h1>Modification d'un Agent</h1>
-          <form onSubmit={handleSubmit}>
-            <Field
-              name="nom"
-              label="Nom de famille"
-              placeholder="Nom de famille de l'agent"
-              value={agentUpdate.nom}
-              onChange={handleChangeUpdate}
-              error={errors.nom}
-            />
-            &nbsp;
-            <Field
-              name="prenom"
-              label="Prénom"
-              placeholder="Prénom de l'agent"
-              value={agentUpdate.prenom}
-              onChange={handleChangeUpdate}
-              error={errors.prenom}
-            />
-            &nbsp;
-            <Field
-              name="telephone"
-              label="Numero Téléphone"
-              placeholder="Numero Téléphone de l'agent"
-              value={agentUpdate.telephone}
-              onChange={handleChangeUpdate}
-              error={errors.telephone}
-            />
-            &nbsp;
-            <Field
-              name="service"
-              label="Service"
-              placeholder="Service de l'agent"
-              value={agentUpdate.service}
-              onChange={handleChangeUpdate}
-              error={errors.service}
-            />
-            &nbsp;
-            <Field
-              name="color"
-              label="Couleur de l'agent"
-              placeholder="#FFFFFF"
-              value={agentUpdate.color}
-              onChange={handleChangeUpdate}
-            />
-            &nbsp;
-            <div>
-              <Button variant="contained" onClick={handleOpen}>
-                Créer User
-              </Button>
-              <Modal
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-              >
-                {modalBody}
-              </Modal>
-            </div>
-            <div className="form-group" style={{ paddingTop: 20 }}>
-              <Button
-                variant="contained"
-                color="success"
-                onClick={handleSubmit}
-              >
-                Enregistrer
-              </Button>
-              <Link to="/agents" className="btn btn-link">
-                Retour à la liste
-              </Link>
-            </div>
-          </form>
-        </>
-      )}
-    </>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "20px",
+      }}
+    >
+      <h1>{editing ? "Modification de l'Agent" : "Ajout d'un Agent"}</h1>
+      <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+        <TextField
+          name="nom"
+          label="Nom de famille"
+          placeholder="Nom de famille de l'agent"
+          value={editing ? agentUpdate.nom : agent.nom}
+          onChange={editing ? handleChangeUpdate : handleChange}
+          error={editing ? !!updateErrors.nom : !!creationErrors.nom}
+          fullWidth
+          margin="normal"
+        />
+        <FormHelperText error>
+          {editing ? updateErrors.nom : creationErrors.nom}
+        </FormHelperText>{" "}
+        <TextField
+          name="prenom"
+          label="Prénom"
+          placeholder="Prénom de l'agent"
+          value={editing ? agentUpdate.prenom : agent.prenom}
+          onChange={editing ? handleChangeUpdate : handleChange}
+          error={editing ? !!updateErrors.prenom : !!creationErrors.prenom}
+          fullWidth
+          margin="normal"
+        />
+        <FormHelperText error>
+          {editing ? updateErrors.prenom : creationErrors.prenom}
+        </FormHelperText>{" "}
+        <TextField
+          name="telephone"
+          label="Numero Téléphone"
+          placeholder="Numero Téléphone de l'agent"
+          value={editing ? agentUpdate.telephone : agent.telephone}
+          onChange={editing ? handleChangeUpdate : handleChange}
+          error={
+            editing ? !!updateErrors.telephone : !!creationErrors.telephone
+          }
+          fullWidth
+          margin="normal"
+        />
+        <FormHelperText error>
+          {editing ? updateErrors.telephone : creationErrors.telephone}
+        </FormHelperText>{" "}
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Service</InputLabel>
+          <Select
+            name="service"
+            value={editing ? agentUpdate.service : agent.service}
+            onChange={
+              editing ? handleSelectionChangeUpdate : handleSelectionChange
+            }
+          >
+            <MenuItem value="">Sélectionnez un justificatif</MenuItem>
+            {services.map((service, index) => (
+              <MenuItem key={index} value={service["@id"]}>
+                {service.name}
+              </MenuItem>
+            ))}
+          </Select>
+          {editing ? (
+            <FormHelperText error={!!updateErrors.service}>
+              {updateErrors.service}
+            </FormHelperText>
+          ) : (
+            <FormHelperText error={!!creationErrors.service}>
+              {creationErrors.service}
+            </FormHelperText>
+          )}
+        </FormControl>
+        <TextField
+          name="color"
+          label="Couleur de l'agent"
+          placeholder="#FFFFFF"
+          value={editing ? agentUpdate.color : agent.color}
+          onChange={editing ? handleChangeUpdate : handleChange}
+          error={editing ? !!updateErrors.color : !!creationErrors.color}
+          fullWidth
+          margin="normal"
+        />
+        <FormHelperText error>
+          {editing ? updateErrors.color : creationErrors.color}
+        </FormHelperText>{" "}
+        {editing && (
+          <Box sx={{ marginTop: 2 }}>
+            <Button variant="contained" onClick={handleOpen}>
+              Créer User
+            </Button>
+            <Modal
+              open={open}
+              onClose={handleClose}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+            >
+              {modalBody}
+            </Modal>
+          </Box>
+        )}
+        <Box sx={{ paddingTop: 2 }}>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleSubmit}
+            style={{ marginRight: 20 }}
+          >
+            Enregistrer
+          </Button>
+          <Link to="/agents" className="btn btn-link">
+            <Button variant="contained" color="primary">
+              Retour a la liste
+            </Button>
+          </Link>
+        </Box>
+      </form>
+    </Box>
   );
 };
 

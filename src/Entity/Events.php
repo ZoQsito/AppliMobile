@@ -11,59 +11,58 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: EventsRepository::class)]
 #[ApiResource(
     normalizationContext: ['groups' => ['events:read']],
-    // denormalizationContext: ['groups' => ['events:create', 'events:update'],],
 )]
 class Events
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['events:read', 'events:create', 'events:update'])]
+    #[Groups(['events:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['events:read', 'events:create', 'events:update'])]
+    #[Groups(['events:read'])]
     private ?\DateTimeInterface $date_debut = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['events:read', 'events:create', 'events:update'])]
+    #[Groups(['events:read'])]
     private ?\DateTimeInterface $date_fin = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['events:read', 'events:create', 'events:update'])]
+    #[Groups(['events:read'])]
     private ?string $label = null;
 
 
     #[ORM\ManyToOne(targetEntity: Agent::class)]
     #[ORM\JoinColumn(name: "agent_id", referencedColumnName: "id")]
-    #[Groups(['events:read', 'events:create', 'events:update'])]
+    #[Groups(['events:read'])]
     private ?Agent $agent = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['events:read', 'events:create', 'events:update'])]
+    #[Groups(['events:read'])]
     private ?string $autreEtablissement = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['events:read', 'events:create', 'events:update'])]
+    #[Groups(['events:read'])]
     private ?string $objetMission = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['events:read', 'events:create', 'events:update'])]
+    #[Groups(['events:read'])]
     private ?string $Quantification = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['events:read', 'events:create', 'events:update'])]
+    #[Groups(['events:read'])]
     private ?string $objetReunion = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['events:read', 'events:create', 'events:update'])]
+    #[Groups(['events:read'])]
     private ?string $ordreJour = null;
 
-    #[Groups(['events:read', 'events:create', 'events:update'])]
+    #[Groups(['events:read'])]
     #[ORM\ManyToOne(inversedBy: 'events')]
     private ?Justificatif $justificatif = null;
 
-    // #[Groups(['events:read', 'events:create', 'events:update'])]
+    #[Groups(['events:read'])]
     #[ORM\ManyToOne(inversedBy: 'events')]
     private ?Etablissement $etablissement = null;
 
@@ -184,18 +183,6 @@ class Events
         return $this;
     }
 
-    public function getJustificatif(): ?Justificatif
-    {
-        return $this->justificatif;
-    }
-
-    public function setJustificatif(?Justificatif $justificatif): static
-    {
-        $this->justificatif = $justificatif;
-
-        return $this;
-    }
-
     public function getEtablissement(): ?Etablissement
     {
         return $this->etablissement;
@@ -204,6 +191,18 @@ class Events
     public function setEtablissement(?Etablissement $etablissement): static
     {
         $this->etablissement = $etablissement;
+
+        return $this;
+    }
+
+    public function getJustificatif(): ?Justificatif
+    {
+        return $this->justificatif;
+    }
+
+    public function setJustificatif(?Justificatif $justificatif): static
+    {
+        $this->justificatif = $justificatif;
 
         return $this;
     }

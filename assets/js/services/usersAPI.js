@@ -37,11 +37,17 @@ function update(id, user){
     .put("/api/users/" + id , user);
 }
 
+function roleUpdate(id, roleUpdate){
+    return fetcher
+    .patch(`/api/user/${id}/role` , roleUpdate)
+}
+
 export default{
     register,
     findAll,
     deleteUsers,
     find,
     update,
-    registerAgentUser
+    registerAgentUser,
+    roleUpdate
 }

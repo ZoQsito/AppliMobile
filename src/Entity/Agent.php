@@ -37,7 +37,7 @@ class Agent
     private ?string $prenom = null;
 
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255)]
     #[Groups(['events:read', 'user:read', 'agent:read'])]
     private ?string $telephone = null;
 

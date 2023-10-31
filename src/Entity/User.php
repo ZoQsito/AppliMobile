@@ -23,8 +23,6 @@ use Symfony\Component\Validator\Constraints as Assert;
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:create', 'user:update']],
 )]
-#[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')]
 #[Put(security: "is_granted('ROLE_ADMIN')", processor: UserPasswordHasher::class)]
 #[Delete(security: "is_granted('ROLE_ADMIN')")]
 #[Post(security: "is_granted('ROLE_ADMIN')", processor: UserPasswordHasher::class, validationContext: ['groups' => ['Default', 'user:create']])]
@@ -43,13 +41,13 @@ use Symfony\Component\Validator\Constraints as Assert;
     processor: CreateUserStateProcessor::class,
     read:false
 )]
-#[Patch(
+#[Put(
     security: "is_granted('ROLE_ADMIN')",
     uriTemplate: '/users/{id}/role',
-   
     denormalizationContext: ['groups' => ['user:changeRole']],
-    read:false
 )]
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[Groups(['user:read'])]

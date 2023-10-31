@@ -39,7 +39,7 @@ function update(id, user){
 
 function roleUpdate(id, roleUpdate){
     return fetcher
-    .patch(`/api/user/${id}/role` , roleUpdate)
+    .put(`/api/users/${id}/role` , roleUpdate)
 }
 
 export default{

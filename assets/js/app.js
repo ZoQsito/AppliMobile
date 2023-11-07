@@ -85,6 +85,8 @@ const App = () => {
         isAdmin,
         isRESP,
         decodedToken,
+        setIsAdmin,
+        setIsRESP,
       }}
     >
         <ToggleColorModeProvider>

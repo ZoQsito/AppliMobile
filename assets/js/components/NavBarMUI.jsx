@@ -11,16 +11,19 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import CustomizedSwitches from "./MUISwitch";
 import ColorModeContext from "../services/ColorModeContext";
 import { useContext } from "react";
+import Autocomplete from '@mui/material/Autocomplete';
 
 function ResponsiveAppBar() {
   const navigate = useNavigate();
 
-  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP } = useAuth();
+  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP, setIsAdmin, setIsRESP } = useAuth();
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     AuthAPI.logout();
     navigate("/login");
+    setIsAdmin(false)
+    setIsRESP(false)
   };
 
   const colorMode = useContext(ColorModeContext);
@@ -45,32 +48,56 @@ function ResponsiveAppBar() {
               />
             </NavLink>
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-              {isAuthenticated ? (
-                isAdmin === true ? (
-                  <>
+              {isAuthenticated && (
+                <>
+                  {isAdmin && (
+                    <>
+                      <Link
+                        variant="contained"
+                        color="inherit"
+                        style={{
+                          textDecoration: "none",
+                          color: currentMode === "dark" ? "white" : "black",
+                          marginRight: "10px",
+                        }}
+                        to={"/agents"}
+                      >
+                        Gestion Agent
+                      </Link>
+                      <Link
+                        variant="contained"
+                        color="inherit"
+                        style={{
+                          textDecoration: "none",
+                          color: currentMode === "dark" ? "white" : "black",
+                        }}
+                        to={"/users"}
+                      >
+                        Gestion User
+                      </Link>
+                    </>
+                  )}
+                  {isRESP && (
                     <Link
                       variant="contained"
                       color="inherit"
-                      style={currentMode === 'dark' ? { textDecoration: "none", color: "white", marginRight: "10px" } : {textDecoration: "none", color:"black", marginRight: "10px"}}
+                      style={{
+                        textDecoration: "none",
+                        color: currentMode === "dark" ? "white" : "black",
+                        marginRight: "10px",
+                      }}
                       to={"/agents"}
                     >
                       Gestion Agent
                     </Link>
-                    <Link
-                      variant="contained"
-                      color="inherit"
-                      style={currentMode === 'dark' ? { textDecoration: "none", color: "white" } : {textDecoration: "none", color:"black"}}
-                      to={"/users"}
-                    >
-                      Gestion User
-                    </Link>
-                  </>
-                ) : null
-              ) : null}
+                  )}
+                </>
+              )}
             </Box>
             <Box>
               <CustomizedSwitches />
             </Box>
+            
             <Box sx={{ flexGrow: 0 }}>
               {(isAuthenticated === false && (
                 <Button

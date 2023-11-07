@@ -7,58 +7,61 @@ import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import usersAPI from "../services/usersAPI";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import RoleAPI from "../services/RoleAPI";
 
 const UserPage = ({ props }) => {
   const { id = "new" } = useParams();
   const navigate = useNavigate();
+  const [role, setRole] = useState([]);
 
-  const [userRole, setUserRole] = useState({
-    roles: [],
-  });
+  const [userRole, setUserRole] = useState("");
+
 
   const fetchUsers = async (id) => {
     try {
-      const {roles} = await usersAPI.find(id);
-      setUserRole({ roles });
+      const { role } = await usersAPI.find(id);
+      setUserRole( role["@id"] );
     } catch (error) {
       toast.error("Le user n'a pas pu être chargé");
     }
   };
 
-  
+  const fetchRole = async () => {
+    try {
+      const data = await RoleAPI.findAll();
+      setRole(data);
+    } catch (error) {
+      toast.error("Les Roles n'ont pas été chargés");
+    }
+  };
 
   useEffect(() => {
     if (id !== "new") {
       fetchUsers(id);
+      fetchRole();
     }
   }, [id]);
-
-  const handleChangeModif = ({ currentTarget }) => {
-    const { name, value } = currentTarget;
-
-    if (name === "roles") {
-      const rolesArray = value.split(",").map((role) => role.trim());
-      setUserRole({ ...userRole, [name]: rolesArray });
-    } else {
-      setUserRole({ ...userRole, [name]: value });
-    }
-  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (userRole.roles.length === 0) {
-      userRole.roles = [];
-    }
-
     try {
-      await usersAPI.roleUpdate(id, userRole);
+      await usersAPI.roleUpdate(id, {role:userRole});
       toast.success("Le role du user a bien été modifié");
       navigate("/users");
     } catch ({ error }) {
       toast.error("Le user n'a pas pu être créé");
     }
   };
+
+  const handleSelectionChange = (event) => {
+    const selectedValue = event.target.value;
+
+    setUserRole(selectedValue)
+
+  };
+
 
   return (
     <>
@@ -69,16 +72,20 @@ const UserPage = ({ props }) => {
               Modification du rôle du User
             </Typography>
             <form onSubmit={handleSubmit}>
-              <TextField
-                name="roles"
-                label="Rôle"
-                placeholder="Rôle du User"
-                fullWidth
-                value={userRole.roles}
-                onChange={handleChangeModif}
-                variant="outlined"
-                margin="normal"
-              />
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Roles</InputLabel>
+                <Select
+                  value={userRole}
+                  onChange={handleSelectionChange}
+                >
+                  <MenuItem value="">Sélectionnez un role</MenuItem>
+                  {role.map((role, index) => (
+                    <MenuItem key={index} value={role['@id']}>
+                      {role.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <Button type="submit" variant="contained" color="primary">
                   Enregistrer

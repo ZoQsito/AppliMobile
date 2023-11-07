@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20231017081737 extends AbstractMigration
+final class Version20231106084311 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -21,11 +21,10 @@ final class Version20231017081737 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('DROP SEQUENCE messenger_messages_id_seq CASCADE');
+        $this->addSql('DROP SEQUENCE roles_id_seq CASCADE');
         $this->addSql('DROP TABLE messenger_messages');
-        $this->addSql('ALTER TABLE agent ADD service_id INT NOT NULL');
-        $this->addSql('ALTER TABLE agent DROP service');
-        $this->addSql('ALTER TABLE agent ADD CONSTRAINT FK_268B9C9DED5CA9E6 FOREIGN KEY (service_id) REFERENCES service (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
-        $this->addSql('CREATE INDEX IDX_268B9C9DED5CA9E6 ON agent (service_id)');
+        $this->addSql('DROP TABLE roles');
+        $this->addSql('ALTER TABLE "user" ADD role VARCHAR(255) NOT NULL');
     }
 
     public function down(Schema $schema): void
@@ -33,13 +32,12 @@ final class Version20231017081737 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE SCHEMA public');
         $this->addSql('CREATE SEQUENCE messenger_messages_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
+        $this->addSql('CREATE SEQUENCE roles_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE TABLE messenger_messages (id BIGSERIAL NOT NULL, body TEXT NOT NULL, headers TEXT NOT NULL, queue_name VARCHAR(190) NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, available_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, delivered_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX idx_75ea56e016ba31db ON messenger_messages (delivered_at)');
         $this->addSql('CREATE INDEX idx_75ea56e0e3bd61ce ON messenger_messages (available_at)');
         $this->addSql('CREATE INDEX idx_75ea56e0fb7336f0 ON messenger_messages (queue_name)');
-        $this->addSql('ALTER TABLE agent DROP CONSTRAINT FK_268B9C9DED5CA9E6');
-        $this->addSql('DROP INDEX IDX_268B9C9DED5CA9E6');
-        $this->addSql('ALTER TABLE agent ADD service VARCHAR(255) NOT NULL');
-        $this->addSql('ALTER TABLE agent DROP service_id');
+        $this->addSql('CREATE TABLE roles (id INT NOT NULL, name VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('ALTER TABLE "user" DROP role');
     }
 }

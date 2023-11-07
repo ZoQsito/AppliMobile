@@ -11,7 +11,6 @@ use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
-use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use App\State\CreateUserStateProcessor;
@@ -65,9 +64,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:create', 'user:update'])]
     private ?string $plainPassword = null;
 
-    #[ORM\Column]
-    #[Groups(['user:read', 'user:create', 'user:update','agent:createAccount', 'user:changeRole'])]
-    private array $roles = [];
+
 
     #[ORM\Column(length: 180)]
     #[Groups(['user:read', 'user:create', 'user:update','agent:createAccount'])]
@@ -78,11 +75,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy:'user',targetEntity: Agent::class)]
     private ?Agent $agent = null;
 
+    #[ORM\ManyToOne(inversedBy: 'users')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['user:read', 'user:create', 'user:update','agent:createAccount', 'user:changeRole'])]
+    private ?Role $role = null;
+
     /**
      * @var string The hashed password
      */
     #[ORM\Column(nullable: true)]
     private ?string $password = null;
+
+
 
     public function getId(): ?int
     {
@@ -121,22 +125,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->plainPassword = $plainPassword;
         return $this;
     }
+     public function getRole() : ?Role {
+       return $this->role; 
+     }
 
     /**
      * @see UserInterface
      */
     public function getRoles(): array
     {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
+        return [$this->role->getName()];
     }
 
-    public function setRoles(array $roles): static
+    public function setRole(?Role $role): static
     {
-        $this->roles = $roles;
+        $this->role = $role;
 
         return $this;
     }
@@ -197,4 +200,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+
 }

@@ -7,6 +7,7 @@ import usersAPI from "../services/usersAPI";
 import { Container, Typography, TextField, Button, Paper } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ColorModeContext from "../services/ColorModeContext";
+import RoleAPI from "../services/RoleAPI";
 
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
@@ -29,6 +30,7 @@ const UsersPage = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
+
 
   const handleDelete = async (id) => {
     const originalUsers = [...users];
@@ -81,10 +83,10 @@ const UsersPage = () => {
       ),
     },
     {
-      field: "roles[0]",
+      field: "role",
       headerName: "Role",
       width: 150,
-      renderCell: (params) => <Typography>{params.row.roles[0]}</Typography>,
+      renderCell: (params) => <Typography>{params.row.role.name}</Typography>,
     },
     {
       field: "action",

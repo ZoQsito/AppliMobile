@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import usersAPI from "../services/usersAPI";
 import ServiceAPI from "../services/ServiceAPI";
+import RoleAPI from "../services/RoleAPI";
 
 const AgentPage = ({}) => {
   const { id = "new" } = useParams();
@@ -31,7 +32,7 @@ const AgentPage = ({}) => {
     telephone: "",
     service: "",
     color: "",
-    user:"",
+    user: "",
   });
 
   const [agent, setAgent] = useState({
@@ -61,15 +62,16 @@ const AgentPage = ({}) => {
   const [User, setUser] = useState({
     username: "",
     email: "",
-    roles: [],
+    role: "",
   });
   User.agent = `/api/agents/${agentID}`;
 
+  const [role, setRole] = useState([]);
+
   const fetchAgent = async (id) => {
     try {
-      const { prenom, nom, telephone, service, color, user } = await AgentsAPI.find(
-        id
-      );
+      const { prenom, nom, telephone, service, color, user } =
+        await AgentsAPI.find(id);
       setAgentID(id);
       setAgentUpdate({
         prenom,
@@ -93,14 +95,25 @@ const AgentPage = ({}) => {
     }
   };
 
+  const fetchRole = async () => {
+    try {
+      const data = await RoleAPI.findAll();
+      setRole(data);
+    } catch (error) {
+      toast.error("Les Roles n'ont pas été chargés");
+    }
+  };
 
   useEffect(() => {
     if (id !== "new") {
       setEditing(true);
       fetchAgent(id);
+      fetchRole();
     }
     fetchService();
   }, [id]);
+
+  console.log(role)
 
   const handleChange = ({ currentTarget }) => {
     const { name, value } = currentTarget;
@@ -206,8 +219,8 @@ const AgentPage = ({}) => {
   const handleConfirm = async (event) => {
     event.preventDefault();
 
-    if (User.roles.length === 0) {
-      User.roles = [];
+    if (User.role.length === 0) {
+      User.role = [];
     }
 
     await usersAPI.registerAgentUser(agentID, User);
@@ -234,6 +247,15 @@ const AgentPage = ({}) => {
     setAgentUpdate((prevAgent) => ({
       ...prevAgent,
       service: selectedValue,
+    }));
+  };
+
+  const handleSelectionChangeRole = (event) => {
+    const selectedValue = event.target.value;
+
+    setUser((prevUser) => ({
+      ...prevUser,
+      role: selectedValue,
     }));
   };
 
@@ -267,15 +289,21 @@ const AgentPage = ({}) => {
         onChange={handleChangeModal}
         sx={{ mt: 2 }}
       />
-      <TextField
-        name="roles"
-        label="Rôle"
-        variant="filled"
-        fullWidth
-        value={User.roles}
-        onChange={handleChangeModal}
-        sx={{ mt: 2 }}
-      />
+      <FormControl fullWidth margin="normal">
+        <InputLabel>Roles</InputLabel>
+        <Select
+          name="role"
+          value={User.role}
+          onChange={handleSelectionChangeRole}
+        >
+          <MenuItem value="">Sélectionnez un role</MenuItem>
+          {role.map((role, index) => (
+            <MenuItem key={index} value={role["@id"]}>
+              {role.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
       <Button variant="contained" onClick={handleConfirm} sx={{ mt: 2 }}>
         Confirmer
       </Button>

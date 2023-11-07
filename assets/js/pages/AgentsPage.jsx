@@ -36,6 +36,7 @@ const AgentsPage = () => {
     fetchAgents();
   }, []);
 
+
   const handleDelete = async (id) => {
     const originalAgents = [...agents];
     setAgents(agents.filter((agent) => agent.id !== id));

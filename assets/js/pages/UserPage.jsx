@@ -17,11 +17,14 @@ const UserPage = ({ props }) => {
 
   const [userRole, setUserRole] = useState("");
 
+  const handleReturn = () => {
+    navigate("/users");
+  };
 
   const fetchUsers = async (id) => {
     try {
       const { role } = await usersAPI.find(id);
-      setUserRole( role["@id"] );
+      setUserRole(role["@id"]);
     } catch (error) {
       toast.error("Le user n'a pas pu être chargé");
     }
@@ -47,7 +50,7 @@ const UserPage = ({ props }) => {
     event.preventDefault();
 
     try {
-      await usersAPI.roleUpdate(id, {role:userRole});
+      await usersAPI.roleUpdate(id, { role: userRole });
       toast.success("Le role du user a bien été modifié");
       navigate("/users");
     } catch ({ error }) {
@@ -58,43 +61,43 @@ const UserPage = ({ props }) => {
   const handleSelectionChange = (event) => {
     const selectedValue = event.target.value;
 
-    setUserRole(selectedValue)
-
+    setUserRole(selectedValue);
   };
-
 
   return (
     <>
       <Grid container justifyContent="center">
         <Grid item xs={10} md={6}>
           <Paper elevation={3} style={{ padding: "20px", margin: "30px" }}>
-            <Typography variant="h5" align="center" gutterBottom>
+            <Typography
+              variant="h5"
+              align="center"
+              gutterBottom
+              sx={{
+                fontFamily: '"Lexend-SemiBold", sans-serif',
+              }}
+            >
               Modification du rôle du User
             </Typography>
             <form onSubmit={handleSubmit}>
               <FormControl fullWidth margin="normal">
                 <InputLabel>Roles</InputLabel>
-                <Select
-                  value={userRole}
-                  onChange={handleSelectionChange}
-                >
+                <Select value={userRole} onChange={handleSelectionChange}>
                   <MenuItem value="">Sélectionnez un role</MenuItem>
                   {role.map((role, index) => (
-                    <MenuItem key={index} value={role['@id']}>
+                    <MenuItem key={index} value={role["@id"]}>
                       {role.name}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <Button type="submit" variant="contained" color="primary">
+                <Button type="submit" variant="contained" color="success">
                   Enregistrer
                 </Button>
-                <Link to="/users" style={{ textDecoration: "none" }}>
-                  <Button variant="text" color="secondary">
+                  <Button variant="text" color="primary" onClick={handleReturn}>
                     Retour à la liste
                   </Button>
-                </Link>
               </div>
             </form>
           </Paper>

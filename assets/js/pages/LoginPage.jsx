@@ -38,14 +38,14 @@ const LoginPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // if (!isPasswordValid(credentials.password)) {
-    //   setPasswordError(
-    //     "Le mot de passe doit avoir au moins 12 caractères avec une minuscule, une majuscule, un caractère spéciale et un chiffre."
-    //   );
-    //   return;
-    // } else {
-    //   setPasswordError("");
-    // }
+    if (!isPasswordValid(credentials.password)) {
+      setPasswordError(
+        "Le mot de passe doit avoir au moins 12 caractères avec une minuscule, une majuscule, un caractère spéciale et un chiffre."
+      );
+      return;
+    } else {
+      setPasswordError("");
+    }
 
     try {
       await AuthAPI.authenticate(credentials);

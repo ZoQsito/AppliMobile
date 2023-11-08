@@ -145,6 +145,7 @@ const PlanningComponent = ({ props }) => {
 
   const services = Object.keys(agentsByService);
 
+
   const deleteOldEvents = async () => {
     try {
       const currentDate = new Date();
@@ -202,6 +203,9 @@ const PlanningComponent = ({ props }) => {
     };
 
     fetchDataAndDeleteOldEvents();
+  }, [isLoading]);
+
+  useEffect(() => {
 
     if (decodedToken?.custom_data?.service) {
       let selectedService;
@@ -209,8 +213,9 @@ const PlanningComponent = ({ props }) => {
         selectedService = localStorage.getItem("selectedService");
       } else if (decodedToken?.custom_data?.service) {
         selectedService = decodedToken?.custom_data?.service;
+        console.log(selectedService)
         localStorage.setItem("selectedService", selectedService);
-      } else {
+      } else{
         selectedService = "ALL";
         localStorage.setItem("selectedService", "ALL");
       }
@@ -220,6 +225,7 @@ const PlanningComponent = ({ props }) => {
       } else {
         handleServiceChange();
       }
+    
     }
 
     if (localStorage.getItem("selectedViewMode")) {
@@ -235,7 +241,7 @@ const PlanningComponent = ({ props }) => {
         );
       }
     }
-  }, [isLoading]);
+  }, [services]);
 
 
   const handleOptionChange = (event) => {
@@ -286,7 +292,6 @@ const PlanningComponent = ({ props }) => {
     setIsDeletable(false);
     setAllPressed(true);
     setActiveService(null);
-    localStorage.setItem("selectedService", "ALL");
 
     calendarRef.current?.scheduler?.handleState(agents, "resources");
   };

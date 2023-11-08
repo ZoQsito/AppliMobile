@@ -19,11 +19,9 @@ function ResponsiveAppBar() {
   const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP, setIsAdmin, setIsRESP } = useAuth();
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
     AuthAPI.logout();
+    setIsAuthenticated(false);
     navigate("/login");
-    setIsAdmin(false)
-    setIsRESP(false)
   };
 
   const colorMode = useContext(ColorModeContext);

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import AuthAPI from "../services/AuthAPI";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
   Avatar,
   Box,
@@ -40,7 +39,7 @@ const LoginPage = () => {
 
     if (!isPasswordValid(credentials.password)) {
       setPasswordError(
-        "Le mot de passe doit avoir au moins 12 caractères avec une minuscule, une majuscule, un caractère spéciale et un chiffre."
+        "Le mot de passe n'est pas conforme"
       );
       return;
     } else {

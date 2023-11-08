@@ -16,7 +16,7 @@ import jwtDecode from "jwt-decode";
 import UsersPage from "./pages/UsersPage";
 import UserPage from "./pages/UserPage";
 import { AuthContext } from "./contexts/AuthContext";
-import { CssBaseline } from "@mui/material";
+import { CssBaseline,Backdrop, CircularProgress, Container } from "@mui/material";
 import ResponsiveAppBar from "./components/NavBarMUI";
 import ToggleColorModeProvider from "./services/ToggleColorModeProvider";
 
@@ -25,7 +25,7 @@ const App = () => {
     AuthAPI.isAuthenticated()
   );
   
-  const [decodedToken, setDecodedToken] = useState([]);
+  const [decodedToken, setDecodedToken] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isRESP, setIsRESP] = useState(false);
 
@@ -44,6 +44,14 @@ const App = () => {
         setIsRESP(true);
       }
     }
+
+    else {
+      setIsAdmin(false);
+      setIsRESP(false);
+      setDecodedToken(null);
+
+    }
+
   }, [isAuthenticated]);
 
   const adminRoute = (path, element) => {
@@ -76,6 +84,17 @@ const App = () => {
     );
   };
 
+  if (isAuthenticated && !decodedToken) {
+    return (
+      <Container>
+        <Backdrop open={true}>
+          <CircularProgress color="primary" />
+        </Backdrop>
+      </Container>
+    );
+  }
+    
+  
 
   return (
     <AuthContext.Provider

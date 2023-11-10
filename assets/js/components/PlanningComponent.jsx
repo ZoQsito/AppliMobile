@@ -416,8 +416,8 @@ const PlanningComponent = ({ props }) => {
           onDelete={(props) => handleDeleteEvent(props)}
           customEditor={(props) =>
             props.edited === undefined ? (
-              <Card sx={{ width: "750px" }}>
-                <CardContent style={{ overflowY: "auto" }}>
+              <Card sx={{ width: "750px", overflowX: "auto" }}>
+                <CardContent style={{ overflowX: "auto" }}>
                   <AppBar position="static">
                     <Toolbar>
                       <Typography

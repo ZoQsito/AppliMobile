@@ -55,8 +55,6 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
     fetchData();
   }, []);
 
-  console.log(edited)
-
   const [eventData, setEventData] = useState(
     edited
       ? {
@@ -86,8 +84,6 @@ const EventForm = ({ type, props, setIsLoading, edited, state }) => {
           justificatif: "",
         }
   );
-
-  console.log(eventData);
 
   useEffect(() => {
     setEventData({

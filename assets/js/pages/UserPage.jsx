@@ -30,6 +30,7 @@ const UserPage = ({ props }) => {
     }
   };
 
+
   const fetchRole = async () => {
     try {
       const data = await RoleAPI.findAll();

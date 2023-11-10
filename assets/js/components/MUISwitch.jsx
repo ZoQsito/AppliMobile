@@ -56,6 +56,8 @@ const MaterialUISwitch = styled(Switch)(({ theme }) => ({
 export default function CustomizedSwitches() {
 
   const colorMode = useContext(ColorModeContext);
+  const currentMode = colorMode.mode;
+
 
   const toggleTheme = () => {
     colorMode.toggleColorMode();
@@ -63,7 +65,15 @@ export default function CustomizedSwitches() {
 
   return (
     <FormGroup>
-      <FormControlLabel control={<MaterialUISwitch onClick={toggleTheme} />} />
+      <FormControlLabel
+        control={
+          <MaterialUISwitch
+            checked={currentMode === 'dark'}
+            onClick={toggleTheme}
+          />
+        }
+      />
     </FormGroup>
   );
 }
+

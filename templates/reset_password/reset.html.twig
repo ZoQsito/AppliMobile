@@ -1,14 +1,21 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Reset your password{% endblock %}
+{% block title %}Changer votre Mot de Passe
+{% endblock %}
 
 {% block body %}
-    <div style="text-align: center;">
-        <h1 style="font-size: 24px; margin-top: 20px;">Reset your password</h1>
+	<div style="margin-top: 4rem; margin-left: 4rem; margin-right: 4rem; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+		<div style="border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); padding: 2rem;">
+			<h1 style="text-align: center;">Changer votre Mot de Passe</h1>
 
-        {{ form_start(resetForm, {'attr': {'style': 'max-width: 300px; margin: 0 auto;'}}) }}
-            {{ form_row(resetForm.plainPassword, {'attr': {'style': 'display: block; width: 100%; padding: 10px; margin: 10px 0;'}}) }}
-            <button style="background-color: #0073e6; color: #fff; border: none; padding: 10px 20px; cursor: pointer;">Reset password</button>
-        {{ form_end(resetForm) }}
-    </div>
+			{{ form_start(resetForm, {'attr': {'style': 'margin-top: 1rem;'}}) }}
+			<div style="margin-bottom: 1.5rem;">
+				{{ form_row(resetForm.plainPassword, { 'attr': {'style': 'width: 100%; padding: 0.375rem 0.75rem; font-size: 1rem; border: 1px solid #007bff; border-radius: 0.25rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;'} }) }}
+			</div>
+			<div style="text-align: center;">
+				<button style="background-color: #007bff; color: #fff; border: none; border-radius: 0.25rem; padding: 0.375rem 0.75rem; font-size: 1rem; cursor: pointer;">Changer le Mot de Passe</button>
+			</div>
+			{{ form_end(resetForm) }}
+		</div>
+	</div>
 {% endblock %}

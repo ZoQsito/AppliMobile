@@ -17,10 +17,28 @@ function ToggleColorModeProvider({ children }) {
       }),
       [mode]
     );
+
+    const lightTheme = createTheme({
+      palette: {
+        mode: 'light',
+        primary: {
+          main: '#2196f3',
+        },
+        secondary: {
+          main: '#F7C73D', 
+        },
+        background: {
+          default: '#f5f5f5', 
+        },
+      },
+    });
   
     const darkTheme = createTheme({
       palette: {
         mode: 'dark',
+        secondary: {
+          main: '#2145BF', 
+        },
       },
     });
   
@@ -29,10 +47,16 @@ function ToggleColorModeProvider({ children }) {
         createTheme({
           palette: {
             mode,
+            primary: {
+              main: '#2196f3', 
+            },
+            secondary: {
+              main: '#f50057', 
+            },
           },
-          ...(mode === 'dark' ? darkTheme : {}),
+          ...(mode === 'dark' ? darkTheme : lightTheme),
         }),
-      [mode, darkTheme]
+      [mode, darkTheme, lightTheme]
     );
   
     return (

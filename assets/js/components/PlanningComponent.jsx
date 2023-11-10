@@ -1,4 +1,10 @@
-import React, { useState, useEffect, Fragment, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  Fragment,
+  useRef,
+  useContext,
+} from "react";
 import {
   AppBar,
   Button,
@@ -18,6 +24,8 @@ import { toast } from "react-toastify";
 import { useAuth } from "../contexts/AuthContext";
 import { addDays } from "date-fns";
 import { fr } from "date-fns/locale";
+import ServiceAPI from "../services/ServiceAPI";
+import ColorModeContext from "../services/ColorModeContext";
 
 function CustomEditor({
   props,
@@ -116,35 +124,17 @@ const PlanningComponent = ({ props }) => {
   const [isEditable, setIsEditable] = useState(false);
   const [isDeletable, setIsDeletable] = useState(false);
   const [activeService, setActiveService] = useState(null);
+  const [services, setServices] = useState(undefined);
+  const [allPressed, setAllPressed] = useState(true);
 
-  const { decodedToken } =
-    useAuth();
+  const { decodedToken } = useAuth();
 
   const [events, setEvents] = useState([]);
 
-  const [agents, setAgents] = useState([
-    {
-      admin_id: "",
-      title: "",
-      mobile: "",
-      avatar: "",
-      color: "",
-      service: "",
-      user: "",
-    },
-  ]);
+  const [agents, setAgents] = useState([]);
 
-  const agentsByService = {};
-
-  agents.forEach((agent) => {
-    if (!agentsByService[agent.service.name]) {
-      agentsByService[agent.service.name] = [];
-    }
-    agentsByService[agent.service.name].push(agent);
-  });
-
-  const services = Object.keys(agentsByService);
-
+  const colorMode = useContext(ColorModeContext);
+  const currentMode = colorMode.mode;
 
   const deleteOldEvents = async () => {
     try {
@@ -171,11 +161,13 @@ const PlanningComponent = ({ props }) => {
 
   const fetchData = async () => {
     try {
-      const eventsData = await EventsAPI.findAll();
-      const agentsData = await AgentsAPI.findAll();
+      const [eventsData, agentsData, servicesData] = await Promise.all([
+        EventsAPI.findAll(),
+        AgentsAPI.findAll(),
+        ServiceAPI.findAll(),
+      ]);
 
       setEvents(eventsData);
-
       setAgents(
         agentsData.map((agent) => ({
           admin_id: agent.id,
@@ -186,6 +178,11 @@ const PlanningComponent = ({ props }) => {
           service: agent.service,
           user: agent.user,
         }))
+      );
+      setServices(
+        servicesData
+          .filter((service) => service.agents.length)
+          .map((service) => service.name)
       );
 
       setIsLoading(false);
@@ -206,26 +203,25 @@ const PlanningComponent = ({ props }) => {
   }, [isLoading]);
 
   useEffect(() => {
-
-    if (decodedToken?.custom_data?.service) {
-      let selectedService;
-      if (localStorage.getItem("selectedService")) {
-        selectedService = localStorage.getItem("selectedService");
-      } else if (decodedToken?.custom_data?.service) {
+    let selectedService;
+    if (localStorage.getItem("selectedService")) {
+      selectedService = localStorage.getItem("selectedService");
+    } else {
+      if (decodedToken?.custom_data?.service) {
         selectedService = decodedToken?.custom_data?.service;
-        console.log(selectedService)
         localStorage.setItem("selectedService", selectedService);
-      } else{
+      } else {
         selectedService = "ALL";
-        localStorage.setItem("selectedService", "ALL");
+        localStorage.setItem("selectedService", selectedService);
       }
+    }
 
+    if (services) {
       if (services.includes(selectedService)) {
         handleServiceChangeForAll(selectedService);
       } else {
         handleServiceChange();
       }
-    
     }
 
     if (localStorage.getItem("selectedViewMode")) {
@@ -242,7 +238,6 @@ const PlanningComponent = ({ props }) => {
       }
     }
   }, [services]);
-
 
   const handleOptionChange = (event) => {
     setSelectedOption(event.target.value);
@@ -285,13 +280,12 @@ const PlanningComponent = ({ props }) => {
     calendarRef.current?.scheduler?.handleState(filteredResources, "resources");
   };
 
-  const [allPressed, setAllPressed] = useState(true);
-
   const handleServiceChange = () => {
     setIsEditable(false);
     setIsDeletable(false);
     setAllPressed(true);
     setActiveService(null);
+    localStorage.setItem("selectedService", "ALL");
 
     calendarRef.current?.scheduler?.handleState(agents, "resources");
   };
@@ -372,10 +366,13 @@ const PlanningComponent = ({ props }) => {
             },
           }}
           month={{
-            weekDays: [2, 3, 4,5,6]
+            weekDays: [2, 3, 4, 5, 6],
           }}
           day={{
-            weekDays: [2, 3, 4, 5, 6]
+            weekDays: [2, 3, 4, 5, 6],
+            startHour: 7,
+            endHour: 19,
+            step: 60,
           }}
           locale={fr}
           hourFormat="24"
@@ -387,7 +384,7 @@ const PlanningComponent = ({ props }) => {
             admin_id: event.agent.id,
             color:
               event.label === "MISSION"
-                ? "red"
+                ? "#d32f2f"
                 : event.label === "REUNION"
                 ? "orange"
                 : event.label === "ABSENCE"
@@ -405,8 +402,8 @@ const PlanningComponent = ({ props }) => {
           draggable={false}
           week={{
             weekDays: [2, 3, 4, 5, 6],
-            startHour: 8,
-            endHour: 20,
+            startHour: 7,
+            endHour: 19,
             step: 60,
           }}
           resourceFields={{
@@ -509,12 +506,13 @@ const PlanningComponent = ({ props }) => {
                         {event?.etablissement?.name}
                       </Typography>
                     )}
-                    {event.autreEtablissement && (
-                      <Typography variant="body1">
-                        <strong>Etablissement:</strong>{" "}
-                        {event.autreEtablissement}
-                      </Typography>
-                    )}
+                    {event.autreEtablissement &&
+                      !event?.etablissement?.name && (
+                        <Typography variant="body1">
+                          <strong>Etablissement:</strong>{" "}
+                          {event.autreEtablissement}
+                        </Typography>
+                      )}
                     <Typography variant="body1">
                       <strong>Objet de la Mission:</strong> {event.objetMission}
                     </Typography>
@@ -540,12 +538,13 @@ const PlanningComponent = ({ props }) => {
                         {event?.etablissement?.name}
                       </Typography>
                     )}
-                    {event.autreEtablissement && (
-                      <Typography variant="body1">
-                        <strong>Etablissement:</strong>{" "}
-                        {event.autreEtablissement}
-                      </Typography>
-                    )}
+                    {event.autreEtablissement &&
+                      !event?.etablissement?.name && (
+                        <Typography variant="body1">
+                          <strong>Etablissement:</strong>{" "}
+                          {event.autreEtablissement}
+                        </Typography>
+                      )}
                     <Typography variant="body1">
                       <strong>Objet de la Réunion:</strong> {event.objetReunion}
                     </Typography>

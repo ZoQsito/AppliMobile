@@ -3,18 +3,22 @@ import AuthAPI from "../services/AuthAPI";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
+  Alert,
   Avatar,
   Box,
   Button,
   Container,
   CssBaseline,
   Grid,
+  IconButton,
   Link,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { toast } from "react-toastify";
+import CustomizedSnackbars from "../components/CustomizedSnackbars";
+
 
 const LoginPage = () => {
   const { setIsAuthenticated } = useAuth();
@@ -26,6 +30,8 @@ const LoginPage = () => {
   });
 
   const [passwordError, setPasswordError] = useState("");
+  const [errorOccurred, setErrorOccurred] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (event) => {
     const value = event.currentTarget.value;
@@ -37,28 +43,14 @@ const LoginPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!isPasswordValid(credentials.password)) {
-      setPasswordError(
-        "Le mot de passe n'est pas conforme"
-      );
-      return;
-    } else {
-      setPasswordError("");
-    }
-
     try {
       await AuthAPI.authenticate(credentials);
       setIsAuthenticated(true);
       navigate("/");
     } catch (error) {
-      toast.error("Les informations de connexion ne sont pas correct");
+      setErrorOccurred(true);
+      setErrorMessage("Une erreur s'est produite. Veuillez vérifier vos identifiants.");
     }
-  };
-
-  const isPasswordValid = (password) => {
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
-    return passwordRegex.test(password);
   };
 
   return (
@@ -74,7 +66,7 @@ const LoginPage = () => {
               alignItems: "center",
             }}
           >
-            <Avatar sx={{ m: 1}}>
+            <Avatar sx={{ m: 1 }}>
               <LockOutlinedIcon />
             </Avatar>
             <Typography
@@ -117,8 +109,11 @@ const LoginPage = () => {
                 helperText={passwordError}
               />
               <Grid item xs>
-                <Link href={`${process.env.BASE_PATH ?? ""}/reset-password`} variant="body2">
-                  Forgot password?
+                <Link
+                  href={`${process.env.BASE_PATH ?? ""}/reset-password`}
+                  variant="body2"
+                >
+                  Mot de Passe Oublié ?
                 </Link>
               </Grid>
               <Button
@@ -131,6 +126,14 @@ const LoginPage = () => {
               </Button>
             </Box>
           </Box>
+          {errorOccurred && (
+        <CustomizedSnackbars
+          open={errorOccurred}
+          severity="error"
+          message={errorMessage}
+          onClose={() => setErrorOccurred(false)}
+        />
+      )}
         </Container>
       </div>
     </>

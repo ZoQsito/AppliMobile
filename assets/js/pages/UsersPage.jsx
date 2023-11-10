@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { DataGrid } from "@mui/x-data-grid";
 import usersAPI from "../services/usersAPI";
-import { Container, Typography, TextField, Button, Paper } from "@mui/material";
+import { Container, Typography, TextField, Button, Box } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ColorModeContext from "../services/ColorModeContext";
 import RoleAPI from "../services/RoleAPI";
@@ -123,7 +123,7 @@ const UsersPage = () => {
           Liste des Utilisateurs
         </Typography>
       </div>
-      <Paper>
+      <Box>
         <TextField
           type="text"
           label="Rechercher..."
@@ -151,7 +151,7 @@ const UsersPage = () => {
             onPageChanged={handlePageChange}
           />
         )}
-      </Paper>
+      </Box>
     </Container>
   );
 };

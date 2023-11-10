@@ -24,6 +24,7 @@ class ChangePasswordFormType extends AbstractType
                     ],
                 ],
                 'first_options' => [
+                    'label' => 'Nouveau mot de passe',
                     'constraints' => [
                         new NotBlank([
                             'message' => 'Veuillez entrer un mot de passe',
@@ -38,7 +39,6 @@ class ChangePasswordFormType extends AbstractType
                             'message' => 'Votre mot de passe doit contenir au moins une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial.',
                         ]),
                     ],
-                    'label' => 'Nouveau mot de passe',
                 ],
                 'second_options' => [
                     'label' => 'Répéter le mot de passe',

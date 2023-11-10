@@ -1,35 +1,31 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Réinitialisez votre mot de passe{% endblock %}
-
-{% block body %}
-    {% for flash_error in app.flashes('reset_password_error') %}
-        <div class="card resetPassword" style="border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-            <div class="alert resetPassword alert-danger" role="alert" style="background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; padding: 0.75rem 1.25rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: 0.25rem;">
-                {{ flash_error }}
-            </div>
-        </div>
-    {% endfor %}
-    
-    <div class="container resetPassword" style="margin-top: 4rem; margin-left: 4rem; margin-right: 4rem;">
-        <div class="card resetPassword" style="border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-            <div class="card-content resetPassword" style="padding: 2rem;">
-                <h1 class="card-title resetPassword" style="text-align: center;">Réinitialisez votre mot de passe</h1>
-
-                {{ form_start(requestForm, {'attr': {'class': 'resetPassword mt-3'}}) }}
-                <div class="form-group resetPassword" style="margin-bottom: 1.5rem;">
-                    {{ form_row(requestForm.email, { 'attr': {'class': 'form-control resetPassword', 'placeholder': 'Entrez votre adresse e-mail'} }) }}
-                </div>
-                <small class="text-muted resetPassword" style="font-size: 0.875rem; color: #6c757d;">
-                    Entrez votre adresse e-mail, et nous vous enverrons un lien pour réinitialiser votre mot de passe.
-                </small>
-                <div class="text-center resetPassword" style="margin-top: 1rem;">
-                    <button class="btn resetPassword btn-primary" style="background-color: #007bff; color: #fff; border: none; border-radius: 0.25rem; padding: 0.375rem 0.75rem; font-size: 1rem; cursor: pointer;">Envoyer l'e-mail de réinitialisation du mot de passe</button>
-                </div>
-                {{ form_end(requestForm) }}
-            </div>
-        </div>
-    </div>
+{% block title %}Réinitialisez votre mot de passe
 {% endblock %}
 
 
+{% block body %}
+	{% for flash_error in app.flashes('reset_password_error') %}
+		<div style="border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; padding: 0.75rem 1.25rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: 0.25rem; font-size: 0.875rem;">
+			Il y a eu un problème de validation de votre demande de réinitialisation de mot de passe. Le lien de réinitialisation du mot de passe n'est pas valide. Veuillez réessayer de réinitialiser votre mot de passe.
+		</div>
+	{% endfor %}
+
+	<div style="margin-top: 4rem; margin-left: 4rem; margin-right: 4rem; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+		<div style="border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); padding: 2rem;">
+			<h1 style="text-align: center;">Réinitialisez votre mot de passe</h1>
+
+			{{ form_start(requestForm) }}
+			<div style="margin-bottom: 1.5rem; margin-top: 1rem;">
+				{{ form_row(requestForm.email, { 'attr': {'style': 'width: 100%; padding: 0.375rem 0.75rem; font-size: 1rem; border: 1px solid #007bff; border-radius: 0.25rem; box-sizing: border-box; outline: none; transition: border-color 0.2s;'} }) }}
+			</div>
+			<small style="font-size: 0.875rem; color: #6c757d; display: block; margin-bottom: 1rem;">
+				Entrez votre adresse e-mail, et nous vous enverrons un lien pour réinitialiser votre mot de passe.
+			</small>
+			<div style="text-align: center;">
+				<button style="background-color: #007bff; color: #fff; border: none; border-radius: 0.25rem; padding: 0.375rem 0.75rem; font-size: 1rem; cursor: pointer;">Envoyer l'e-mail de réinitialisation du mot de passe</button>
+			</div>
+			{{ form_end(requestForm) }}
+		</div>
+	</div>
+{% endblock %}

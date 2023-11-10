@@ -11,7 +11,6 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import CustomizedSwitches from "./MUISwitch";
 import ColorModeContext from "../services/ColorModeContext";
 import { useContext } from "react";
-import Autocomplete from '@mui/material/Autocomplete';
 
 function ResponsiveAppBar() {
   const navigate = useNavigate();
@@ -33,7 +32,7 @@ function ResponsiveAppBar() {
 
   return (
     <>
-      <AppBar position="static" color="inherit">
+      <AppBar position="static" sx={{ backgroundColor: currentMode === 'dark' ? '#333333' : '#f2f2f2' }}>
         <Container maxWidth="xl">
           <Toolbar disableGutters>
             <NavLink to="/">

@@ -5,7 +5,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import AgentsAPI from "../services/AgentsAPI";
 import Pagination from "../components/Pagination";
 import { useAuth } from "../contexts/AuthContext";
-import { Container, Typography, TextField, Button, Paper } from "@mui/material";
+import { Container, Typography, TextField, Button, Box } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useContext } from "react";
 import ColorModeContext from "../services/ColorModeContext";
@@ -149,7 +149,7 @@ const AgentsPage = () => {
           </Button>
         </Link>
       </div>
-      <Paper>
+      <Box>
         <TextField
           type="text"
           label="Rechercher..."
@@ -177,7 +177,7 @@ const AgentsPage = () => {
             onPageChanged={handlePageChange}
           />
         )}
-      </Paper>
+      </Box>
     </Container>
   );
 };

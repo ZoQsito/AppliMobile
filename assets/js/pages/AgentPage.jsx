@@ -17,6 +17,7 @@ import {
 import usersAPI from "../services/usersAPI";
 import ServiceAPI from "../services/ServiceAPI";
 import RoleAPI from "../services/RoleAPI";
+import { useAuth } from "../contexts/AuthContext";
 
 const AgentPage = ({}) => {
   const { id = "new" } = useParams();
@@ -25,6 +26,8 @@ const AgentPage = ({}) => {
   const [editing, setEditing] = useState(false);
   const [agentID, setAgentID] = useState();
   const [services, setServices] = useState([]);
+
+  const { isRESP, decodedToken } = useAuth();
 
   const [agentUpdate, setAgentUpdate] = useState({
     nom: "",
@@ -66,6 +69,7 @@ const AgentPage = ({}) => {
   });
   User.agent = `/api/agents/${agentID}`;
 
+
   const [role, setRole] = useState([]);
 
   const fetchAgent = async (id) => {
@@ -81,6 +85,10 @@ const AgentPage = ({}) => {
         color,
         user,
       });
+      setUser({
+        username: `${prenom}.${nom}`.toLowerCase(),
+        email:`${prenom}.${nom}@justice.fr`.toLowerCase(),
+      })
     } catch (error) {
       toast.error("L'agent n'a pas pu être chargé");
     }
@@ -111,9 +119,8 @@ const AgentPage = ({}) => {
       fetchRole();
     }
     fetchService();
+    generateRandomColor();
   }, [id]);
-
-  console.log(role)
 
   const handleChange = ({ currentTarget }) => {
     const { name, value } = currentTarget;
@@ -123,6 +130,18 @@ const AgentPage = ({}) => {
   const handleChangeUpdate = ({ currentTarget }) => {
     const { name, value } = currentTarget;
     setAgentUpdate({ ...agentUpdate, [name]: value });
+  };
+
+  const generateRandomColor = () => {
+
+    const red = Math.floor(Math.random() * (200 - 50 + 1)) + 50;
+    const green = Math.floor(Math.random() * (200 - 50 + 1)) + 50;
+    const blue = Math.floor(Math.random() * (200 - 50 + 1)) + 50;
+  
+
+    const colorCode = `#${red.toString(16)}${green.toString(16)}${blue.toString(16)}`;
+  
+    setAgent({color :colorCode});
   };
 
   const phoneRegex = /^\d{10}$/;
@@ -275,7 +294,6 @@ const AgentPage = ({}) => {
       <TextField
         name="username"
         label="Username"
-        variant="filled"
         fullWidth
         value={User.username}
         onChange={handleChangeModal}
@@ -283,7 +301,6 @@ const AgentPage = ({}) => {
       <TextField
         name="email"
         label="Adresse Email"
-        variant="filled"
         fullWidth
         value={User.email}
         onChange={handleChangeModal}
@@ -372,11 +389,16 @@ const AgentPage = ({}) => {
             }
           >
             <MenuItem value="">Sélectionnez un justificatif</MenuItem>
-            {services.map((service, index) => (
-              <MenuItem key={index} value={service["@id"]}>
-                {service.name}
-              </MenuItem>
-            ))}
+            {services.map((service, index) => {
+              if (isRESP && service.name !== decodedToken?.custom_data?.service) {
+                return null;
+              }
+              return (
+                <MenuItem key={index} value={service["@id"]}>
+                  {service.name}
+                </MenuItem>
+              );
+            })}
           </Select>
           {editing ? (
             <FormHelperText error={!!updateErrors.service}>

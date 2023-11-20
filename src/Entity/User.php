@@ -27,19 +27,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[Post(security: "is_granted('ROLE_ADMIN')", processor: UserPasswordHasher::class, validationContext: ['groups' => ['Default', 'user:create']])]
 #[Get(security: "is_granted('ROLE_ADMIN')")]
 #[GetCollection(security: "is_granted('ROLE_ADMIN')")]
-#[Post(
-    security: "is_granted('ROLE_ADMIN')",
-    uriTemplate: '/agents/{id}/createAccount',
-    uriVariables: [
-        'id' => new Link(
-            fromClass: Agent::class,
-            fromProperty: 'user'
-        )
-    ],
-    denormalizationContext: ['groups' => ['agent:createAccount']],
-    processor: CreateUserStateProcessor::class,
-    read:false
-)]
 #[Put(
     security: "is_granted('ROLE_ADMIN')",
     uriTemplate: '/users/{id}/role',
@@ -71,9 +58,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Email(groups: ['user:create', 'user:update','agent:createAccount'])]
     private ?string $email = null;
 
-    #[Groups(['agent:createAccount'])]
-    #[ORM\OneToOne(mappedBy:'user',targetEntity: Agent::class)]
-    private ?Agent $agent = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
     #[ORM\JoinColumn(nullable: false)]
@@ -178,28 +162,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-
-    public function getAgent(): ?Agent
-    {
-        return $this->agent;
-    }
-
-    public function setAgent(?Agent $agent): static
-    {
-        // unset the owning side of the relation if necessary
-        if ($agent === null && $this->agent !== null) {
-            $this->agent->setUser(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($agent !== null && $agent->getUser() !== $this) {
-            $agent->setUser($this);
-        }
-
-        $this->agent = $agent;
-
-        return $this;
-    }
-
 
 }

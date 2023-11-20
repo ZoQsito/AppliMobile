@@ -15,7 +15,7 @@ import { useContext } from "react";
 function ResponsiveAppBar() {
   const navigate = useNavigate();
 
-  const { isAdmin, setIsAuthenticated, isAuthenticated, isRESP, setIsAdmin, setIsRESP } = useAuth();
+  const { isAdmin, setIsAuthenticated, isAuthenticated } = useAuth();
 
   const handleLogout = () => {
     AuthAPI.logout();
@@ -32,69 +32,38 @@ function ResponsiveAppBar() {
 
   return (
     <>
-      <AppBar position="static" sx={{ backgroundColor: currentMode === 'dark' ? '#333333' : '#f2f2f2' }}>
+      <AppBar
+        position="static"
+        sx={{ backgroundColor: currentMode === "dark" ? "#333333" : "#f2f2f2" }}
+      >
         <Container maxWidth="xl">
           <Toolbar disableGutters>
             <NavLink to="/">
-              <EventIcon
-                sx={{
-                  display: { xs: "none", md: "flex" },
-                  mr: 3,
-                  fontSize: "36px",
-                }}
-              />
+
             </NavLink>
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
               {isAuthenticated && (
                 <>
-                  {isAdmin && (
-                    <>
-                      <Link
-                        variant="contained"
-                        color="inherit"
-                        style={{
-                          textDecoration: "none",
-                          color: currentMode === "dark" ? "white" : "black",
-                          marginRight: "10px",
-                        }}
-                        to={"/agents"}
-                      >
-                        Gestion Agent
-                      </Link>
-                      <Link
-                        variant="contained"
-                        color="inherit"
-                        style={{
-                          textDecoration: "none",
-                          color: currentMode === "dark" ? "white" : "black",
-                        }}
-                        to={"/users"}
-                      >
-                        Gestion User
-                      </Link>
-                    </>
-                  )}
-                  {isRESP && (
-                    <Link
-                      variant="contained"
-                      color="inherit"
-                      style={{
-                        textDecoration: "none",
-                        color: currentMode === "dark" ? "white" : "black",
-                        marginRight: "10px",
-                      }}
-                      to={"/agents"}
-                    >
-                      Gestion Agent
-                    </Link>
-                  )}
+                  {isAdmin && <></>}
+                  <Link
+                    variant="contained"
+                    color="inherit"
+                    style={{
+                      textDecoration: "none",
+                      color: currentMode === "dark" ? "white" : "black",
+                      marginRight: "10px",
+                    }}
+                    to={"/test"}
+                  >
+                    Test
+                  </Link>
                 </>
               )}
             </Box>
             <Box>
               <CustomizedSwitches />
             </Box>
-            
+
             <Box sx={{ flexGrow: 0 }}>
               {(isAuthenticated === false && (
                 <Button

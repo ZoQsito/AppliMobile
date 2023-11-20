@@ -8,17 +8,13 @@ import {
 import { createRoot } from "react-dom/client";
 import "../styles/app.css";
 import LoginPage from "./pages/LoginPage";
-import AgentsPage from "./pages/AgentsPage";
-import AgentPage from "./pages/AgentPage";
-import PlanningPage from "./pages/PlanningPage";
 import AuthAPI from "./services/AuthAPI";
 import jwtDecode from "jwt-decode";
-import UsersPage from "./pages/UsersPage";
-import UserPage from "./pages/UserPage";
 import { AuthContext } from "./contexts/AuthContext";
 import { CssBaseline,Backdrop, CircularProgress, Container } from "@mui/material";
 import ResponsiveAppBar from "./components/NavBarMUI";
 import ToggleColorModeProvider from "./services/ToggleColorModeProvider";
+import HomePage from "./pages/HomePage";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -27,7 +23,6 @@ const App = () => {
   
   const [decodedToken, setDecodedToken] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isRESP, setIsRESP] = useState(false);
 
 
   useEffect(() => {
@@ -39,15 +34,10 @@ const App = () => {
       if (decodedToken.roles[0] === "ROLE_ADMIN") {
         setIsAdmin(true);
       }
-
-      if (decodedToken.roles[0] === "ROLE_RESP") {
-        setIsRESP(true);
-      }
     }
 
     else {
       setIsAdmin(false);
-      setIsRESP(false);
       setDecodedToken(null);
 
     }
@@ -60,21 +50,6 @@ const App = () => {
         path={path}
         element={
           isAdmin ? (
-            element
-          ) : (
-            <Navigate to="/" state={{ from: window.location.pathname }} />
-          )
-        }
-      />
-    );
-  };
-
-  const RESPRoute = (path, element) => {
-    return (
-      <Route
-        path={path}
-        element={
-          isAdmin || isRESP ? (
             element
           ) : (
             <Navigate to="/" state={{ from: window.location.pathname }} />
@@ -102,10 +77,8 @@ const App = () => {
         isAuthenticated,
         setIsAuthenticated,
         isAdmin,
-        isRESP,
         decodedToken,
         setIsAdmin,
-        setIsRESP,
       }}
     >
         <ToggleColorModeProvider>
@@ -116,11 +89,7 @@ const App = () => {
             <main id="container" style={{marginLeft: "10%", marginRight:"10%"}}>
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/" element={<PlanningPage />} />
-                {RESPRoute("/agents", <AgentsPage />)}
-                {RESPRoute("/agent/:id", <AgentPage />)}
-                {adminRoute("/users", <UsersPage />)}
-                {adminRoute("/user/:id", <UserPage />)}
+                <Route path="/" element={<HomePage />} />
                 <Route path="*" element={<Navigate to="/" />} />
               </Routes>
             </main>

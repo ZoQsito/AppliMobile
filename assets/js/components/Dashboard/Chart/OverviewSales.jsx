@@ -13,10 +13,19 @@ import {
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 import { Chart } from '../chart';
+import { useAuth } from '../../../contexts/AuthContext';
 
 
 const useChartOptions = () => {
   const theme = useTheme();
+  const {
+    isAdmin,
+    setIsAuthenticated,
+    isAuthenticated,
+    decodedToken,
+    etats,
+    apps,
+  } = useAuth();
 
   return {
     chart: {
@@ -53,7 +62,7 @@ const useChartOptions = () => {
     },
     plotOptions: {
       bar: {
-        columnWidth: '40px'
+        columnWidth: '8px'
       }
     },
     stroke: {
@@ -73,20 +82,7 @@ const useChartOptions = () => {
         color: theme.palette.divider,
         show: true
       },
-      categories: [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec'
-      ],
+      categories: apps?.map(app => app.name),
       labels: {
         offsetY: 5,
         style: {
@@ -105,6 +101,8 @@ const useChartOptions = () => {
     }
   };
 };
+
+
 
 export const OverviewSales = (props) => {
   const { chartSeries, sx } = props;

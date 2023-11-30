@@ -57,6 +57,7 @@ const TicketsAdminPage = () => {
   const handleRowsPerPageChange = useCallback((event) => {
     setRowsPerPage(event.target.value);
   }, []);
+  
 
   return (
     <>

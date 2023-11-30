@@ -17,7 +17,7 @@ class JWTListener
         $user = $event->getUser();
 
         $userData = [
-            "service" => $user->getAgent()?->getService()?->getName(),
+            "UserId" => $user->getId()
         ];
 
         $jwt['custom_data'] = $userData;

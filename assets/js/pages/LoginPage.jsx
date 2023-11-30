@@ -52,8 +52,8 @@ const LoginPage = () => {
 
   return (
     <>
-      <div>
-        <Container component="main" maxWidth="xs">
+      <div style={{marginTop: "150px"}}>
+        <Container maxWidth="xs">
           <CssBaseline />
           <Box
             sx={{

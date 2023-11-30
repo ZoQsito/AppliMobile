@@ -8,6 +8,8 @@
         "@symfony/webpack-encore": "^4.0.0",
         "core-js": "^3.23.0",
         "regenerator-runtime": "^0.13.9",
+        "ts-loader": "^9.0.0",
+        "typescript": "^5.3.2",
         "webpack": "^5.74.0",
         "webpack-cli": "^4.10.0",
         "webpack-notifier": "^1.15.0"
@@ -24,8 +26,10 @@
         "@emotion/react": "^11.11.1",
         "@emotion/styled": "^11.11.0",
         "@fontsource/roboto": "^5.0.8",
+        "@heroicons/react": "^2.0.18",
         "@mui/icons-material": "^5.14.13",
         "@mui/material": "^5.14.8",
+        "@mui/system": "^5.14.18",
         "@mui/x-data-grid": "^6.16.2",
         "@mui/x-date-pickers": "^6.13.0",
         "@reduxjs/toolkit": "^1.9.5",
@@ -33,10 +37,18 @@
         "date-fns": "^2.30.0",
         "dayjs": "^1.11.9",
         "dotenv-webpack": "^8.0.1",
+        "jss": "^10.10.0",
+        "jss-preset-default": "^10.10.0",
         "jwt-decode": "^3.1.2",
         "moment": "^2.29.4",
+        "next": "^14.0.3",
+        "prop-types": "^15.8.1",
         "react": "^18.2.0",
+        "react-apexcharts": "^1.4.1",
         "react-dom": "^18.2.0",
-        "react-router-dom": "^6.15.0"
+        "react-router-dom": "^6.15.0",
+        "sass": "1.25.0",
+        "simplebar-react": "^3.2.4",
+        "uuid": "3.4.0"
     }
 }

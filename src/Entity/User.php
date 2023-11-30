@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -10,11 +12,10 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
-use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
-use App\State\CreateUserStateProcessor;
 use App\State\UserPasswordHasher;
+use phpDocumentor\Reflection\Types\Nullable;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -36,7 +37,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[Groups(['user:read'])]
+    #[Groups(['user:read','ticket:read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -44,7 +45,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['user:read', 'user:create', 'user:update','agent:createAccount'])]
+    #[Groups(['user:read', 'user:create', 'user:update','ticket:read'])]
     private ?string $username = null;
 
     #[Assert\NotBlank(groups: ['user:create'])]
@@ -54,14 +55,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user:read', 'user:create', 'user:update','agent:createAccount'])]
-    #[Assert\Email(groups: ['user:create', 'user:update','agent:createAccount'])]
+    #[Groups(['user:read', 'user:create', 'user:update'])]
+    #[Assert\Email(groups: ['user:create', 'user:update'])]
     private ?string $email = null;
 
 
     #[ORM\ManyToOne(inversedBy: 'users')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['user:read', 'user:create', 'user:update','agent:createAccount', 'user:changeRole'])]
+    #[Groups(['user:read', 'user:create', 'user:update', 'user:changeRole'])]
     private ?Role $role = null;
 
     /**
@@ -69,6 +70,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column(nullable: true)]
     private ?string $password = null;
+
+    #[ORM\Column(length: 20)]
+    #[Groups(['user:read', 'user:create', 'user:update'])]
+    private ?string $numero = null;
+
+    #[ORM\ManyToOne(inversedBy: 'users')]
+    #[Groups(['user:read', 'user:create', 'user:update'])]
+    private ?Service $service = null;
+
+    #[ORM\OneToMany(mappedBy: 'userId', targetEntity: Ticket::class)]
+    private Collection $tickets;
+
+    public function __construct()
+    {
+        $this->tickets = new ArrayCollection();
+    }
 
 
 
@@ -159,6 +176,60 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(?string $email): self
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function getNumero(): ?string
+    {
+        return $this->numero;
+    }
+
+    public function setNumero(string $numero): static
+    {
+        $this->numero = $numero;
+
+        return $this;
+    }
+
+    public function getService(): ?Service
+    {
+        return $this->service;
+    }
+
+    public function setService(?Service $service): static
+    {
+        $this->service = $service;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Ticket>
+     */
+    public function getTickets(): Collection
+    {
+        return $this->tickets;
+    }
+
+    public function addTicket(Ticket $ticket): static
+    {
+        if (!$this->tickets->contains($ticket)) {
+            $this->tickets->add($ticket);
+            $ticket->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTicket(Ticket $ticket): static
+    {
+        if ($this->tickets->removeElement($ticket)) {
+            // set the owning side to null (unless already changed)
+            if ($ticket->getUserId() === $this) {
+                $ticket->setUserId(null);
+            }
+        }
 
         return $this;
     }

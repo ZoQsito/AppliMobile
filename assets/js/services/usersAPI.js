@@ -8,13 +8,6 @@ function register(user){
       );
 }
 
-function registerAgentUser(agentId,user){
-    return fetcher.post(
-        `/api/agents/${agentId}/createAccount`,
-        user
-      );
-}
-
 function find(id){
     return fetcher
         .get("/api/users/" + id)
@@ -48,6 +41,5 @@ export default{
     deleteUsers,
     find,
     update,
-    registerAgentUser,
     roleUpdate
 }

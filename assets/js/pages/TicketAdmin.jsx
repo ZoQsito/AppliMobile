@@ -24,7 +24,7 @@ const now = new Date();
 
 const TicketsAdminPage = () => {
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [tickets, setTickets] = useState([]);
 
   const fetchTickets = async () => {

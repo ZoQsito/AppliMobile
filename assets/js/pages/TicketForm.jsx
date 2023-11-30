@@ -20,6 +20,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { fr } from "date-fns/locale";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { useNavigate } from "react-router-dom";
 
 const TicketForm = (props) => {
   const {
@@ -40,6 +41,7 @@ const TicketForm = (props) => {
   };
   const [ticketData, setTicketData] = useState(initialState);
   const [isEditing, setIsEditing] = useState(false);
+  const navigate = useNavigate();
 
 
   useEffect(() => {
@@ -90,7 +92,7 @@ const TicketForm = (props) => {
       try {
         await ticketAPI.create(ticketData);
         setTicketData(initialState);
-        props.onClose();
+        navigate("/ticket");
       } catch (error) {
         console.error("Error creating ticket:", error);
       }

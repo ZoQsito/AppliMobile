@@ -27,6 +27,18 @@ const TicketsAdminPage = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [tickets, setTickets] = useState([]);
 
+  const handleDelete = async (selectedItems) => {
+    try {
+      ticketAPI.delete(selectedItems)
+
+      fetchTickets();
+
+      ticketSelection.handleDeselectAll();
+    } catch (error) {
+      console.error("Error deleting tickets:", error);
+    }
+  };
+
   const fetchTickets = async () => {
     try {
       const data = await ticketAPI.findAll();
@@ -88,6 +100,7 @@ const TicketsAdminPage = () => {
               page={page}
               rowsPerPage={rowsPerPage}
               selected={ticketSelection.selected}
+              onDelete={handleDelete}
             />
           </Stack>
         </Container>

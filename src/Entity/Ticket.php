@@ -4,14 +4,20 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\TicketRepository;
+use DateTime;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+use Doctrine\ORM\Mapping\PrePersist;
+use Doctrine\ORM\Mapping\PreUpdate;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: TicketRepository::class)]
 #[ApiResource(
     normalizationContext: ['groups' => ['ticket:read']]
 )]
+#[HasLifecycleCallbacks]
 class Ticket
 {
     #[ORM\Id]
@@ -121,5 +127,20 @@ class Ticket
         $this->userId = $userId;
 
         return $this;
+    }
+
+
+    #[PreUpdate]
+    public function initiateEnd(PreUpdateEventArgs $event)
+    {
+        if ($this->getEtat()->getName() === "Ferme")
+            $this->dateEnd = new DateTime();
+    }
+
+    #[PrePersist]
+    public function initiateDebut()
+    {
+
+        $this->dateStart = new DateTime();
     }
 }

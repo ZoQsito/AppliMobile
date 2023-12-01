@@ -14,6 +14,18 @@ const UsersPage = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [user, setUser] = useState([]);
 
+  const handleDelete = async (selectedItems) => {
+    try {
+      usersAPI.deleteUsers(selectedItems)
+
+      fetchTickets();
+
+      ticketSelection.handleDeselectAll();
+    } catch (error) {
+      console.error("Error deleting tickets:", error);
+    }
+  };
+
   const fetchUser = async () => {
     try {
       const users = await usersAPI.findAll();
@@ -76,18 +88,6 @@ const UsersPage = () => {
                   Users
                 </Typography>
               </Stack>
-              <div>
-                <Button
-                  startIcon={(
-                    <SvgIcon fontSize="small">
-                      <PlusIcon />
-                    </SvgIcon>
-                  )}
-                  variant="contained"
-                >
-                  Ajouté
-                </Button>
-              </div>
             </Stack>
             <UsersSearch />
             <UsersTable
@@ -102,6 +102,7 @@ const UsersPage = () => {
               page={page}
               rowsPerPage={rowsPerPage}
               selected={usersSelection.selected}
+              onDelete={handleDelete}
             />
           </Stack>
         </Container>

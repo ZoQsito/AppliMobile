@@ -25,12 +25,24 @@ const now = new Date();
 
 const TicketClientPage = () => {
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [tickets, setTickets] = useState([]);
 
   const { isAdmin, setIsAuthenticated, isAuthenticated, decodedToken } = useAuth();
 
   const UserId = decodedToken?.custom_data?.UserId
+
+  const handleDelete = async (selectedItems) => {
+    try {
+      ticketAPI.delete(selectedItems)
+
+      fetchTickets();
+
+      ticketSelection.handleDeselectAll();
+    } catch (error) {
+      console.error("Error deleting tickets:", error);
+    }
+  };
 
 
   const fetchTickets = async () => {
@@ -95,6 +107,7 @@ const TicketClientPage = () => {
               page={page}
               rowsPerPage={rowsPerPage}
               selected={ticketSelection.selected}
+              onDelete={handleDelete}
             />
           </Stack>
         </Container>

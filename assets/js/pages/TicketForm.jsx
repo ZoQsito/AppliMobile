@@ -31,17 +31,18 @@ const TicketForm = (props) => {
     etats,
     apps,
   } = useAuth();
+
   const initialState = {
     app: "",
     description: "",
-    dateStart: "",
-    dateEnd: undefined ,
     etat: `/api/etats/1` ,
     userId: `/api/users/${decodedToken?.custom_data?.UserId}`,
   };
   const [ticketData, setTicketData] = useState(initialState);
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
+
+  console.log(ticketData)
 
 
   useEffect(() => {
@@ -55,8 +56,6 @@ const TicketForm = (props) => {
       setTicketData({
         app: props.ticket.app["@id"],
         description: props.ticket.description,
-        dateStart: props.ticket.dateStart,
-        dateEnd: props.ticket.dateEnd,
         etat: props.ticket.etat["@id"],
         userId: props.ticket.userId["@id"],
       });
@@ -82,6 +81,7 @@ const TicketForm = (props) => {
 
     if (isEditing) {
       try {
+
         await ticketAPI.update(props.ticket.id, ticketData);
         setTicketData(initialState);
         props.onClose();
@@ -99,26 +99,6 @@ const TicketForm = (props) => {
     }
   };
 
-  const handleDateChange = (newDate) => {
-    setTicketData((prevData) => ({
-      ...prevData,
-      dateStart: format(new Date(newDate), "yyyy-MM-dd"),
-    }));
-  };
-
-  if (apps === undefined || etats === undefined) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100vh",
-        }}
-      ></Box>
-    );
-  }
-
   return (
     <Box
       sx={{
@@ -130,7 +110,7 @@ const TicketForm = (props) => {
         <Card>
           <CardContent>
             <Typography variant="h5" component="div" mb={3}>
-              Création d'un Ticket
+             {isEditing ? "Modification du Ticket" : "Création d'un Ticket"}
             </Typography>
             <form onSubmit={handleSubmit}>
               <Grid container spacing={3}>
@@ -145,7 +125,7 @@ const TicketForm = (props) => {
                       defaultValue={""}
                     >
                       <MenuItem value="">Sélectionnez une application</MenuItem>
-                      {apps.map((app, index) => (
+                      {apps?.map((app, index) => (
                         <MenuItem key={index} value={app["@id"]}>
                           {app.name}
                         </MenuItem>
@@ -164,19 +144,7 @@ const TicketForm = (props) => {
                     onChange={handleInputChange}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}  style={{marginTop : "18px"}}>
-                  <LocalizationProvider
-                    dateAdapter={AdapterDateFns}
-                    adapterLocale={fr}
-                  >
-                    <DatePicker
-                      value={new Date(ticketData.dateStart)}
-                      label="Date de Début"
-                      onChange={(newDate) => handleDateChange(newDate)}
-                    />
-                  </LocalizationProvider>
-                </Grid>
-                {isEditing &&(<Grid item xs={12} md={6}>
+                {isEditing && isAdmin &&(<Grid item xs={12} md={6}>
                   <FormControl fullWidth margin="normal">
                     <InputLabel>État</InputLabel>
                     <Select
@@ -188,7 +156,7 @@ const TicketForm = (props) => {
                       required
                     >
                       <MenuItem value="">Sélectionnez un état</MenuItem>
-                      {etats.map((etat, index) => (
+                      {etats?.map((etat, index) => (
                         <MenuItem key={index} value={etat["@id"]}>
                           {etat.name}
                         </MenuItem>
@@ -198,7 +166,7 @@ const TicketForm = (props) => {
                 </Grid>)}
                 <Grid item xs={12}>
                   <Button type="submit" variant="contained" color="primary">
-                    Créer Ticket
+                    {isEditing ? "Modifier Ticket" : "Créer Ticket"}
                   </Button>
                 </Grid>
               </Grid>

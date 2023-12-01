@@ -28,6 +28,7 @@ import TicketsAdminPage from "./pages/TicketAdmin";
 import TicketForm from "./pages/TicketForm";
 import ApplicationAPI from "./services/ApplicationAPI";
 import etatAPI from "./services/etatAPI";
+import UserForm from "./pages/UserForm";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -127,6 +128,7 @@ const App = () => {
                   <Route path="/addticket" element={<TicketForm />} />
                   {adminRoute("/ticketsAdmin", <TicketsAdminPage />)}
                   {adminRoute("/users", <UsersPage />)}
+                  {adminRoute("/AddUsers", <UserForm />)}
                   <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
               </main>

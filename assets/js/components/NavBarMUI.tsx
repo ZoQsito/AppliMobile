@@ -28,6 +28,7 @@ import MuiDrawer from "@mui/material/Drawer";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import PeopleIcon from "@mui/icons-material/People";
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -217,7 +218,7 @@ export default function NavBarAndSideBar() {
                     <ListItemIcon>
                       <PostAddIcon />
                     </ListItemIcon>
-                    <ListItemText primary="Faire Ticket" />
+                    <ListItemText primary="Faire un Ticket" />
                   </ListItemButton>
               </>
             )}
@@ -240,6 +241,12 @@ export default function NavBarAndSideBar() {
                       <PeopleIcon />
                     </ListItemIcon>
                     <ListItemText primary="Utilisateurs" />
+                  </ListItemButton>
+                  <ListItemButton onClick={()=> navigate("/AddUsers")}>
+                    <ListItemIcon>
+                      <PersonAddIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Add User" />
                   </ListItemButton>
               </div>
             </List>

@@ -124,8 +124,8 @@ const App = () => {
                 <Routes>
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/" element={<HomePage />} />
-                  <Route path="/ticket" element={<TicketClientPage />} />
-                  <Route path="/addticket" element={<TicketForm />} />
+                  {isAuthenticated &&(<Route path="/ticket" element={<TicketClientPage />} />)}
+                  {isAuthenticated &&(<Route path="/addticket" element={<TicketForm />} />)}
                   {adminRoute("/ticketsAdmin", <TicketsAdminPage />)}
                   {adminRoute("/users", <UsersPage />)}
                   {adminRoute("/AddUsers", <UserForm />)}

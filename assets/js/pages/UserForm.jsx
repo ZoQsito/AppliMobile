@@ -109,7 +109,7 @@ const UserForm = (props) => {
         <Card>
           <CardContent>
             <Typography variant="h5" component="div" mb={3}>
-              {isEditing ? "Modification du User" : "Création d'un User"}
+              {isEditing ? "Modification de l'Utilisateur" : "Création d'un Utilisateur"}
             </Typography>
             <form onSubmit={handleSubmit}>
               <Grid container spacing={3}>
@@ -183,7 +183,7 @@ const UserForm = (props) => {
                 </Grid>
                 <Grid item xs={12}>
                   <Button type="submit" variant="contained" color="primary">
-                    {isEditing ? "Modifier User" : "Créer User"}
+                    {isEditing ? "Modifier Utilisateur" : "Créer Utilisateur"}
                   </Button>
                 </Grid>
               </Grid>

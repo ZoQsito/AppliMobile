@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import { SeverityPill } from "./severity-pill";
 import { useAuth } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 
 const statusMap = {
@@ -31,6 +32,7 @@ const statusMap = {
 export const LatestTickets = (props) => {
   const { tickets = [], sx } = props;
   const { isAdmin, setIsAuthenticated, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   const formatDate = (dateString) => {
     if (dateString) {
@@ -39,6 +41,10 @@ export const LatestTickets = (props) => {
       return format(date, "dd/MM/yyyy");
     }
   };
+
+  const handleViewAll = () => {
+    navigate("/ticket")
+  }
 
   return (
     <Card sx={sx}>
@@ -55,7 +61,7 @@ export const LatestTickets = (props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {tickets.map((ticket) => {
+            {tickets.slice(-5).reverse().map((ticket) => {
               return (
                 <TableRow hover key={ticket.id}>
                   <TableCell style={{textAlign: "center" }}>
@@ -92,8 +98,9 @@ export const LatestTickets = (props) => {
               }
               size="small"
               variant="text"
+              onClick={() => handleViewAll()}
             >
-              View all
+              Voir Tous
             </Button>
           </CardActions>
         </>

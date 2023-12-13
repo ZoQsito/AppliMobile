@@ -1,13 +1,14 @@
 {
     "api-platform/core": {
-        "version": "3.0",
+        "version": "3.2",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
-            "version": "3.0",
-            "ref": "4cb2fbb788857f187cab1e6d9df562305d92b20b"
+            "version": "3.2",
+            "ref": "696d44adc3c0d4f5d25a2f1c4f3700dd8a5c6db9"
         },
         "files": [
+            "./config/packages/api_platform.yaml",
             "./config/routes/api_platform.yaml",
             "./src/ApiResource/.gitignore"
         ]

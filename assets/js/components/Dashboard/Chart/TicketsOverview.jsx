@@ -97,8 +97,7 @@ export const TicketsOverview = (props) => {
 
   return (
     <Card sx={sx}>
-      <CardHeader title="Traffic Source" />
-      <CardContent>
+      <CardContent style={{marginTop: "30px"}}>
         <Chart
           height={300}
           options={chartOptions}

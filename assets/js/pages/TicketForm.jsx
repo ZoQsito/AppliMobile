@@ -42,8 +42,6 @@ const TicketForm = (props) => {
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
 
-  console.log(ticketData)
-
 
   useEffect(() => {
     if (props.ticket) {
@@ -81,7 +79,6 @@ const TicketForm = (props) => {
 
     if (isEditing) {
       try {
-
         await ticketAPI.update(props.ticket.id, ticketData);
         setTicketData(initialState);
         props.onClose();

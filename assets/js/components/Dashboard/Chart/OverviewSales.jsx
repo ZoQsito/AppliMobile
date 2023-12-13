@@ -26,6 +26,7 @@ const useChartOptions = () => {
     etats,
     apps,
   } = useAuth();
+  
 
   return {
     chart: {
@@ -92,12 +93,14 @@ const useChartOptions = () => {
     },
     yaxis: {
       labels: {
-        formatter: (value) => (value > 0 ? `${value}K` : `${value}`),
+        formatter: (value) => (value > 0 ? `${value}` : `${value}`),
         offsetX: -10,
         style: {
           colors: theme.palette.text.secondary
         }
-      }
+      },
+      max: 10,
+      tickAmount: 5,
     }
   };
 };
@@ -107,6 +110,7 @@ const useChartOptions = () => {
 export const OverviewSales = (props) => {
   const { chartSeries, sx } = props;
   const chartOptions = useChartOptions();
+  
 
   return (
     <Card sx={sx}>

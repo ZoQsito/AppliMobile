@@ -27,8 +27,10 @@ const TicketClientPage = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [tickets, setTickets] = useState([]);
-
-  const { isAdmin, setIsAuthenticated, isAuthenticated, decodedToken } = useAuth();
+  const [ticketsUpdate, setTicketsUpdate] = useState([]);
+  const { etats, decodedToken } = useAuth();
+  const [activeEtat, setActiveEtat] = useState(null);
+  const [allPressed, setAllPressed] = useState(true);
 
   const UserId = decodedToken?.custom_data?.UserId
 
@@ -50,6 +52,7 @@ const TicketClientPage = () => {
       const data = await ticketAPI.findAll();
       const userTickets = data.filter(ticket => ticket?.userId?.id === UserId);
       setTickets(userTickets);
+      setTicketsUpdate(userTickets);
     } catch (error) {
       console.error("Erreur lors du chargement des utilisateurs :", error);
     }
@@ -61,8 +64,8 @@ const TicketClientPage = () => {
   }, []);
 
   const paginatedTickets = useMemo(() => {
-    return applyPagination(tickets, page, rowsPerPage);
-  }, [tickets, page, rowsPerPage]);
+    return applyPagination(ticketsUpdate, page, rowsPerPage);
+  }, [ticketsUpdate, page, rowsPerPage]);
 
   const ticketsIds = useMemo(() => {
     return tickets.map((ticketData) => ticketData.id);
@@ -77,6 +80,27 @@ const TicketClientPage = () => {
   const handleRowsPerPageChange = useCallback((event) => {
     setRowsPerPage(event.target.value);
   }, []);
+
+  const handleEtatsChangeForAll = (selectedEtat) => {
+    let filteredResources = etats;
+
+    if (selectedEtat) {
+
+      filteredResources = tickets.filter((ticket) => ticket.etat.name === selectedEtat);
+    }
+
+    setTicketsUpdate(filteredResources)
+
+    setAllPressed(false);
+    setActiveEtat(selectedEtat);
+  };
+
+
+  const handleEtatsChange = () => {
+    setAllPressed(true);
+    setActiveEtat(null);
+    setTicketsUpdate(tickets)
+  };
 
   return (
     <>
@@ -94,9 +118,28 @@ const TicketClientPage = () => {
                 <Typography variant="h4">Tickets</Typography>
               </Stack>
             </Stack>
+            <div style={{ marginTop: "20px" }}>
+              <Button
+                variant={allPressed ? "contained" : "outlined"}
+                style={{ marginRight: "10px" }}
+                onClick={() => handleEtatsChange()}
+              >
+                TOUS
+              </Button>
+              {etats?.map((etats, index) => (
+                <Button
+                  key={etats.id}
+                  variant={activeEtat === etats.name ? "contained" : "outlined"}
+                  style={{ marginRight: "10px" }}
+                  onClick={() => handleEtatsChangeForAll(etats.name)}
+                >
+                  {etats.name}
+                </Button>
+              ))}
+            </div>
             <TicketsClientSearch />
             <TicketsClientTable
-              count={paginatedTickets.length}
+              count={ticketsUpdate.length}
               items={paginatedTickets}
               onDeselectAll={ticketSelection.handleDeselectAll}
               onDeselectOne={ticketSelection.handleDeselectOne}

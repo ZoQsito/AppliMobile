@@ -85,7 +85,7 @@ const UsersPage = () => {
             >
               <Stack spacing={1}>
                 <Typography variant="h4">
-                  Users
+                  Utilisateurs
                 </Typography>
               </Stack>
             </Stack>

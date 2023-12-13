@@ -153,7 +153,7 @@ export const TicketsTable = (props) => {
           aria-labelledby="ticket-modal"
           aria-describedby="ticket-details"
         >
-          <Box>
+          <Box style={{ marginTop: "200px" }}>
             {selectedTicket && (
               <TicketForm ticket={selectedTicket} onClose={handleCloseModal} />
             )}

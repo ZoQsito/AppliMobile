@@ -55,7 +55,7 @@ export const TicketsClientTable = (props) => {
   };
 
   const handleOpenModal = (ticket) => {
-    if (document.activeElement.tagName.toLowerCase() !== 'input') {
+    if (document.activeElement.tagName.toLowerCase() !== "input") {
       setSelectedTicket(ticket);
     }
   };
@@ -156,7 +156,7 @@ export const TicketsClientTable = (props) => {
           aria-labelledby="ticket-modal"
           aria-describedby="ticket-details"
         >
-          <Box>
+          <Box style={{ marginTop: "200px" }}>
             {selectedTicket && (
               <TicketForm ticket={selectedTicket} onClose={handleCloseModal} />
             )}
@@ -167,7 +167,7 @@ export const TicketsClientTable = (props) => {
         <Button
           variant="contained"
           color="error"
-          style={{width : "100px"}}
+          style={{ width: "100px" }}
           onClick={() => onDelete?.(selected)}
         >
           Supprimer

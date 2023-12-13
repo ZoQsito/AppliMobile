@@ -164,13 +164,13 @@ export default function NavBarAndSideBar() {
               alignItems: "center",
             }}
           >
-            <IconButton color="inherit" style={{ marginRight: "30px" }}>
-              <Badge badgeContent={4} color="secondary">
+           {isAuthenticated && (<IconButton color="inherit" style={{ marginRight: "30px" }}>
+              <Badge badgeContent={1} color="secondary">
                 <NotificationsIcon />
               </Badge>
-            </IconButton>
+            </IconButton>)}
             <CustomizedSwitches />
-            {isAuthenticated === false && (
+            {!isAuthenticated && (
               <Button
                 variant="contained"
                 onClick={() => loginClick()}

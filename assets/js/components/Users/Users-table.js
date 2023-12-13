@@ -131,7 +131,7 @@ export const UsersTable = (props) => {
           aria-labelledby="ticket-modal"
           aria-describedby="ticket-details"
         >
-          <Box>
+          <Box style={{ marginTop: "200px" }}>
             {selectedUser && (
               <UserForm user={selectedUser} onClose={handleCloseModal} />
             )}

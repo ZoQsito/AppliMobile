@@ -7,7 +7,7 @@ if (!Encore.isRuntimeEnvironmentConfigured()) {
   Encore.configureRuntimeEnvironment(process.env.NODE_ENV || "dev");
 }
 
-if (Encore.isProduction()) Encore.setPublicPath("/planning/build");
+if (Encore.isProduction()) Encore.setPublicPath("/ticketing/build");
 else Encore.setPublicPath("/build");
 
 Encore

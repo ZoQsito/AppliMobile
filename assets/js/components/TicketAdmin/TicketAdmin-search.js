@@ -3,7 +3,7 @@ import MagnifyingGlassIcon from '@heroicons/react/24/solid/MagnifyingGlassIcon';
 import { Card, InputAdornment, OutlinedInput, SvgIcon } from '@mui/material';
 
 export const TicketsSearch = () => (
-  <Card sx={{ p: 2 }}>
+  <Card sx={{ p: 1 }}>
     <OutlinedInput
       defaultValue=""
       fullWidth

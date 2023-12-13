@@ -11,11 +11,13 @@ import { CardTicketInProgress } from "../components/Dashboard/Cards/CardTicketIn
 import { useAuth } from "../contexts/AuthContext";
 import ticketAPI from "../services/ticketAPI";
 
-
 function HomePage() {
   const { isAdmin, setIsAuthenticated, isAuthenticated, decodedToken } = useAuth();
 
   const [tickets, setTickets] = useState([]);
+
+  const applicationOrder = ["SIMBA", "OLAF", "RESPECT", "GPP", "TRON", "HADES", "GERH", "EVA-PARIS", "GLACIS", "MCI"];
+
 
   const fetchTickets = async () => {
     try {
@@ -26,9 +28,33 @@ function HomePage() {
     }
   };
 
-  const ticketsFermes = tickets.filter(ticket => ticket.etat.name === 'Ferme');
+  function countTicketsByApplication(tickets, etatName, applicationOrder) {
+    const ticketsByApplication = {};
+  
+    applicationOrder.forEach((appName) => {
+      ticketsByApplication[appName] = 0;
+    });
+  
+    tickets.forEach((ticket) => {
+      if (ticket.etat.name === etatName) {
+        const applicationName = ticket.app.name;
+        ticketsByApplication[applicationName] += 1;
+      }
+    });
+  
+    const countsArray = applicationOrder.map((appName) => ticketsByApplication[appName]);
+  
+    return countsArray;
+  }
+
   const ticketsOuvert = tickets.filter(ticket => ticket.etat.name === 'Ouvert');
   const ticketsTraitement = tickets.filter(ticket => ticket.etat.name === 'Traitement');
+  const ticketsFermes = tickets.filter(ticket => ticket.etat.name === 'Ferme');
+
+  const ticketsOuvertByApplication = countTicketsByApplication(ticketsOuvert, 'Ouvert', applicationOrder);
+  const ticketsTraitementByApplication = countTicketsByApplication(ticketsTraitement, 'Traitement', applicationOrder);
+  const ticketsFermeByApplication = countTicketsByApplication(ticketsFermes, 'Ferme', applicationOrder);
+
 
   useEffect(() => {
     fetchTickets();
@@ -61,13 +87,16 @@ function HomePage() {
                 chartSeries={[
                   {
                     name: "Ouvert",
-                    data: [18, 16, 5, 8, 3, 14, 14, 16, 17, 19], // avoir le nombre de ticket ouvert par applications dans un tableau !!!!
+                    data: ticketsOuvertByApplication,
                   },
                   {
                     name: "Traitement",
-                    data: [12, 11, 4, 6, 2, 9, 9, 10, 11, 12],
+                    data: ticketsTraitementByApplication,
                   },
-                  
+                  {
+                    name: "Fermé",
+                    data: ticketsFermeByApplication,
+                  },
                 ]}
                 sx={{ height: "100%" }}
               />

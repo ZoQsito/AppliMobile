@@ -131,7 +131,7 @@ export const TicketsOverview = (props) => {
                   {label}
                 </Typography>
                 <Typography color="text.secondary" variant="subtitle2">
-                  {item}%
+                  {item}
                 </Typography>
               </Box>
             );

@@ -1,4 +1,4 @@
-import fetcher from "./dataAcces";
+import fetcher, { fetcherPatch } from "./dataAcces";
 
 function findAll(){
     return fetcher
@@ -22,6 +22,11 @@ function update(id, applications){
     .put("/api/applications/" + id , applications);
 }
 
+function updatePatch(id, applications){
+    return fetcherPatch
+    .patch("/api/applications/" + id , applications);
+}
+
 function create(applications){
     return fetcher
     .post("/api/applications", applications);
@@ -32,5 +37,6 @@ export default{
     delete : deleteApplications,
     find,
     update,
-    create
+    create,
+    updatePatch
 }

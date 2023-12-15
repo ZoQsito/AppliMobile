@@ -1,4 +1,4 @@
-import fetcher from "./dataAcces";
+import fetcher, { fetcherPatch } from "./dataAcces";
 
 
 function register(user){
@@ -30,6 +30,11 @@ function update(id, user){
     .put("/api/users/" + id , user);
 }
 
+function updatePatch(id, user){
+    return fetcherPatch
+    .patch("/api/users/" + id , user);
+}
+
 function roleUpdate(id, roleUpdate){
     return fetcher
     .put(`/api/users/${id}/role` , roleUpdate)
@@ -41,5 +46,6 @@ export default{
     deleteUsers,
     find,
     update,
-    roleUpdate
+    roleUpdate,
+    updatePatch,
 }

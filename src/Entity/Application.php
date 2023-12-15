@@ -10,28 +10,37 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ApplicationRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['app:read']]
+)]
 class Application
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['ticket:read', 'ticket:create', 'ticket:update'])]
+    #[Groups(['ticket:read', 'ticket:create', 'ticket:update','app:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['ticket:read', 'ticket:create', 'ticket:update'])]
+    #[Groups(['ticket:read', 'ticket:create', 'ticket:update','app:read'])]
     private ?string $name = null;
 
     #[ORM\OneToMany(mappedBy: 'app', targetEntity: Ticket::class)]
     private Collection $tickets;
 
+    #[Groups(['ticket:read', 'ticket:create', 'ticket:update', 'app:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $lien = null;
+
+    #[Groups(['ticket:read', 'ticket:create', 'ticket:update', 'app:read'])]
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'applications')]
+    private Collection $users;
+
 
     public function __construct()
     {
         $this->tickets = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -92,4 +101,33 @@ class Application
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): static
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->addApplication($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): static
+    {
+        if ($this->users->removeElement($user)) {
+            $user->removeApplication($this);
+        }
+
+        return $this;
+    }
+
+
 }

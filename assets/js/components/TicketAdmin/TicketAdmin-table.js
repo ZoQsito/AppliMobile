@@ -14,14 +14,15 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TableSortLabel,
   Typography,
 } from "@mui/material";
 import { SeverityPill } from "../Dashboard/severity-pill";
 import TicketForm from "../../pages/TicketForm";
+import { applyPagination } from "../Pagination";
 
 export const TicketsTable = (props) => {
-  const [selectedTicket, setSelectedTicket] = useState(null);
-  const isModalOpen = Boolean(selectedTicket);
+
   const {
     count = 0,
     items = [],
@@ -35,10 +36,43 @@ export const TicketsTable = (props) => {
     rowsPerPage = 0,
     selected = [],
     onDelete,
+    selectedTicket,
+    isModalOpen,
+    onOpenModal,
+    onCloseModal,
   } = props;
 
   const selectedSome = selected.length > 0 && selected.length < items.length;
   const selectedAll = items.length > 0 && selected.length === items.length;
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [sortBy, setSortBy] = useState("Date_Creation");
+
+  const handleSort = (property) => {
+    const isAsc = sortBy === property && sortOrder === "asc";
+    setSortOrder(isAsc ? "desc" : "asc");
+    setSortBy(property);
+  };
+
+  const sortedItems = items.sort((a, b) => {
+    const dateA = new Date(a.dateStart);
+    const dateB = new Date(b.dateStart);
+  
+    if (sortOrder === "asc") {
+      return dateA - dateB;
+    } else {
+      return dateB - dateA;
+    }
+  });
+
+  const handleDelete = () => {
+    if (onDelete && selected.length > 0) {
+      selected.forEach((ticketId) => {
+        onDelete(ticketId);
+      });
+
+      onDeselectAll?.();
+    }
+  };
 
   const formatDate = (dateString) => {
     if (dateString) {
@@ -56,12 +90,12 @@ export const TicketsTable = (props) => {
 
   const handleOpenModal = (ticket) => {
     if (document.activeElement.tagName.toLowerCase() !== "input") {
-      setSelectedTicket(ticket);
+      onOpenModal(ticket);
     }
   };
 
   const handleCloseModal = () => {
-    setSelectedTicket(null);
+    onCloseModal()
   };
 
   return (
@@ -86,13 +120,21 @@ export const TicketsTable = (props) => {
                 </TableCell>
                 <TableCell>Application</TableCell>
                 <TableCell>Agent</TableCell>
-                <TableCell>Date_Creation</TableCell>
+                <TableCell sortDirection={sortBy === "Date_Creation" ? sortOrder : false}>
+                  <TableSortLabel
+                    active={sortBy === "Date_Creation"}
+                    direction={sortOrder}
+                    onClick={() => handleSort("Date_Creation")}
+                  >
+                    Date_Creation
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell>Date_Cloture</TableCell>
                 <TableCell>Etat</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {items.map((ticket) => {
+              {applyPagination(sortedItems, page, rowsPerPage).map((ticket) => {
                 const isSelected = selected.includes(ticket.id);
 
                 return (
@@ -165,7 +207,7 @@ export const TicketsTable = (props) => {
           variant="contained"
           color="error"
           style={{ width: "100px" }}
-          onClick={() => onDelete?.(selected)}
+          onClick={handleDelete}
         >
           Supprimer
         </Button>

@@ -5,21 +5,20 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import PlusIcon from "@heroicons/react/24/solid/PlusIcon";
 import {
   Box,
   Button,
   Container,
   Stack,
-  SvgIcon,
+  Modal,
   Typography,
 } from "@mui/material";
-import { applyPagination } from "../components/Pagination";
 import { useSelection } from "../components/hooks/use-selection";
 import ticketAPI from "../services/ticketAPI";
 import { TicketsClientTable } from "../components/TicketClient/TicketClient-table";
 import { TicketsClientSearch } from "../components/TicketClient/TicketClient-search";
 import { useAuth } from "../contexts/AuthContext";
+import TicketForm from "./TicketForm";
 
 const now = new Date();
 
@@ -28,15 +27,18 @@ const TicketClientPage = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [tickets, setTickets] = useState([]);
   const [ticketsUpdate, setTicketsUpdate] = useState([]);
-  const { etats, decodedToken } = useAuth();
+  const { etats, decodedToken, apps } = useAuth();
   const [activeEtat, setActiveEtat] = useState(null);
   const [allPressed, setAllPressed] = useState(true);
+  const [isModalOpen, setIsModalOpen,] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [ModalUpdateOpen, setModalUpdateOpen] = useState(false);
 
-  const UserId = decodedToken?.custom_data?.UserId
+  const UserId = decodedToken?.custom_data?.UserId;
 
   const handleDelete = async (selectedItems) => {
     try {
-      ticketAPI.delete(selectedItems)
+      ticketAPI.delete(selectedItems);
 
       fetchTickets();
 
@@ -46,11 +48,13 @@ const TicketClientPage = () => {
     }
   };
 
-
   const fetchTickets = async () => {
     try {
       const data = await ticketAPI.findAll();
-      const userTickets = data.filter(ticket => ticket?.userId?.id === UserId);
+      const userTickets = data.filter(
+        (ticket) => ticket?.userId?.id === UserId
+      );
+
       setTickets(userTickets);
       setTicketsUpdate(userTickets);
     } catch (error) {
@@ -58,14 +62,9 @@ const TicketClientPage = () => {
     }
   };
 
-
   useEffect(() => {
     fetchTickets();
-  }, []);
-
-  const paginatedTickets = useMemo(() => {
-    return applyPagination(ticketsUpdate, page, rowsPerPage);
-  }, [ticketsUpdate, page, rowsPerPage]);
+  }, [!isModalOpen, !ModalUpdateOpen]);
 
   const ticketsIds = useMemo(() => {
     return tickets.map((ticketData) => ticketData.id);
@@ -85,21 +84,39 @@ const TicketClientPage = () => {
     let filteredResources = etats;
 
     if (selectedEtat) {
-
-      filteredResources = tickets.filter((ticket) => ticket.etat.name === selectedEtat);
+      filteredResources = tickets.filter(
+        (ticket) => ticket.etat.name === selectedEtat
+      );
     }
 
-    setTicketsUpdate(filteredResources)
+    setTicketsUpdate(filteredResources);
 
     setAllPressed(false);
     setActiveEtat(selectedEtat);
   };
 
-
   const handleEtatsChange = () => {
     setAllPressed(true);
     setActiveEtat(null);
-    setTicketsUpdate(tickets)
+    setTicketsUpdate(tickets);
+  };
+
+  const handleOpenModal = () => {
+      setIsModalOpen(true)
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleOpenUpdateModal = (ticket) => {
+    setSelectedTicket(ticket);
+    setModalUpdateOpen(true);
+  };
+
+  const handleCloseUpdateModal = () => {
+    setSelectedTicket(null);
+    setModalUpdateOpen(false);
   };
 
   return (
@@ -118,29 +135,45 @@ const TicketClientPage = () => {
                 <Typography variant="h4">Tickets</Typography>
               </Stack>
             </Stack>
-            <div style={{ marginTop: "20px" }}>
-              <Button
-                variant={allPressed ? "contained" : "outlined"}
-                style={{ marginRight: "10px" }}
-                onClick={() => handleEtatsChange()}
-              >
-                TOUS
-              </Button>
-              {etats?.map((etats, index) => (
+            <div
+              style={{
+                marginTop: "20px",
+                display: "flex",
+                justifyContent: "space-between",
+              }}
+            >
+              <div>
                 <Button
-                  key={etats.id}
-                  variant={activeEtat === etats.name ? "contained" : "outlined"}
+                  variant={allPressed ? "contained" : "outlined"}
                   style={{ marginRight: "10px" }}
-                  onClick={() => handleEtatsChangeForAll(etats.name)}
+                  onClick={() => handleEtatsChange()}
                 >
-                  {etats.name}
+                  TOUS
                 </Button>
-              ))}
+                {etats?.map((etats, index) => (
+                  <Button
+                    key={etats.id}
+                    variant={
+                      activeEtat === etats.name ? "contained" : "outlined"
+                    }
+                    style={{ marginRight: "10px" }}
+                    onClick={() => handleEtatsChangeForAll(etats.name)}
+                  >
+                    {etats.name}
+                  </Button>
+                ))}
+              </div>
+              <Button
+                variant="contained"
+                color="success"
+                onClick={() => handleOpenModal()}
+              >
+                Créer Tickets
+              </Button>
             </div>
-            <TicketsClientSearch />
             <TicketsClientTable
               count={ticketsUpdate.length}
-              items={paginatedTickets}
+              items={ticketsUpdate}
               onDeselectAll={ticketSelection.handleDeselectAll}
               onDeselectOne={ticketSelection.handleDeselectOne}
               onPageChange={handlePageChange}
@@ -151,7 +184,21 @@ const TicketClientPage = () => {
               rowsPerPage={rowsPerPage}
               selected={ticketSelection.selected}
               onDelete={handleDelete}
+              selectedTicket={selectedTicket}
+              ModalUpdateOpen={ModalUpdateOpen}
+              onOpenUpdateModal={handleOpenUpdateModal}
+              onCloseUpdateModal={handleCloseUpdateModal}
             />
+            <Modal
+              open={isModalOpen}
+              onClose={handleCloseModal}
+              aria-labelledby="ticket-modal"
+              aria-describedby="ticket-details"
+            >
+              <Box style={{ marginTop: "200px" }}>
+                <TicketForm onClose={handleCloseModal}/>
+              </Box>
+            </Modal>
           </Stack>
         </Container>
       </Box>

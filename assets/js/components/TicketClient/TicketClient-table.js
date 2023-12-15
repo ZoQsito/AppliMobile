@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { format } from "date-fns";
 import {
@@ -18,6 +18,8 @@ import {
 } from "@mui/material";
 import { SeverityPill } from "../Dashboard/severity-pill";
 import TicketForm from "../../pages/TicketForm";
+import { TableSortLabel } from "@mui/material";
+import { applyPagination } from "../Pagination";
 
 export const TicketsClientTable = (props) => {
   const {
@@ -33,12 +35,33 @@ export const TicketsClientTable = (props) => {
     rowsPerPage = 0,
     selected = [],
     onDelete,
+    selectedTicket,
+    ModalUpdateOpen,
+    onOpenUpdateModal,
+    onCloseUpdateModal,
   } = props;
 
   const selectedSome = selected.length > 0 && selected.length < items.length;
   const selectedAll = items.length > 0 && selected.length === items.length;
-  const [selectedTicket, setSelectedTicket] = useState(null);
-  const isModalOpen = Boolean(selectedTicket);
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [sortBy, setSortBy] = useState("Date_Creation");
+
+  const handleSort = (property) => {
+    const isAsc = sortBy === property && sortOrder === "asc";
+    setSortOrder(isAsc ? "desc" : "asc");
+    setSortBy(property);
+  };
+
+  const sortedItems = items.sort((a, b) => {
+    const dateA = new Date(a.dateStart);
+    const dateB = new Date(b.dateStart);
+  
+    if (sortOrder === "asc") {
+      return dateA - dateB;
+    } else {
+      return dateB - dateA;
+    }
+  });
 
   const formatDate = (dateString) => {
     if (dateString) {
@@ -54,14 +77,14 @@ export const TicketsClientTable = (props) => {
     Ferme: "success",
   };
 
-  const handleOpenModal = (ticket) => {
+  const handleOpenModal = (user) => {
     if (document.activeElement.tagName.toLowerCase() !== "input") {
-      setSelectedTicket(ticket);
+      onOpenUpdateModal(user);
     }
   };
 
   const handleCloseModal = () => {
-    setSelectedTicket(null);
+    onCloseUpdateModal(null);
   };
 
   return (
@@ -86,13 +109,21 @@ export const TicketsClientTable = (props) => {
                 </TableCell>
                 <TableCell>Application</TableCell>
                 <TableCell>Agent</TableCell>
-                <TableCell>Date_Creation</TableCell>
+                <TableCell sortDirection={sortBy === "Date_Creation" ? sortOrder : false}>
+                  <TableSortLabel
+                    active={sortBy === "Date_Creation"}
+                    direction={sortOrder}
+                    onClick={() => handleSort("Date_Creation")}
+                  >
+                    Date_Creation
+                  </TableSortLabel>
+                </TableCell>
                 <TableCell>Date_Cloture</TableCell>
                 <TableCell>Etat</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {items.map((ticket) => {
+              {applyPagination(sortedItems, page, rowsPerPage).map((ticket) => {
                 const isSelected = selected.includes(ticket.id);
 
                 return (
@@ -151,7 +182,7 @@ export const TicketsClientTable = (props) => {
           rowsPerPageOptions={[5, 10, 25]}
         />
         <Modal
-          open={isModalOpen}
+          open={ModalUpdateOpen}
           onClose={handleCloseModal}
           aria-labelledby="ticket-modal"
           aria-describedby="ticket-details"

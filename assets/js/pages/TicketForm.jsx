@@ -21,8 +21,9 @@ import { fr } from "date-fns/locale";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { useNavigate } from "react-router-dom";
+import NotificationAPI from "../services/NotificationAPI";
 
-const TicketForm = (props) => {
+const TicketForm = (props, setTickets) => {
   const {
     isAdmin,
     setIsAuthenticated,
@@ -37,11 +38,10 @@ const TicketForm = (props) => {
     description: "",
     etat: `/api/etats/1` ,
     userId: `/api/users/${decodedToken?.custom_data?.UserId}`,
+    dateStart: undefined
   };
   const [ticketData, setTicketData] = useState(initialState);
   const [isEditing, setIsEditing] = useState(false);
-  const navigate = useNavigate();
-
 
   useEffect(() => {
     if (props.ticket) {
@@ -56,10 +56,10 @@ const TicketForm = (props) => {
         description: props.ticket.description,
         etat: props.ticket.etat["@id"],
         userId: props.ticket.userId["@id"],
+        dateStart : props.ticket.dateStart,
       });
     } catch (error) {}
   };
-
 
   useEffect(() => {
     fetchTicketsId();
@@ -88,12 +88,24 @@ const TicketForm = (props) => {
     } else {
       try {
         await ticketAPI.create(ticketData);
+        await NotificationAPI.create({name : "Notification", users : ticketData.appUsers })
         setTicketData(initialState);
-        navigate("/ticket");
+        props.onClose();
       } catch (error) {
         console.error("Error creating ticket:", error);
       }
     }
+  };
+
+  const handleAppChange = (e) => {
+    const selectedAppId = e.target.value;
+    const selectedApp = apps.find((app) => app["@id"] === selectedAppId);
+
+    setTicketData((prevData) => ({
+      ...prevData,
+      app: selectedAppId,
+      appUsers: selectedApp.users.map((user) => user["@id"]),
+    }));
   };
 
   return (
@@ -117,7 +129,7 @@ const TicketForm = (props) => {
                     <Select
                       value={ticketData.app}
                       name="app"
-                      onChange={handleInputChange}
+                      onChange={handleAppChange}
                       id="app"
                       defaultValue={""}
                     >

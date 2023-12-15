@@ -1,23 +1,27 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { format } from "date-fns";
 import {
   Box,
   Button,
   Card,
   Checkbox,
-  Stack,
   Modal,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TablePagination,
   TableRow,
+  TableSortLabel,
   Typography,
 } from "@mui/material";
-import UserForm from "../../pages/UserForm";
+import { SeverityPill } from "../Dashboard/severity-pill";
+import AppForm from "../../pages/AppForm";
+import { applyPagination } from "../Pagination";
 
-export const UsersTable = (props) => {
+export const AppTable = (props) => {
   const {
     count = 0,
     items = [],
@@ -31,7 +35,7 @@ export const UsersTable = (props) => {
     rowsPerPage = 0,
     selected = [],
     onDelete,
-    selectedUser,
+    selectedApp,
     ModalUpdateOpen,
     onOpenUpdateModal,
     onCloseUpdateModal,
@@ -40,9 +44,19 @@ export const UsersTable = (props) => {
   const selectedSome = selected.length > 0 && selected.length < items.length;
   const selectedAll = items.length > 0 && selected.length === items.length;
 
-  const handleOpenModal = (user) => {
+  const handleDelete = () => {
+    if (onDelete && selected.length > 0) {
+      selected.forEach((appId) => {
+        onDelete(appId);
+      });
+
+      onDeselectAll?.();
+    }
+  };
+
+  const handleOpenModal = (app) => {
     if (document.activeElement.tagName.toLowerCase() !== "input") {
-      onOpenUpdateModal(user);
+      onOpenUpdateModal(app);
     }
   };
 
@@ -70,23 +84,21 @@ export const UsersTable = (props) => {
                     }}
                   />
                 </TableCell>
-                <TableCell>Username</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Téléphone</TableCell>
-                <TableCell>Service</TableCell>
-                <TableCell>ROLE</TableCell>
+                <TableCell>Id</TableCell>
+                <TableCell>Nom</TableCell>
+                <TableCell>Admin_Associé</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {items.map((user) => {
-                const isSelected = selected.includes(user.id);
+              {applyPagination(items, page, rowsPerPage).map((app) => {
+                const isSelected = selected.includes(app.id);
 
                 return (
                   <TableRow
                     hover
-                    key={user.id}
+                    key={app.id}
                     selected={isSelected}
-                    onClick={() => handleOpenModal(user)}
+                    onClick={() => handleOpenModal(app)}
                     style={{ cursor: "pointer" }}
                   >
                     <TableCell padding="checkbox">
@@ -94,24 +106,27 @@ export const UsersTable = (props) => {
                         checked={isSelected}
                         onChange={(event) => {
                           if (event.target.checked) {
-                            onSelectOne?.(user.id);
+                            onSelectOne?.(app.id);
                           } else {
-                            onDeselectOne?.(user.id);
+                            onDeselectOne?.(app.id);
                           }
                         }}
                       />
                     </TableCell>
                     <TableCell>
                       <Stack alignItems="center" direction="row" spacing={2}>
-                        <Typography variant="subtitle2">
-                          {user.username}
-                        </Typography>
+                        <Typography variant="subtitle2">{app?.id}</Typography>
                       </Stack>
                     </TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.numero}</TableCell>
-                    <TableCell>{user?.service?.name}</TableCell>
-                    <TableCell>{user?.role?.name}</TableCell>
+                    <TableCell>{app?.name}</TableCell>
+                    <TableCell>
+                      {app?.users.map((user, index) => (
+                        <React.Fragment key={user.id}>
+                          {user.username}
+                          {index < app.users.length - 1 && " / "}
+                        </React.Fragment>
+                      ))}
+                    </TableCell>
                   </TableRow>
                 );
               })}
@@ -134,8 +149,8 @@ export const UsersTable = (props) => {
           aria-describedby="ticket-details"
         >
           <Box style={{ marginTop: "200px" }}>
-            {selectedUser && (
-              <UserForm user={selectedUser} onClose={handleCloseModal} />
+            {selectedApp && (
+              <AppForm app={selectedApp} onClose={handleCloseModal} />
             )}
           </Box>
         </Modal>
@@ -145,7 +160,7 @@ export const UsersTable = (props) => {
           variant="contained"
           color="error"
           style={{ width: "100px" }}
-          onClick={() => onDelete?.(selected)}
+          onClick={handleDelete}
         >
           Supprimer
         </Button>
@@ -154,7 +169,7 @@ export const UsersTable = (props) => {
   );
 };
 
-UsersTable.propTypes = {
+AppTable.propTypes = {
   count: PropTypes.number,
   items: PropTypes.array,
   onDeselectAll: PropTypes.func,

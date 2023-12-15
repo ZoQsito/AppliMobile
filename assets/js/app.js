@@ -29,6 +29,9 @@ import TicketForm from "./pages/TicketForm";
 import ApplicationAPI from "./services/ApplicationAPI";
 import etatAPI from "./services/etatAPI";
 import UserForm from "./pages/UserForm";
+import NotificationAPI from "./services/NotificationAPI";
+import AppAdmin from "./pages/AppAdmin";
+import TicketsAdminPersoPage from "./pages/TicketAdminPerso";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -40,6 +43,10 @@ const App = () => {
   const [open, setOpen] = useState(true);
   const [apps, setApps] = useState()
   const [etats, setEtats] = useState()
+  const [notifIds, setNotifIds] = useState([]);
+  const [filteredNotifications, setFilteredNotifications] = useState([]);
+
+  const UserId = decodedToken?.custom_data?.UserId
 
   useEffect(() => {
     var token = localStorage.getItem("authToken");
@@ -59,18 +66,31 @@ const App = () => {
 
   const fetchData = async () => {
     try {
+      const notif = await NotificationAPI.findAll();
       const app = await ApplicationAPI.findAll();
       const etat = await etatAPI.findAll();
       setEtats(etat);
       setApps(app);
+      setNotifIds(notif);
     } catch (error) {
       console.error(error);
     }
   };
 
   useEffect(() => {
+    if (notifIds && UserId) {
+      const filteredNotifs = notifIds.filter((notif) => {
+        return notif.users.includes(`/api/users/${UserId}`);
+      });
+
+      setFilteredNotifications(filteredNotifs);
+    }
+  }, [notifIds, UserId]);
+
+  useEffect(() => {
     fetchData()
   }, []);
+
 
   const adminRoute = (path, element) => {
     return (
@@ -108,7 +128,10 @@ const App = () => {
         decodedToken,
         setIsAdmin,
         etats,
-        apps
+        apps,
+        notifIds : filteredNotifications,
+        setNotifIds,
+        setApps,
       }}
     >
       <ToggleColorModeProvider>
@@ -125,10 +148,11 @@ const App = () => {
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/" element={<HomePage />} />
                   {isAuthenticated &&(<Route path="/ticket" element={<TicketClientPage />} />)}
-                  {isAuthenticated &&(<Route path="/addticket" element={<TicketForm />} />)}
                   {adminRoute("/ticketsAdmin", <TicketsAdminPage />)}
+                  {adminRoute("/ticketsAdminPerso", <TicketsAdminPersoPage />)}
                   {adminRoute("/users", <UsersPage />)}
                   {adminRoute("/AddUsers", <UserForm />)}
+                  {adminRoute("/applications", <AppAdmin />)}
                   <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
               </main>

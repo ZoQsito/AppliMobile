@@ -81,7 +81,7 @@ const UserForm = (props) => {
 
     if (isEditing) {
       try {
-        await usersAPI.update(props.user.id, userData);
+        await usersAPI.updatePatch(props.user.id, userData);
         setUserData(initialState);
         props.onClose();
       } catch (error) {
@@ -91,7 +91,7 @@ const UserForm = (props) => {
       try {
         await usersAPI.register(userData);
         setUserData(initialState);
-        navigate("/users");
+        props.onClose();
       } catch (error) {
         console.error("Error creating user:", error);
       }

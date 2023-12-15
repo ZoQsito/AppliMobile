@@ -20,16 +20,18 @@ import { TicketsSearch } from "../components/TicketAdmin/TicketAdmin-search";
 import { useAuth } from "../contexts/AuthContext";
 
 
-const TicketsAdminPage = () => {
+const TicketsAdminPersoPage = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [tickets, setTickets] = useState([]);
   const [ticketsUpdate, setTicketsUpdate] = useState([]);
-  const { etats } = useAuth();
+  const { etats, decodedToken } = useAuth();
   const [activeEtat, setActiveEtat] = useState(null);
   const [allPressed, setAllPressed] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const UserId = decodedToken?.custom_data?.UserId;
 
   const handleDelete = async (selectedItems) => {
     try {
@@ -46,8 +48,11 @@ const TicketsAdminPage = () => {
   const fetchTickets = async () => {
     try {
       const data = await ticketAPI.findAll();
-      setTickets(data);
-      setTicketsUpdate(data);
+      const filteredTickets = data.filter((ticket) =>
+      ticket.app.users.some((user) => user.id === UserId)
+    );
+      setTickets(filteredTickets);
+      setTicketsUpdate(filteredTickets);
     } catch (error) {
       console.error("Erreur lors du chargement des utilisateurs :", error);
     }
@@ -56,6 +61,7 @@ const TicketsAdminPage = () => {
   useEffect(() => {
     fetchTickets();
   }, [!isModalOpen]);
+
 
   const ticketsIds = useMemo(() => {
     return tickets.map((ticketData) => ticketData.id);
@@ -115,7 +121,7 @@ const TicketsAdminPage = () => {
           <Stack spacing={3}>
             <Stack direction="row" justifyContent="space-between" spacing={4}>
               <Stack spacing={1}>
-                <Typography variant="h4">Tickets Admin</Typography>
+                <Typography variant="h4">Tickets Admin Associé</Typography>
               </Stack>
             </Stack>
             <div
@@ -168,4 +174,4 @@ const TicketsAdminPage = () => {
   );
 };
 
-export default TicketsAdminPage;
+export default TicketsAdminPersoPage;

@@ -43,7 +43,7 @@ export const LatestTickets = (props) => {
   };
 
   const handleViewAll = () => {
-    navigate("/ticket")
+    navigate("/ticketsAdmin")
   }
 
   return (

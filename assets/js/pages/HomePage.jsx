@@ -103,7 +103,7 @@ function HomePage() {
             </Grid>
             <Grid xs={12} md={6} lg={4}>
               <TicketsOverview
-                chartSeries={[Math.round(ticketsOuvert.length * 100 / tickets.length), Math.round(ticketsTraitement.length * 100 / tickets.length), Math.round(ticketsFermes.length * 100 / tickets.length)]}
+                chartSeries={[ticketsOuvert.length, ticketsTraitement.length, ticketsFermes.length]}
                 labels={["Ouvert", "Traitement", "Ferme"]}
                 sx={{ height: "100%" }}
               />

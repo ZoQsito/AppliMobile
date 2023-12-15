@@ -12,52 +12,44 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use App\State\UserPasswordHasher;
 use phpDocumentor\Reflection\Types\Nullable;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\Ignore;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ApiResource(
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:create', 'user:update']],
 )]
-#[Put(security: "is_granted('ROLE_ADMIN')", processor: UserPasswordHasher::class)]
+#[Patch(security: "is_granted('ROLE_ADMIN')", denormalizationContext: ['groups' => ['user:update']]),]
 #[Delete(security: "is_granted('ROLE_ADMIN')")]
-#[Post(security: "is_granted('ROLE_ADMIN')", processor: UserPasswordHasher::class, validationContext: ['groups' => ['Default', 'user:create']])]
+#[Post(security: "is_granted('ROLE_ADMIN')", validationContext: ['groups' => ['Default', 'user:create']])]
 #[Get(security: "is_granted('ROLE_ADMIN')")]
 #[GetCollection(security: "is_granted('ROLE_ADMIN')")]
-#[Put(
-    security: "is_granted('ROLE_ADMIN')",
-    uriTemplate: '/users/{id}/role',
-    denormalizationContext: ['groups' => ['user:changeRole']],
-)]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[Groups(['user:read','ticket:read'])]
+    #[Groups(['user:read','ticket:read','app:read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['user:read', 'user:create', 'user:update','ticket:read'])]
+    #[Groups(['user:read', 'user:create', 'user:update','ticket:read','app:read'])]
     private ?string $username = null;
 
-    #[Groups(['user:create', 'user:update'])]
     private ?string $plainPassword = null;
-
-
 
     #[ORM\Column(length: 180)]
     #[Groups(['user:read', 'user:create', 'user:update'])]
     #[Assert\Email(groups: ['user:create', 'user:update'])]
     private ?string $email = null;
-
 
     #[ORM\ManyToOne(inversedBy: 'users')]
     #[ORM\JoinColumn(nullable: false)]
@@ -68,6 +60,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column(nullable: true)]
+    #[Ignore]
     private ?string $password = null;
 
     #[ORM\Column(length: 20)]
@@ -81,12 +74,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'userId', targetEntity: Ticket::class)]
     private Collection $tickets;
 
+    #[ORM\ManyToMany(targetEntity: Application::class, inversedBy: 'users')]
+    private Collection $applications;
+
+    #[ORM\ManyToMany(targetEntity: Notification::class, inversedBy: 'users')]
+    private Collection $notifications;
+
+
+
     public function __construct()
     {
         $this->tickets = new ArrayCollection();
+        $this->applications = new ArrayCollection();
+        $this->notifications = new ArrayCollection();
     }
-
-
 
     public function getId(): ?int
     {
@@ -125,9 +126,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->plainPassword = $plainPassword;
         return $this;
     }
-     public function getRole() : ?Role {
-       return $this->role; 
-     }
+
+    public function getRole() : ?Role {
+        return $this->role; 
+    }
 
     /**
      * @see UserInterface
@@ -229,6 +231,54 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $ticket->setUserId(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Application>
+     */
+    public function getApplications(): Collection
+    {
+        return $this->applications;
+    }
+
+    public function addApplication(Application $application): static
+    {
+        if (!$this->applications->contains($application)) {
+            $this->applications->add($application);
+        }
+
+        return $this;
+    }
+
+    public function removeApplication(Application $application): static
+    {
+        $this->applications->removeElement($application);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Notification>
+     */
+    public function getNotifications(): Collection
+    {
+        return $this->notifications;
+    }
+
+    public function addNotification(Notification $notification): static
+    {
+        if (!$this->notifications->contains($notification)) {
+            $this->notifications->add($notification);
+        }
+
+        return $this;
+    }
+
+    public function removeNotification(Notification $notification): static
+    {
+        $this->notifications->removeElement($notification);
 
         return $this;
     }

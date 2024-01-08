@@ -34,14 +34,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[Groups(['user:read','ticket:read','app:read'])]
+    #[Groups(['user:read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['user:read', 'user:create', 'user:update','ticket:read','app:read'])]
+    #[Groups(['user:read', 'user:create', 'user:update'])]
     private ?string $username = null;
 
     private ?string $plainPassword = null;
@@ -67,27 +67,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read', 'user:create', 'user:update'])]
     private ?string $numero = null;
 
-    #[ORM\ManyToOne(inversedBy: 'users')]
-    #[Groups(['user:read', 'user:create', 'user:update'])]
-    private ?Service $service = null;
-
-    #[ORM\OneToMany(mappedBy: 'userId', targetEntity: Ticket::class)]
-    private Collection $tickets;
-
-    #[ORM\ManyToMany(targetEntity: Application::class, inversedBy: 'users')]
-    private Collection $applications;
-
-    #[ORM\ManyToMany(targetEntity: Notification::class, inversedBy: 'users')]
-    private Collection $notifications;
-
-
+    #[ORM\ManyToMany(targetEntity: Produit::class, mappedBy: 'panier')]
+    private Collection $produits;
 
     public function __construct()
     {
-        $this->tickets = new ArrayCollection();
-        $this->applications = new ArrayCollection();
-        $this->notifications = new ArrayCollection();
+        $this->produits = new ArrayCollection();
     }
+
 
     public function getId(): ?int
     {
@@ -193,92 +180,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getService(): ?Service
-    {
-        return $this->service;
-    }
-
-    public function setService(?Service $service): static
-    {
-        $this->service = $service;
-
-        return $this;
-    }
-
     /**
-     * @return Collection<int, Ticket>
+     * @return Collection<int, Produit>
      */
-    public function getTickets(): Collection
+    public function getProduits(): Collection
     {
-        return $this->tickets;
+        return $this->produits;
     }
 
-    public function addTicket(Ticket $ticket): static
+    public function addProduit(Produit $produit): static
     {
-        if (!$this->tickets->contains($ticket)) {
-            $this->tickets->add($ticket);
-            $ticket->setUserId($this);
+        if (!$this->produits->contains($produit)) {
+            $this->produits->add($produit);
+            $produit->addPanier($this);
         }
 
         return $this;
     }
 
-    public function removeTicket(Ticket $ticket): static
+    public function removeProduit(Produit $produit): static
     {
-        if ($this->tickets->removeElement($ticket)) {
-            // set the owning side to null (unless already changed)
-            if ($ticket->getUserId() === $this) {
-                $ticket->setUserId(null);
-            }
+        if ($this->produits->removeElement($produit)) {
+            $produit->removePanier($this);
         }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Application>
-     */
-    public function getApplications(): Collection
-    {
-        return $this->applications;
-    }
-
-    public function addApplication(Application $application): static
-    {
-        if (!$this->applications->contains($application)) {
-            $this->applications->add($application);
-        }
-
-        return $this;
-    }
-
-    public function removeApplication(Application $application): static
-    {
-        $this->applications->removeElement($application);
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Notification>
-     */
-    public function getNotifications(): Collection
-    {
-        return $this->notifications;
-    }
-
-    public function addNotification(Notification $notification): static
-    {
-        if (!$this->notifications->contains($notification)) {
-            $this->notifications->add($notification);
-        }
-
-        return $this;
-    }
-
-    public function removeNotification(Notification $notification): static
-    {
-        $this->notifications->removeElement($notification);
 
         return $this;
     }

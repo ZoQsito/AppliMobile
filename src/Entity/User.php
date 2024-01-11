@@ -70,9 +70,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Produit::class, mappedBy: 'panier')]
     private Collection $produits;
 
+    #[ORM\OneToMany(mappedBy: 'client', targetEntity: Commande::class)]
+    private Collection $commandes;
+
     public function __construct()
     {
         $this->produits = new ArrayCollection();
+        $this->commandes = new ArrayCollection();
     }
 
 
@@ -202,6 +206,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->produits->removeElement($produit)) {
             $produit->removePanier($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Commande>
+     */
+    public function getCommandes(): Collection
+    {
+        return $this->commandes;
+    }
+
+    public function addCommande(Commande $commande): static
+    {
+        if (!$this->commandes->contains($commande)) {
+            $this->commandes->add($commande);
+            $commande->setClient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCommande(Commande $commande): static
+    {
+        if ($this->commandes->removeElement($commande)) {
+            // set the owning side to null (unless already changed)
+            if ($commande->getClient() === $this) {
+                $commande->setClient(null);
+            }
         }
 
         return $this;
